@@ -101,23 +101,24 @@ public class TerminusEstV3 {
     public static boolean BUILDNETWORK = true;
     public static boolean USEHASH = true;
 
+
+    //! -------------------------------------
+    // Printout methods, etc.
+    private static void InitialInfo(int hyb, Tree t1, Tree t2) {
+        System.out.println("Entering with hyb="+hyb);
+        System.out.println("Tree 1 before collapsing:");
+        t1.dump();
+        System.out.println();
+        System.out.println("Tree 2 before collapsing:");
+        t2.dump();
+        System.out.println();
+    }
+
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
     public static Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
     {
-        if(VERBOSE) System.out.println("Entering with hyb="+hyb);
-
-        //! origT1 and origT2 are just passed all the way down, as reference...they are never changed
-
-        if(VERBOSE)
-        {
-            System.out.println("Tree 1 before collapsing:");
-            t1.dump();
-            System.out.println();
-            System.out.println("Tree 2 before collapsing:");
-            t2.dump();
-            System.out.println();
-        }
+        if (VERBOSE) InitialInfo(hyb, t1, t2);
 
         Vector ST = Tree.computeMaxSTsets(t1,t2);
 
