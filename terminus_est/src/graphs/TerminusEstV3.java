@@ -2,6 +2,10 @@ package graphs;
 
 import java.util.*;
 import java.io.*;
+
+/**
+ * TODO: Remove input handling from this algorithm. We want all of that to be handled BEFORE it is passed to the algorithm itself.
+ */
 public class TerminusEstV3 {
 
     public static Hashtable nameToNum;
