@@ -1,4 +1,4 @@
-package graphs.base;
+package graphs;
 
 import java.util.*;
 
