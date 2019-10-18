@@ -1,7 +1,7 @@
 package graphs;
 
 import java.util.*;
-
+import java.io.*;
 public class TerminusEstV3 {
 
     public static Hashtable nameToNum;
@@ -31,7 +31,7 @@ public class TerminusEstV3 {
 
         i = new Integer(seenLeaves);
 
-        if( graphs.TerminusEstV3.VERBOSE ) System.out.println("** Leaf '"+leaf+"' gets internal number "+seenLeaves);
+        if( TerminusEstV3.VERBOSE ) System.out.println("** Leaf '"+leaf+"' gets internal number "+seenLeaves);
 
         nameToNum.put( leaf, i );
 
@@ -75,7 +75,7 @@ public class TerminusEstV3 {
 
     public static void parseTrees()
     {
-        graphs.TerminusEstV3 n = new graphs.TerminusEstV3(System.in);
+        TerminusEstV3 n = new TerminusEstV3(System.in);
 
         try{ n.Input(); }
         catch( ParseException e )
@@ -87,7 +87,7 @@ public class TerminusEstV3 {
 
     }
 
-    public static String VERSION = graphs.TerminusEstV3h 2015";
+    public static String VERSION = "TerminusEstV3.jj Version 3, 30th March 2015";
 
     public final static boolean VERBOSE = false;
     public final static boolean BUILD_VERBOSE = false;
@@ -908,7 +908,7 @@ public class TerminusEstV3 {
         {
             if( args[0].equals("-help") )
             {
-                System.out.pgraphs.TerminusEstV3 treeFile.txt");
+                System.out.println("// Usage: java TerminusEstV3 [optional switches] < treeFile.txt");
                 System.out.println("// Optional switches:");
                 System.out.println("// -nonetwork : only compute hybridization number, do not generate a network. (The default is to generate a network.)");
                 System.out.println("// -nohash : do not use look-up table to store intermediate solutions. (The default is to use the hash table, which potentially uses an exponential amount of memory.");
@@ -917,7 +917,8 @@ public class TerminusEstV3 {
 
         }
 
-        Systegraphs.TerminusEstV3ion 30th March 2015.");graphs.TerminusEstV3al switches] < treeFile.txt");
+        System.out.println("// This is TerminusEstV3, version 30th March 2015.");
+        System.out.println("// Usage: java TerminusEstV3 [optional switches] < treeFile.txt");
         System.out.println("// (If the program seems to have hung, you have probably");
         System.out.println("// forgotten the '<' operator).");
         System.out.println("// -------------------------------------");
@@ -925,7 +926,7 @@ public class TerminusEstV3 {
 
         parseTrees();
 
-        System.out.println("// We saw "+graphs.TerminusEstV3.seenLeaves+" taxa in total.");
+        System.out.println("// We saw "+TerminusEstV3.seenLeaves+" taxa in total.");
 
 
         //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
@@ -981,7 +982,7 @@ public class TerminusEstV3 {
         else System.out.println("Hash tables will NOT be used.");
 
 
-        for( int l=0; l <= graphs.TerminusEstV3.seenLeaves; l++ )
+        for( int l=0; l <= TerminusEstV3.seenLeaves; l++ )
         {
             Tree T1 = t1.copy(null,null);
             Tree T2 = t2.copy(null,null);
