@@ -146,6 +146,18 @@ public class TerminusEstV3 {
         System.out.println();
     }
 
+    private static void TreeDumpNewRootInfo(Tree killA, Tree killB) {
+        if( killA != null )
+        {
+            System.out.println("New root in T1...");
+        }
+
+        if( killB != null )
+        {
+            System.out.println("New root in T2...");
+        }
+    }
+
     //! -------------------------------------
     // Important methods.
     private static Network ReconstructNetwork(Tree del, Tree origT1, Tree origT2, Network net) {
@@ -839,28 +851,17 @@ public class TerminusEstV3 {
             // System.out.println("NewGuyB... "+beta[0].name);
 
             Tree killA = alpha[0].delete();
-            if( killA != null )
-            {
-                if(VERBOSE) System.out.println("New root in T1...");
-            }
-            else killA = newGuyA;
-
-
             Tree killB = beta[0].delete();
 
-            if( killB != null )
-            {
-                if(VERBOSE) System.out.println("New root in T2...");
-            }
-            else killB = newGuyB;
+            if (VERBOSE) TreeDumpNewRootInfo(killA, killB);
+
+            if( killA == null ) killA = newGuyA;
+            if( killB == null ) killB = newGuyB;
 
             if(VERBOSE)
             {
                 killA.dump();
                 System.out.println();
-            }
-            if(VERBOSE)
-            {
                 killB.dump();
                 System.out.println();
             }
