@@ -114,26 +114,41 @@ public class TerminusEstV3 {
         System.out.println();
     }
 
+    private static void CompatibleResultInfo(int depth) {
+        if(VERBOSE) System.out.println("Compatibility detected.");
+
+        long timeEnd = System.currentTimeMillis();
+        double seconds =  ((double)(timeEnd - timeNow))/1000.0;
+
+        System.out.println("// -----------------------------");
+        System.out.println("// HYBRIDIZATION NUMBER = "+depth);
+        System.out.println("// -----------------------------");
+        if(BUILDNETWORK==false) System.out.println("// Real-time elapsed in seconds: "+seconds);
+    }
+
+    private static void TreesAndCommonBinaryRefinementInfo(Tree stripT1, Tree stripT2, Tree commonrf) {
+        System.out.print("T1: ");
+        stripT1.dump();	System.out.println(";");
+
+        System.out.print("T2: ");
+        stripT2.dump(); System.out.println(";");
+
+        System.out.print("Common binary refinement: ");
+        commonrf.dump(); System.out.println(";");
+    }
+
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
     public static Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
     {
-        if (VERBOSE) InitialInfo(hyb, t1, t2);
+        if (VERBOSE) InitialInfo(hyb, t1, t2); // Just printing statements.
 
         Vector ST = Tree.computeMaxSTsets(t1,t2);
 
+        // Compatibility detected if true.
         if( ST.size() == 1 )
         {
-            if(VERBOSE) System.out.println("Compatibility detected.");
-
-            long timeEnd = System.currentTimeMillis();
-            double seconds =  ((double)(timeEnd - timeNow))/1000.0;
-
-            System.out.println("// -----------------------------");
-            System.out.println("// HYBRIDIZATION NUMBER = "+depth);
-            System.out.println("// -----------------------------");
-            if(BUILDNETWORK==false) System.out.println("// Real-time elapsed in seconds: "+seconds);
-
+            CompatibleResultInfo(depth); // Just printing statements.
 
             if(BUILDNETWORK == false) System.exit(0);
 
@@ -151,23 +166,9 @@ public class TerminusEstV3 {
                 Tree stripT1 = Tree.restrict(origT1, s);
                 Tree stripT2 = Tree.restrict(origT2, s);
 
-                if(BUILD_VERBOSE)
-                {
-                    System.out.print("T1: ");
-                    stripT1.dump();	System.out.println(";");
-
-                    System.out.print("T2: ");
-                    stripT2.dump(); System.out.println(";");
-
-                    System.out.print("Common binary refinement: ");
-                }
-
                 Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
 
-                if(BUILD_VERBOSE)
-                {
-                    commonrf.dump(); System.out.println(";");
-                }
+                if(BUILD_VERBOSE) TreesAndCommonBinaryRefinementInfo(stripT1, stripT2, commonrf); // Just info printing.
 
                 Tree fakeRoot = new Tree();
                 fakeRoot.addChild(commonrf);
