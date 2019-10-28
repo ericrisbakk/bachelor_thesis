@@ -352,6 +352,139 @@ public class TerminusEstV3 {
         return net;
     }
 
+    public static Network getNetworkOrExit(Tree t1, Tree t2, Tree origT1, Tree origT2, Vector ST, int depth) {
+        CompatibleResultInfo(depth); // Just printing statements.
+
+        if(BUILDNETWORK == false) System.exit(0);
+
+        Tree.collapseMaxSTsets(t1,t2,ST);
+
+        Network net = null;
+
+        if(t1.isLeaf())
+        {
+            if(BUILD_VERBOSE) System.out.println("Will output MAAF components in hanging-back order (first is the base tree):" );
+            String s[] = getTaxaFromString(t1.name);
+            // for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
+            // System.out.println();
+
+            Tree stripT1 = Tree.restrict(origT1, s);
+            Tree stripT2 = Tree.restrict(origT2, s);
+
+            Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
+
+            if(BUILD_VERBOSE) TreesAndCommonBinaryRefinementInfo(stripT1, stripT2, commonrf); // Just info printing.
+
+            Tree fakeRoot = new Tree();
+            fakeRoot.addChild(commonrf);
+            commonrf.netParent[0] = fakeRoot;
+            commonrf.netParent[1] = null;
+
+            net = new Network(fakeRoot);
+        }
+        else
+        {
+            System.out.println("ERROR! Compatible ST-set not a leaf.");
+            System.exit(0);
+        }
+
+        return net;
+    }
+
+    private static String ComputeMyBitVec(Vector ST, int hyb) {
+        String myBitVec = null;
+
+        StringBuffer allTaxa = new StringBuffer();
+
+        for(int x=0;x<ST.size();x++)
+        {
+            STset s = (STset) ST.elementAt(x);
+            int count[] = new int[1];
+            String t = s.getTaxaString(count);
+            allTaxa.append(t);
+            //! System.out.println("max ST set "+x+" contains taxa "+t);
+            //! System.out.println(count[0]);
+        }
+
+        StringBuffer stripped = new StringBuffer();
+        String back = allTaxa.toString();
+        String forth = back.trim();
+        allTaxa = new StringBuffer( forth );
+
+        for(int x=0; x<allTaxa.length(); x++ )
+        {
+            char c = allTaxa.charAt(x);
+
+            if( (c == '{') || (c=='}') ) continue;
+
+            if( c == ' ' )
+            {
+                //! Only add a character to the end of stripped if there isn't one there already...
+                if( stripped.length() < 1 ) continue;
+                if( stripped.charAt( stripped.length() - 1 ) == ' ' ) continue;
+            }
+
+            stripped.append(c);
+        }
+
+        String taxaList[] = stripped.toString().split(" ");
+
+
+        if(VERBOSE)
+        {
+            System.out.println(" ---- TAXA AT THIS ITERATION --- ");
+            for(int x=0; x<taxaList.length; x++)
+            {
+                System.out.println(taxaList[x] + " = " + getLeafNumber(taxaList[x]));
+            }
+        }
+
+        //! This is going to become a bit vector denoting which taxa we have.
+        boolean got[] = new boolean[ seenLeaves + 1 ];
+
+        for(int x=0; x<taxaList.length; x++)
+        {
+            int tick = getLeafNumber(taxaList[x]);
+            got[tick] = true;
+        }
+
+        StringBuffer bitVec = new StringBuffer();
+        for(int x=1; x<=seenLeaves; x++ )
+        {
+            if( got[x] ) bitVec.append('1');
+            else bitVec.append('0');
+        }
+
+        myBitVec = bitVec.toString();
+
+        if(VERBOSE) System.out.println("Bit vector = "+myBitVec);
+
+        return myBitVec;
+    }
+
+    private static boolean SolutionFoundBefore(String myBitVec, Vector ST, int hyb) {
+        //! Check whether there is already a fail-recording in the hashtable.
+
+        Integer failInt = (Integer) lookup.get(myBitVec);
+
+        if( failInt != null )
+        {
+            int bound = failInt.intValue();
+
+            //! THis means that this input is known to not have a hybridization number >= bound.
+
+            if( bound >= hyb )
+            {
+                //! WE CAN TERMINATE IMMEDIATELY...
+                if(VERBOSE) System.out.println("HASHTABLE HIT! Terminating this search branch.");
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
     public static Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
@@ -361,45 +494,7 @@ public class TerminusEstV3 {
         Vector ST = Tree.computeMaxSTsets(t1,t2);
 
         // Compatibility detected if true.
-        if( ST.size() == 1 )
-        {
-            CompatibleResultInfo(depth); // Just printing statements.
-
-            if(BUILDNETWORK == false) System.exit(0);
-
-            Tree.collapseMaxSTsets(t1,t2,ST);
-
-            Network net = null;
-
-            if(t1.isLeaf())
-            {
-                if(BUILD_VERBOSE) System.out.println("Will output MAAF components in hanging-back order (first is the base tree):" );
-                String s[] = getTaxaFromString(t1.name);
-                // for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
-                // System.out.println();
-
-                Tree stripT1 = Tree.restrict(origT1, s);
-                Tree stripT2 = Tree.restrict(origT2, s);
-
-                Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
-
-                if(BUILD_VERBOSE) TreesAndCommonBinaryRefinementInfo(stripT1, stripT2, commonrf); // Just info printing.
-
-                Tree fakeRoot = new Tree();
-                fakeRoot.addChild(commonrf);
-                commonrf.netParent[0] = fakeRoot;
-                commonrf.netParent[1] = null;
-
-                net = new Network(fakeRoot);
-            }
-            else
-            {
-                System.out.println("ERROR! Compatible ST-set not a leaf.");
-                System.exit(0);
-            }
-
-            return net;
-        }
+        if( ST.size() == 1 ) return getNetworkOrExit(t1, t2, origT1, origT2, ST, depth);
 
         //! We reach this point if the two trees are not compatible.
 
@@ -408,98 +503,14 @@ public class TerminusEstV3 {
         //! -----------------------------------------------
         //! VERSION 2 STARTS HERE....................
 
-
         String myBitVec = null;
 
         if( USEHASH)
         {
 
-            StringBuffer allTaxa = new StringBuffer();
-
-            for(int x=0;x<ST.size();x++)
-            {
-                STset s = (STset) ST.elementAt(x);
-                int count[] = new int[1];
-                String t = s.getTaxaString(count);
-                allTaxa.append(t);
-                //! System.out.println("max ST set "+x+" contains taxa "+t);
-                //! System.out.println(count[0]);
-            }
-
-            StringBuffer stripped = new StringBuffer();
-            String back = allTaxa.toString();
-            String forth = back.trim();
-            allTaxa = new StringBuffer( forth );
-
-            for(int x=0; x<allTaxa.length(); x++ )
-            {
-                char c = allTaxa.charAt(x);
-
-                if( (c == '{') || (c=='}') ) continue;
-
-                if( c == ' ' )
-                {
-                    //! Only add a character to the end of stripped if there isn't one there already...
-                    if( stripped.length() < 1 ) continue;
-                    if( stripped.charAt( stripped.length() - 1 ) == ' ' ) continue;
-                }
-
-                stripped.append(c);
-            }
-
-            String taxaList[] = stripped.toString().split(" ");
-
-
-            if(VERBOSE)
-            {
-                System.out.println(" ---- TAXA AT THIS ITERATION --- ");
-                for(int x=0; x<taxaList.length; x++)
-                {
-                    System.out.println(taxaList[x] + " = " + getLeafNumber(taxaList[x]));
-                }
-            }
-
-            //! This is going to become a bit vector denoting which taxa we have.
-            boolean got[] = new boolean[ seenLeaves + 1 ];
-
-            for(int x=0; x<taxaList.length; x++)
-            {
-                int tick = getLeafNumber(taxaList[x]);
-                got[tick] = true;
-            }
-
-            StringBuffer bitVec = new StringBuffer();
-            for(int x=1; x<=seenLeaves; x++ )
-            {
-                if( got[x] ) bitVec.append('1');
-                else bitVec.append('0');
-            }
-
-            myBitVec = bitVec.toString();
-
-            if(VERBOSE)
-            {
-                System.out.println("Bit vector = "+myBitVec);
-            }
-
-            //! Check whether there is already a fail-recording in the hashtable.
-
-            Integer failInt = (Integer) lookup.get(myBitVec);
-
-            if( failInt != null )
-            {
-                int bound = failInt.intValue();
-
-                //! THis means that this input is known to not have a hybridization number >= bound.
-
-                if( bound >= hyb )
-                {
-                    //! WE CAN TERMINATE IMMEDIATELY...
-                    if(VERBOSE) System.out.println("HASHTABLE HIT! Terminating this search branch.");
-                    return null;
-                }
-
-            }
+            myBitVec = ComputeMyBitVec(ST, hyb);
+            if (SolutionFoundBefore(myBitVec, ST, hyb))
+                return null;
 
         } //! end if(USEHASH)
 
