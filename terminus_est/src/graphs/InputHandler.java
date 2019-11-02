@@ -34,7 +34,11 @@ public class InputHandler {
     }
 
     public static void ParseInput(String trees) {
+        String tree1 = trees.split(";")[0];
+        String tree2 = trees.split(";")[1];
 
+        Tree root1 = new Tree();
+        Tree root2 = new Tree();
     }
 
     public static void main(String[] args) {
