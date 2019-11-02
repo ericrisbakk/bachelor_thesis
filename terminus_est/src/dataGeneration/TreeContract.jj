@@ -1,0 +1,449 @@
+options{
+  LOOKAHEAD = 2;
+  FORCE_LA_CHECK = true;  
+}
+
+ 
+PARSER_BEGIN(TreeContract)
+
+//! Be very careful with leaf indexing...because we're doing multiple trees!! BE VERY CAREFUL!!!
+//! This is based on the Newick parser found at http://olduvai.sourceforge.net/tj/tj-javadoc-public/Parser/Newick.html, thanks to the author!
+
+import java.util.*;
+
+class TreeNode
+	{
+	TreeNode parent;
+	Vector children;
+	String name;
+	int num;
+	
+	
+	public TreeNode()
+		{
+		parent = null;
+		children = new Vector();
+		name = null;
+		num = -1;
+		}	
+
+	public void addChild( TreeNode c )
+		{
+		children.add(c);
+		}	
+
+	public TreeNode getParent()
+		{
+		return parent;
+		}
+
+	public void setParent( TreeNode p )
+		{
+		this.parent = p;
+		} 
+
+	public void setName( String s )
+		{
+		//! System.out.println(this + " has name set to "+s);
+		name = s;
+		}
+
+	public String getName()
+		{
+		//! System.out.println(this + " returns name "+name);
+		return name;
+		}
+
+	public void setNumber(int n)
+		{
+		num = n;
+		}
+
+	public Vector getChildren()
+		{
+		return children;
+		}
+
+	public void dump()
+		{
+		this.dumpInternal();
+		System.out.println(";");
+		}
+
+	private void dumpInternal()
+		{
+		if( this.children.size() == 0 )
+			{
+			System.out.print(this.getName());
+			}
+		else
+			{
+			System.out.print("(");
+			for(int c=0; c<children.size(); c++)
+				{
+				if( c != 0 ) System.out.print(",");
+				TreeNode tn = (TreeNode) children.elementAt(c);
+				tn.dumpInternal();
+				}
+			System.out.print(")");
+			}
+			
+		}
+
+	public Vector getInternalEdges()
+		{
+		Vector v = new Vector();
+		this.harvestInternalEdges(v);
+		return(v);
+		}
+
+	private void harvestInternalEdges(Vector v)
+		{
+		if( (this.parent != null) && (this.children.size() > 0) )
+			{
+			v.addElement(this);
+			}
+		for(int c=0; c<children.size(); c++)
+			{
+			TreeNode tn = (TreeNode) children.elementAt(c);
+			tn.harvestInternalEdges(v);
+			}
+		}
+
+	//! Contracts the edge feeding into this node
+	public void contractEdge()
+		{
+		TreeNode p = this.parent;
+		p.children.removeElement(this);
+		for(int c=0; c<children.size(); c++)
+			{
+			TreeNode tn = (TreeNode) children.elementAt(c);
+			tn.parent = p;
+			p.addChild(tn);
+			}
+			
+		}
+		
+	}
+
+
+
+//! ------------------------------------------
+
+public class TreeContract {
+	
+	public static Vector intNodesT1 = new Vector();
+	public static Vector intNodesT2 = new Vector();
+	
+	public static int numIntNodes = 0;
+	
+	public static Hashtable nameToNum;
+	public static Hashtable numToName;
+
+	public static int INFINITY = 100000;
+	
+	public static int seenLeaves = 0;
+
+	public static TreeNode t1;
+
+	//! Switch this to true to have verbose output
+	public static final boolean DEBUG = false;
+		
+	public static int getLeafNumber( String leaf )
+		{
+		if( nameToNum == null ) nameToNum = new Hashtable();
+
+		Integer i = (Integer) nameToNum.get( leaf );
+
+		if( i != null )
+			{
+			return i.intValue();
+			}
+
+		seenLeaves++;
+
+		i = new Integer(seenLeaves);
+
+		if(DEBUG) System.out.println("// Leaf '"+leaf+"' gets internal number "+seenLeaves);
+
+		nameToNum.put( leaf, i );
+
+		if( numToName == null )
+			{
+			numToName = new Hashtable();
+			}
+
+		numToName.put( i, leaf );
+
+		return seenLeaves;
+		}
+
+
+	public static String getLeafName( int num )
+		{
+		Integer i = new Integer(num);
+
+		if( numToName == null )
+			{
+			numToName = new Hashtable();
+			}
+
+		String s = (String) numToName.get( i );
+
+		return s;
+		}
+
+	
+		
+
+  public static TreeNode tree;
+
+  public static TreeNode current_node;
+
+  private static TreeNode tn;  
+
+  public static int leaves = 0;
+  public static int trees = 0;
+
+  public static void parseTrees()
+	{
+	TreeContract n = new TreeContract(System.in);
+
+	try{ n.Input(); }
+	catch( ParseException e )
+		{
+		System.out.println("Parsing error!");
+	        e.printStackTrace();
+		System.exit(0);
+    		}
+	//! TreeContract.t1.dump();
+  	}
+
+public static String VERSION = "TreeContract.jj Version 1.0";
+
+  public static void main(String args[])
+	{
+	if( args.length < 2 )
+		{
+		System.out.println("Usage: java TreeContract [percent] [seed] < treeFile");
+		System.out.println("Where 'percent' is the percentage of internal edges that should be contracted;");
+		System.out.println("Where 'seed' is an integer used to seed the random number generator: specify 0 to seed from the system clock.");
+		System.exit(0);
+		}
+
+	int percent = Integer.parseInt(args[0]);
+	long seed = Long.parseLong(args[1]);
+
+	if(percent > 100)
+		{
+		System.out.println("First argument must be an integer between 0 and 100 inclusive.");
+		System.exit(0);
+		}
+	
+	if(DEBUG) System.out.println("// Will contract "+percent+"% of the internal edges randomly.");
+	
+	if(seed==0)
+		{
+		seed = System.currentTimeMillis();
+		if(DEBUG) System.out.println("// Using system clock to seed random number generator.");
+		}
+	else
+		{
+		if(DEBUG) System.out.println("// Using value "+seed+" to seed random number generator.");
+		}
+
+		Random r = new Random(seed);
+
+	parseTrees();
+
+	//! The tree will be in t1
+	
+	Vector v = t1.getInternalEdges();
+	if(DEBUG) System.out.println("// " + v.size() + " internal edges found.");
+	
+	int todo = (int) ((v.size() / 100.0) * percent);
+
+	if(DEBUG) System.out.println("// Will contract "+todo+" internal edges randomly.");
+	
+	while( todo != 0 )
+		{
+		Vector l = t1.getInternalEdges();
+		
+		int sample = r.nextInt( l.size() );
+		TreeNode contractMe = (TreeNode) l.elementAt(sample);
+		
+		contractMe.contractEdge();
+		
+		todo--;
+
+		if(DEBUG)
+			{
+			System.out.print("// ");
+			t1.dump();
+			}
+		}
+
+	if(DEBUG) System.out.println("// Final tree:");
+	t1.dump();
+
+	}
+
+
+}	
+
+PARSER_END(TreeContract)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+| <comment: "[" ( ~["]"] )* "]"> 
+}
+
+void Input() :
+{ 
+  String s; 
+  double len;
+}
+{
+  (
+  { tree = new TreeNode(); current_node = tree; leaves = 0; } 
+  descendant_list() 
+  ( s = label() {}  )? 
+  ( ":" len = branch_length()   )? 
+  ";"
+	{        
+	trees++;
+	
+	//! System.out.println("// Processing tree "+trees+"...");
+
+	if( trees > 1 )
+		{
+		System.out.println("Only one tree allowed in the input! Stopping.");
+		System.exit(0);
+		}
+
+	if(trees==1)
+		{
+		TreeContract.t1 = tree;
+		}
+		
+	}
+ )*
+  <EOF>
+
+	{
+	int taxa = TreeContract.seenLeaves;
+
+
+
+	
+	}
+
+
+}
+
+
+
+void descendant_list():
+{ int children = 0;}
+{
+  "(" { 
+	children++;
+	tn = new TreeNode(); 
+	tn.setParent(current_node);
+	current_node.addChild(tn);
+	current_node = tn;
+      } 
+  subtree() 
+  ( "," {
+	  children++;
+	  tn = new TreeNode();
+	  tn.setParent(current_node);
+	  current_node.addChild(tn);
+	  current_node = tn;
+	}
+    subtree() 
+    )*
+  ")"
+}
+
+
+/** function subtree will set name, length and weight for each tree node */
+void subtree():
+{ 
+  String s;
+  double len; 
+}
+{
+  descendant_list() {}
+  ( s = label() {}    )? 
+  ( ":" len = branch_length() {}	
+    )? { current_node = current_node.getParent(); }
+| ( s = label() { leaves++;
+		int x = getLeafNumber(s);
+		current_node.setName(s); 
+		//! System.out.println(current_node.getName());
+		current_node.setNumber(x);
+		}
+    )?
+  ( ":" len = branch_length() {} 
+    )?
+{ current_node = current_node.parent; }
+}
+
+String label(): 
+{ String s; }
+{ 
+  s = unquoted_label() { return s; }
+| s = quoted_label() { return s; } 
+}
+
+/** for each unquoted label, we need to replace '_' by ' ' */
+String unquoted_label():
+{ Token t; }
+{ 
+  t = <unquoted_string> { String s = new String(t.toString());
+				return s;
+			  // return s.replace('_', ' ');
+ 				}
+| t = <double_number> { return new String(t.toString()); }
+}
+
+/** for each quoted label, we remove double quotes from the string */
+String quoted_label():
+{ Token t; }
+{ 
+  t = <quoted_string> { String s = new String(t.toString());
+			return s.substring(1, s.length()-1); 
+		      }
+}
+
+double branch_length():
+{ Token t; }
+{
+  t = <double_number> { return Double.parseDouble(t.toString()); } 
+}
+
+
+TOKEN:
+{
+  <#digit: ["0"-"9"] >
+| <#alpha: ["a"-"z", "A"-"Z"] >
+| <#only_quote_char: [ "(", ")", "[", "]", ":", ";", "," ]>
+| <#single_quote: "''">
+| <#both_char: [ "~", "`", "!", "@", "#", "$", "%", "^", "&", "*", 
+		 "-", "_", "+", "=", "{", "}", "|", ".", "?", "/", 
+		 "[", "]", "<", ">" ] > 
+| <#whitespace: [ " " , "\t" , "\n" , "\r" ] >
+| <#unquoted_char: ( <digit> | <alpha> | <both_char> ) >
+| <#quoted_char: ( <unquoted_char> | <whitespace> | <only_quote_char> )>
+| <#number: ( <digit> )+ ("." ( <digit> )* )? | "." ( <digit> )+ >
+| <#exponent: ["e", "E"] ("+"|"-")? (<digit>)+ >
+| <double_number: ("+"|"-")? <number> (<exponent>)? >
+| <unquoted_string: ( <unquoted_char> )+ >
+| <quoted_string: "'" ( <quoted_char> | <single_quote> )+ "'" >
+}

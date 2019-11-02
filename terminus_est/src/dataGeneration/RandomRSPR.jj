@@ -1,0 +1,502 @@
+options{
+  LOOKAHEAD = 2;
+  FORCE_LA_CHECK = true;  
+}
+
+ 
+PARSER_BEGIN(RandomRSPR)
+
+//! Be very careful with leaf indexing...because we're doing multiple trees!! BE VERY CAREFUL!!!
+//! This is based on the Newick parser found at http://olduvai.sourceforge.net/tj/tj-javadoc-public/Parser/Newick.html, thanks to the author!
+
+import java.util.*;
+
+class TreeNode
+	{
+	TreeNode parent;
+	Vector children;
+	String name;
+	int num;
+	
+	
+	public TreeNode()
+		{
+		parent = null;
+		children = new Vector();
+		name = null;
+		num = -1;
+		}	
+
+	public void addChild( TreeNode c )
+		{
+		children.add(c);
+		}	
+
+	public TreeNode getParent()
+		{
+		return parent;
+		}
+
+	public void setParent( TreeNode p )
+		{
+		this.parent = p;
+		} 
+
+	public void setName( String s )
+		{
+		//! System.out.println(this + " has name set to "+s);
+		name = s;
+		}
+
+	public String getName()
+		{
+		//! System.out.println(this + " returns name "+name);
+		return name;
+		}
+
+	public void setNumber(int n)
+		{
+		num = n;
+		}
+
+	public Vector getChildren()
+		{
+		return children;
+		}
+
+	public void dump()
+		{
+		this.dumpInternal();
+		System.out.println(";");
+		}
+
+	private void dumpInternal()
+		{
+		if( this.children.size() == 0 )
+			{
+			System.out.print(this.getName());
+			}
+		else
+			{
+			System.out.print("(");
+			for(int c=0; c<children.size(); c++)
+				{
+				if( c != 0 ) System.out.print(",");
+				TreeNode tn = (TreeNode) children.elementAt(c);
+				tn.dumpInternal();
+				}
+			System.out.print(")");
+			}
+			
+		}
+
+	public Vector getAllEdges(boolean includerho)
+		{
+		Vector v = new Vector();
+
+		TreeNode realRoot = ((TreeNode)(this.children.elementAt(0)));
+
+		if( !includerho ) realRoot.harvestAllEdges(v, this);
+		else realRoot.harvestAllEdges(v, null);
+
+		return(v);
+		}
+
+	private void harvestAllEdges(Vector v, TreeNode fakeroot)
+		{
+		if( this.parent != fakeroot) v.addElement(this);
+
+		for(int c=0; c<children.size(); c++)
+			{
+			TreeNode tn = (TreeNode) children.elementAt(c);
+			tn.harvestAllEdges(v, fakeroot);
+			}
+		}
+
+	
+	}
+
+
+
+//! ------------------------------------------
+
+public class RandomRSPR {
+	
+	public static Vector intNodesT1 = new Vector();
+	public static Vector intNodesT2 = new Vector();
+	
+	public static int numIntNodes = 0;
+	
+	public static Hashtable nameToNum;
+	public static Hashtable numToName;
+
+	public static int INFINITY = 100000;
+	
+	public static int seenLeaves = 0;
+
+	public static TreeNode t1;
+
+	//! Switch this to true to have verbose output
+	public static final boolean DEBUG = false;
+		
+	public static int getLeafNumber( String leaf )
+		{
+		if( nameToNum == null ) nameToNum = new Hashtable();
+
+		Integer i = (Integer) nameToNum.get( leaf );
+
+		if( i != null )
+			{
+			return i.intValue();
+			}
+
+		seenLeaves++;
+
+		i = new Integer(seenLeaves);
+
+		if(DEBUG) System.out.println("// Leaf '"+leaf+"' gets internal number "+seenLeaves);
+
+		nameToNum.put( leaf, i );
+
+		if( numToName == null )
+			{
+			numToName = new Hashtable();
+			}
+
+		numToName.put( i, leaf );
+
+		return seenLeaves;
+		}
+
+
+	public static String getLeafName( int num )
+		{
+		Integer i = new Integer(num);
+
+		if( numToName == null )
+			{
+			numToName = new Hashtable();
+			}
+
+		String s = (String) numToName.get( i );
+
+		return s;
+		}
+
+	
+		
+
+  public static TreeNode tree;
+
+  public static TreeNode current_node;
+
+  private static TreeNode tn;  
+
+  public static int leaves = 0;
+  public static int trees = 0;
+
+  public static void parseTrees()
+	{
+	RandomRSPR n = new RandomRSPR(System.in);
+
+	try{ n.Input(); }
+	catch( ParseException e )
+		{
+		System.out.println("Parsing error!");
+	        e.printStackTrace();
+		System.exit(0);
+    		}
+	//! RandomRSPR.t1.dump();
+  	}
+
+public static String VERSION = "RandomRSPR.jj Version 1.0";
+
+  public static void main(String args[])
+	{
+	if( args.length < 2 )
+		{
+		System.out.println("Usage: java RandomRSPR [number of RSPR moves] [random seed] < treeFile");
+		System.out.println("Where 'number of RSPR moves' is the number of random RSPR moves that should be applied;");
+		System.out.println("Where 'seed' is an integer used to seed the random number generator: specify 0 to seed from the system clock.");
+		System.exit(0);
+		}
+
+	int moves = Integer.parseInt(args[0]);
+	long seed = Long.parseLong(args[1]);
+
+	
+	if(DEBUG) System.out.println("// Will conduct "+moves+" random RSPR moves.");
+	
+	if(seed==0)
+		{
+		seed = System.currentTimeMillis();
+		if(DEBUG) System.out.println("// Using system clock to seed random number generator.");
+		}
+	else
+		{
+		if(DEBUG) System.out.println("// Using value "+seed+" to seed random number generator.");
+		}
+
+		Random r = new Random(seed);
+
+	parseTrees();
+
+	//! The tree will be in t1
+
+	int todo = moves;
+
+	TreeNode rho = new TreeNode();
+	rho.addChild(t1);
+	t1.setParent(rho);
+
+	while( todo != 0 )
+		{
+		Vector l = rho.getAllEdges(false);
+	
+		//! Note that each element is a node, and the edge it represents is the edge *incoming* to it. 
+		//! The edge from rho to the real root is not selected...
+		
+		TreeNode prune = null;
+		
+		int p = r.nextInt( l.size() );
+		prune = (TreeNode) l.elementAt(p);
+
+		TreeNode suppress = prune.parent;
+		
+		if (suppress.children.size() != 2)
+			{
+			System.out.println("Something went wrong, the vertex we want to suppress did not have two children.");
+			System.exit(0);
+			}
+
+		TreeNode c1 = (TreeNode) (suppress.children.elementAt(0));
+		TreeNode c2 = (TreeNode) (suppress.children.elementAt(1));
+		
+		TreeNode select = null;
+		TreeNode jump = null;
+		TreeNode grandpa = null;
+		
+		grandpa = suppress.parent;
+		
+		if( c1 == prune )
+			{
+			select = c1;
+			jump = c2;
+			}
+		else
+		if( c2 == prune )
+			{
+			select = c2;
+			jump = c1;
+			}
+		else
+			{
+			System.out.println("Something went wrong, could not find end-point of the cut.");
+			System.exit(0);
+			}
+		
+		jump.parent = grandpa;
+		grandpa.children.remove(suppress);
+		grandpa.children.add(jump);
+		
+		if(DEBUG)
+			{
+			System.out.println("Parent of suppressed node should have 2 children again, it has..."+grandpa.children.size()+" elements.");
+			}
+		
+		//! Hopefully that completes the suppression...
+		
+		//! Get a random edge to subdivide. This time the edge leaving rho is ok.
+		
+		Vector m = rho.getAllEdges(true);
+		
+		int a = r.nextInt( m.size() );
+		TreeNode attach = (TreeNode) m.elementAt(a);
+
+		TreeNode subdivide = new TreeNode();
+
+		TreeNode opa = attach.parent;
+		
+		prune.parent = subdivide;
+		subdivide.children.add(prune);
+		subdivide.children.add(attach);
+		subdivide.parent = opa;
+		
+		opa.children.remove(attach);
+		opa.children.add(subdivide);
+		
+		attach.parent = subdivide;
+		
+		todo--;
+
+		if(DEBUG)
+			{
+			System.out.print("// ");
+			((TreeNode) rho.children.elementAt(0) ).dump();
+			}
+		} //! end while moves
+
+	if(DEBUG) System.out.println("// Final tree:");
+	((TreeNode) rho.children.elementAt(0) ).dump();
+		
+	}
+
+
+}	
+
+PARSER_END(RandomRSPR)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+| <comment: "[" ( ~["]"] )* "]"> 
+}
+
+void Input() :
+{ 
+  String s; 
+  double len;
+}
+{
+  (
+  { tree = new TreeNode(); current_node = tree; leaves = 0; } 
+  descendant_list() 
+  ( s = label() {}  )? 
+  ( ":" len = branch_length()   )? 
+  ";"
+	{        
+	trees++;
+	
+	//! System.out.println("// Processing tree "+trees+"...");
+
+	if( trees > 1 )
+		{
+		System.out.println("Only one tree allowed in the input! Stopping.");
+		System.exit(0);
+		}
+
+	if(trees==1)
+		{
+		RandomRSPR.t1 = tree;
+		}
+		
+	}
+ )*
+  <EOF>
+
+	{
+	int taxa = RandomRSPR.seenLeaves;
+
+
+
+	
+	}
+
+
+}
+
+
+
+void descendant_list():
+{ int children = 0;}
+{
+  "(" { 
+	children++;
+	tn = new TreeNode(); 
+	tn.setParent(current_node);
+	current_node.addChild(tn);
+	current_node = tn;
+      } 
+  subtree() 
+  ( "," {
+	  children++;
+	  tn = new TreeNode();
+	  tn.setParent(current_node);
+	  current_node.addChild(tn);
+	  current_node = tn;
+	}
+    subtree() 
+    )*
+  ")"
+}
+
+
+/** function subtree will set name, length and weight for each tree node */
+void subtree():
+{ 
+  String s;
+  double len; 
+}
+{
+  descendant_list() {}
+  ( s = label() {}    )? 
+  ( ":" len = branch_length() {}	
+    )? { current_node = current_node.getParent(); }
+| ( s = label() { leaves++;
+		int x = getLeafNumber(s);
+		current_node.setName(s); 
+		//! System.out.println(current_node.getName());
+		current_node.setNumber(x);
+		}
+    )?
+  ( ":" len = branch_length() {} 
+    )?
+{ current_node = current_node.parent; }
+}
+
+String label(): 
+{ String s; }
+{ 
+  s = unquoted_label() { return s; }
+| s = quoted_label() { return s; } 
+}
+
+/** for each unquoted label, we need to replace '_' by ' ' */
+String unquoted_label():
+{ Token t; }
+{ 
+  t = <unquoted_string> { String s = new String(t.toString());
+				return s;
+			  // return s.replace('_', ' ');
+ 				}
+| t = <double_number> { return new String(t.toString()); }
+}
+
+/** for each quoted label, we remove double quotes from the string */
+String quoted_label():
+{ Token t; }
+{ 
+  t = <quoted_string> { String s = new String(t.toString());
+			return s.substring(1, s.length()-1); 
+		      }
+}
+
+double branch_length():
+{ Token t; }
+{
+  t = <double_number> { return Double.parseDouble(t.toString()); } 
+}
+
+
+TOKEN:
+{
+  <#digit: ["0"-"9"] >
+| <#alpha: ["a"-"z", "A"-"Z"] >
+| <#only_quote_char: [ "(", ")", "[", "]", ":", ";", "," ]>
+| <#single_quote: "''">
+| <#both_char: [ "~", "`", "!", "@", "#", "$", "%", "^", "&", "*", 
+		 "-", "_", "+", "=", "{", "}", "|", ".", "?", "/", 
+		 "[", "]", "<", ">" ] > 
+| <#whitespace: [ " " , "\t" , "\n" , "\r" ] >
+| <#unquoted_char: ( <digit> | <alpha> | <both_char> ) >
+| <#quoted_char: ( <unquoted_char> | <whitespace> | <only_quote_char> )>
+| <#number: ( <digit> )+ ("." ( <digit> )* )? | "." ( <digit> )+ >
+| <#exponent: ["e", "E"] ("+"|"-")? (<digit>)+ >
+| <double_number: ("+"|"-")? <number> (<exponent>)? >
+| <unquoted_string: ( <unquoted_char> )+ >
+| <quoted_string: "'" ( <quoted_char> | <single_quote> )+ "'" >
+}
