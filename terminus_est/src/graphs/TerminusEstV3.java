@@ -79,6 +79,7 @@ public class TerminusEstV3 {
 
     public static void parseTrees()
     {
+        /*
         TerminusEstV3 n = new TerminusEstV3(System.in);
 
         try{ n.Input(); }
@@ -88,7 +89,7 @@ public class TerminusEstV3 {
             e.printStackTrace();
             System.exit(0);
         }
-
+        */
     }
 
     public static String VERSION = "TerminusEstV3.jj Version 3, 30th March 2015";
