@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/bachelor_thesis.iml" filepath="$PROJECT_DIR$/bachelor_thesis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../mcts-master/mcts.iml" filepath="$PROJECT_DIR$/../mcts-master/mcts.iml" />
       <module fileurl="file://$PROJECT_DIR$/terminus_est/terminus_est.iml" filepath="$PROJECT_DIR$/terminus_est/terminus_est.iml" />
     </modules>
   </component>
