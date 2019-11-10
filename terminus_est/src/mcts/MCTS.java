@@ -15,7 +15,8 @@ public class MCTS {
     }
 
     /**
-     * Builds the search tree
+     * Builds the search tree.
+     * During the expansion stage, all states are simulated from once, to get an initial result.
      */
     public void BuildTree() {
         int iteration = 0;
