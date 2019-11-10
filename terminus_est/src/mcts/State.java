@@ -1,5 +1,7 @@
 package mcts;
 
+import java.util.Collection;
+
 /**
  * Represents the collection of values which defines an instance of some object, as well
  * as an MCTS node.
@@ -12,6 +14,17 @@ public interface State {
     void Apply(Action a);
 
     /**
+     * Create ActionStatePair for all allowed actions and store to this object.
+     */
+    void Expand();
+
+    /**
+     * Fetch results from expansion.
+     * @return Some collection of
+     */
+    Collection<ActionStatePair> GetActionsAndChildren();
+
+    /**
      * Get parent in search tree.
      * @return parent state-node.
      */
@@ -22,6 +35,4 @@ public interface State {
      * @return Deep copy.
      */
     State DeepCopy();
-
-    Iterable<Action> GetActions();
 }

@@ -9,5 +9,5 @@ public interface ISimulationPolicy {
      * @param state given state.
      */
     void Simulate(State state);
-    
+
 }
