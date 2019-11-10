@@ -1,7 +1,8 @@
 package mcts;
 
 /**
- * Represents the collection of values which defines an instance of some object.
+ * Represents the collection of values which defines an instance of some object, as well
+ * as an MCTS node.
  */
 public interface State {
     /**
@@ -10,5 +11,17 @@ public interface State {
      */
     void Apply(Action a);
 
-    void Revert();
+    /**
+     * Get parent in search tree.
+     * @return parent state-node.
+     */
+    State GetParent();
+
+    /**
+     * Creates a deep copy of this object.
+     * @return Deep copy.
+     */
+    State DeepCopy();
+
+    Iterable<Action> GetActions();
 }
