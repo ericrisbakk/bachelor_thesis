@@ -22,11 +22,24 @@ public class MCTS {
         int iteration = 0;
 
         while (iteration < maxIterations) {
+
+            // Select
             NodeMCTS select = selectionPolicy.Select(root);
+
+            // Expand
             select.Expand();
             NodeMCTS next = selectionPolicy.SelectFromExpansion(select);
 
+            // Simulate
+            IResult result = simulationPolicy.Simulate(next);
+
+            // Backpropagation.
+            NodeMCTS bpNode = next;
+            while (bpNode != null) {
+                bpNode.GetResult().Update(result);
+                bpNode = bpNode.GetParent();
+            }
         }
-    }
+    } // End building tree.
 
 }
