@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 /**
  * Calculates the "value" of a state.

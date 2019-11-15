@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 /**
  * Interface for class which selects the next node to expand and simulate.

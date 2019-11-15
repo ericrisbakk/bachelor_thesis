@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 /**
  * Represents any discrete event which may change the state.

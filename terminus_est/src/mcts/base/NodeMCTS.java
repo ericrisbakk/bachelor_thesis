@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 import java.util.Collection;
 

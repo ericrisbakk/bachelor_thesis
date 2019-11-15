@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 /**
  * Used for objects that store the results from a simulation in a single node.

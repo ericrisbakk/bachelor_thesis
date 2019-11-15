@@ -1,4 +1,4 @@
-package mcts;
+package mcts.base;
 
 /**
  * Basic MCTS.
@@ -9,9 +9,11 @@ public class MCTS {
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
 
-    public MCTS(NodeMCTS root, int maxIterations) {
+    public MCTS(NodeMCTS root, int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy) {
         this.root = root.DeepCopy();
         this.maxIterations = maxIterations;
+        this.selectionPolicy = selectionPolicy;
+        this.simulationPolicy = simulationPolicy;
     }
 
     /**
