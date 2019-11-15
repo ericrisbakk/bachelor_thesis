@@ -5,11 +5,11 @@ package mcts;
  */
 public class MCTS {
     public int maxIterations = 0;
-    public State root;
+    public NodeMCTS root;
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
 
-    public MCTS(State root, int maxIterations) {
+    public MCTS(NodeMCTS root, int maxIterations) {
         this.root = root.DeepCopy();
         this.maxIterations = maxIterations;
     }
@@ -22,9 +22,9 @@ public class MCTS {
         int iteration = 0;
 
         while (iteration < maxIterations) {
-            State select = selectionPolicy.Select(root);
+            NodeMCTS select = selectionPolicy.Select(root);
             select.Expand();
-            State next = selectionPolicy.SelectFromExpansion(select.GetActionsAndChildren());
+            NodeMCTS next = selectionPolicy.SelectFromExpansion(select);
 
         }
     }

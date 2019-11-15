@@ -8,6 +8,6 @@ public interface ISimulationPolicy {
      * Simulate from the given state.
      * @param state given state.
      */
-    void Simulate(State state);
+    void Simulate(NodeMCTS state);
 
 }
