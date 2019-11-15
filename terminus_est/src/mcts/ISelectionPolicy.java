@@ -1,7 +1,5 @@
 package mcts;
 
-import java.util.Collection;
-
 /**
  * Interface for class which selects the next node to expand.
  */
@@ -11,12 +9,12 @@ public interface ISelectionPolicy {
      * @param root from which we expand from.
      * @return Next node to expand.
      */
-    State Select(State root);
+    NodeMCTS Select(NodeMCTS root);
 
     /**
      * Behaviour for selecting which node to simulate from after an expansion.
-     * @param collection Collection of actions and the states we get from the node that expanded
+     * @param parent The parent node whose children we (potentially) select from.
      * @return The state we wish to simulate from.
      */
-    State SelectFromExpansion(Collection<ActionStatePair> collection);
+    NodeMCTS SelectFromExpansion(NodeMCTS parent);
 }
