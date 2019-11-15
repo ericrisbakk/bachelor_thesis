@@ -4,10 +4,12 @@ package mcts;
  * MCTS Simulation step.
  */
 public interface ISimulationPolicy {
+
     /**
-     * Simulate from the given state.
-     * @param state given state.
+     * Run simulation and get results.
+     * @param state State we pass on.
+     * @return Results from having run simulation on given state.
      */
-    void Simulate(NodeMCTS state);
+    IResult Simulate(NodeMCTS state);
 
 }

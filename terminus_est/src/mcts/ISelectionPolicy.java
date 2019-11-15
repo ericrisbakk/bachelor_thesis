@@ -1,7 +1,7 @@
 package mcts;
 
 /**
- * Interface for class which selects the next node to expand.
+ * Interface for class which selects the next node to expand and simulate.
  */
 public interface ISelectionPolicy {
     /**
