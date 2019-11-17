@@ -1,8 +1,8 @@
 package main.mcts;
 
-import mcts.base.Action;
-import mcts.base.IResult;
-import mcts.base.NodeMCTS;
+import main.mcts.base.Action;
+import main.mcts.base.IResult;
+import main.mcts.base.NodeMCTS;
 
 public class NodeTerminusEst implements NodeMCTS {
     @Override
