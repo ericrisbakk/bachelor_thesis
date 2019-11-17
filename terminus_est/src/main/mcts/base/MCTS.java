@@ -35,7 +35,7 @@ public class MCTS {
             // Simulate
             IResult result = simulationPolicy.Simulate(next);
 
-            // Backpropagation.
+            // Back-propagation.
             NodeMCTS bpNode = next;
             while (bpNode != null) {
                 bpNode.GetResult().Update(result);
