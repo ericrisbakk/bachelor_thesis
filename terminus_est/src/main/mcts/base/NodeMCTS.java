@@ -7,11 +7,6 @@ import java.util.Collection;
  * as an MCTS node.
  */
 public interface NodeMCTS {
-    /**
-     * Apply action to this state.
-     * @param a Given action. It should always be a legal w.r.t. State params.
-     */
-    void Apply(Action a);
 
     /**
      * Returns the action which was last taken, and so created the state of this node.

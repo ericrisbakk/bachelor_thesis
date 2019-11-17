@@ -11,18 +11,13 @@ public class TicTacToeNode implements NodeMCTS {
     ResultUCT result;
 
     @Override
-    public void Apply(Action a) {
-
-    }
-
-    @Override
     public Action GetLastAction() {
-        return null;
+        return lastAction;
     }
 
     @Override
     public IResult GetResult() {
-        return null;
+        return result;
     }
 
     @Override
