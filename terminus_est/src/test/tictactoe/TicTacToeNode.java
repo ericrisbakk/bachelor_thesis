@@ -9,7 +9,6 @@ public class TicTacToeState implements NodeMCTS {
 
     Action lastAction;
     ResultUCT result;
-    int[][] board;
     int currentPlayer;
 
     @Override
