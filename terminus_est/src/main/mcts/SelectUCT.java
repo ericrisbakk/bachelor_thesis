@@ -3,6 +3,10 @@ package main.mcts;
 import main.mcts.base.ISelectionPolicy;
 import main.mcts.base.NodeMCTS;
 
+/**
+ * This is a selection policy which uses `ResultUCT` for choosing nodes.
+ * Note that ResultUCT is made in mind with a "single-player game" only.
+ */
 public class SelectUCT implements ISelectionPolicy {
     private static final boolean DEBUG = true;
     public static double param_c = Math.sqrt(2);
