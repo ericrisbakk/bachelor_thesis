@@ -6,7 +6,7 @@ package mcts.base;
 public interface ISelectionPolicy {
     /**
      * Select the next leaf node to expand.
-     * @param root from which we expand from.
+     * @param root from which we search from.
      * @return Next node to expand.
      */
     NodeMCTS Select(NodeMCTS root);
