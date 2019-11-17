@@ -29,7 +29,7 @@ public class MCTS {
             NodeMCTS select = selectionPolicy.Select(root);
 
             // Expand
-            select.Expand();
+            if (!select.IsExpanded()) select.Expand();
             NodeMCTS next = selectionPolicy.SelectFromExpansion(select);
 
             // Simulate
