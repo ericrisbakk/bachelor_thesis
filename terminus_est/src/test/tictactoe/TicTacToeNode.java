@@ -5,11 +5,10 @@ import main.mcts.base.Action;
 import main.mcts.base.IResult;
 import main.mcts.base.NodeMCTS;
 
-public class TicTacToeState implements NodeMCTS {
+public class TicTacToeNode implements NodeMCTS {
 
     Action lastAction;
     ResultUCT result;
-    int currentPlayer;
 
     @Override
     public void Apply(Action a) {
