@@ -4,8 +4,6 @@ import mcts.base.Action;
 import mcts.base.IResult;
 import mcts.base.NodeMCTS;
 
-import java.util.Collection;
-
 public class NodeTerminusEst implements NodeMCTS {
     @Override
     public void Apply(Action a) {
@@ -28,7 +26,7 @@ public class NodeTerminusEst implements NodeMCTS {
     }
 
     @Override
-    public Collection<NodeMCTS> GetChildren() {
+    public NodeMCTS[] GetChildren() {
         return null;
     }
 

@@ -33,7 +33,7 @@ public interface NodeMCTS {
      * Fetch results from expansion.
      * @return Some collection of
      */
-    Collection<NodeMCTS> GetChildren();
+    NodeMCTS[] GetChildren();
 
     /**
      * Get parent in search tree.
