@@ -5,10 +5,6 @@ import main.mcts.base.IResult;
 import main.mcts.base.NodeMCTS;
 
 public class NodeTerminusEst implements NodeMCTS {
-    @Override
-    public void Apply(Action a) {
-
-    }
 
     @Override
     public Action GetLastAction() {
