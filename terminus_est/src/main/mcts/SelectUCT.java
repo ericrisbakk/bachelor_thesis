@@ -1,8 +1,7 @@
-package mcts;
+package main.mcts;
 
-import mcts.base.ISelectionPolicy;
-import mcts.base.NodeMCTS;
-import org.w3c.dom.Node;
+import main.mcts.base.ISelectionPolicy;
+import main.mcts.base.NodeMCTS;
 
 public class SelectUCT implements ISelectionPolicy {
     private static final boolean DEBUG = true;

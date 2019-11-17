@@ -1,4 +1,4 @@
-package mcts;
+package main.mcts;
 
 import mcts.base.Action;
 import mcts.base.IResult;

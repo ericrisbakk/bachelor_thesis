@@ -1,4 +1,4 @@
-package dataGeneration;
+package main.dataGeneration;
 
 import java.io.*;
 import java.util.*;

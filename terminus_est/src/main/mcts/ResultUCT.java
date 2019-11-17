@@ -1,4 +1,4 @@
-package mcts;
+package main.mcts;
 
 /**
  * Logs the necessary information for doing UCT-MCTS.

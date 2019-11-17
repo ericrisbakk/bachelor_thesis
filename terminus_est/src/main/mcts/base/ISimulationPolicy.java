@@ -1,4 +1,4 @@
-package mcts.base;
+package main.mcts.base;
 
 /**
  * MCTS Simulation step.

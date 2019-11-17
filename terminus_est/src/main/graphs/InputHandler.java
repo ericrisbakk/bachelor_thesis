@@ -1,4 +1,4 @@
-package graphs;
+package main.graphs;
 import java.io.*;
 
 public class InputHandler {
