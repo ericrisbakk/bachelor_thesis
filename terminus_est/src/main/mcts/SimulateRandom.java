@@ -1,11 +1,14 @@
 package main.mcts;
 
-import main.mcts.base.INodeMCTS;
-import main.mcts.base.IResult;
-import main.mcts.base.ISimulationPolicy;
-import main.mcts.base.State;
+import main.mcts.base.*;
 
 public class SimulateRandom implements ISimulationPolicy {
+    IHeuristic heuristicP1Wins;
+
+    public SimulateRandom(IHeuristic heuristicP1Wins) {
+        this.heuristicP1Wins = heuristicP1Wins;
+    }
+
     @Override
     public IResult Simulate(INodeMCTS node) {
         State s = ((NodeMCTS) node).ConstructNodeState();
