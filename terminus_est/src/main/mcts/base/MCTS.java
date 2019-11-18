@@ -5,11 +5,11 @@ package main.mcts.base;
  */
 public class MCTS {
     public int maxIterations = 0;
-    public NodeMCTS root;
+    public INodeMCTS root;
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
 
-    public MCTS(NodeMCTS root, int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy) {
+    public MCTS(INodeMCTS root, int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy) {
         this.root = root.DeepCopy();
         this.maxIterations = maxIterations;
         this.selectionPolicy = selectionPolicy;
@@ -26,17 +26,17 @@ public class MCTS {
         while (iteration < maxIterations) {
 
             // Select
-            NodeMCTS select = selectionPolicy.Select(root);
+            INodeMCTS select = selectionPolicy.Select(root);
 
             // Expand
             if (!select.IsExpanded()) select.Expand();
-            NodeMCTS next = selectionPolicy.SelectFromExpansion(select);
+            INodeMCTS next = selectionPolicy.SelectFromExpansion(select);
 
             // Simulate
             IResult result = simulationPolicy.Simulate(next);
 
             // Back-propagation.
-            NodeMCTS bpNode = next;
+            INodeMCTS bpNode = next;
             while (bpNode != null) {
                 bpNode.GetResult().Update(result);
                 bpNode = bpNode.GetParent();

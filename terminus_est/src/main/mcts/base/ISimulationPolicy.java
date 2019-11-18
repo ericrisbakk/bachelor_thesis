@@ -10,6 +10,6 @@ public interface ISimulationPolicy {
      * @param state State we pass on.
      * @return Results from having run simulation on given state.
      */
-    IResult Simulate(NodeMCTS state);
+    IResult Simulate(INodeMCTS state);
 
 }

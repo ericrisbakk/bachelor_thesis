@@ -1,7 +1,7 @@
 package main.mcts;
 
 import main.mcts.base.ISelectionPolicy;
-import main.mcts.base.NodeMCTS;
+import main.mcts.base.INodeMCTS;
 
 /**
  * This is a selection policy which uses `ResultUCT` for choosing nodes.
@@ -20,8 +20,8 @@ public class SelectUCT implements ISelectionPolicy {
      * @return Node from which we expand from.
      */
     @Override
-    public NodeMCTS Select(NodeMCTS root) {
-        NodeMCTS current = root;
+    public INodeMCTS Select(INodeMCTS root) {
+        INodeMCTS current = root;
 
         // Find best and most immediate unexpanded node.
         while (current.IsExpanded()) {
@@ -30,9 +30,9 @@ public class SelectUCT implements ISelectionPolicy {
             }
 
             // Get child with highest UCT value, or the one which has not been expanded (if it exists).
-            NodeMCTS best = current.GetChildren()[0];
+            INodeMCTS best = current.GetChildren()[0];
             for (int i = 0; i < current.GetChildren().length; ++i) {
-                NodeMCTS option = current.GetChildren()[i];
+                INodeMCTS option = current.GetChildren()[i];
                 // Check whether child is unexpanded first.
                 if (!HasBeenSimulatedFrom(option)) {
                     return current;
@@ -56,7 +56,7 @@ public class SelectUCT implements ISelectionPolicy {
      * @return Node to simulate from.
      */
     @Override
-    public NodeMCTS SelectFromExpansion(NodeMCTS parent) {
+    public INodeMCTS SelectFromExpansion(INodeMCTS parent) {
         // Know this has no children.
         if (parent.IsTerminal())
             return parent;
@@ -71,11 +71,11 @@ public class SelectUCT implements ISelectionPolicy {
         return null;
     }
 
-    public boolean HasBeenSimulatedFrom(NodeMCTS node) {
+    public boolean HasBeenSimulatedFrom(INodeMCTS node) {
         return ((ResultUCT) node.GetResult()).simulations == 0;
     }
 
-    public double GetUCT(NodeMCTS node) {
+    public double GetUCT(INodeMCTS node) {
         ResultUCT values = (ResultUCT) node.GetResult();
         ResultUCT parentValues = (ResultUCT) node.GetParent().GetResult();
 

@@ -3,9 +3,9 @@ package test.tictactoe;
 import main.mcts.ResultUCT;
 import main.mcts.base.Action;
 import main.mcts.base.IResult;
-import main.mcts.base.NodeMCTS;
+import main.mcts.base.INodeMCTS;
 
-public class TicTacToeNode implements NodeMCTS {
+public class TicTacToeNode implements INodeMCTS {
 
     Action lastAction;
     ResultUCT result;
@@ -26,17 +26,17 @@ public class TicTacToeNode implements NodeMCTS {
     }
 
     @Override
-    public NodeMCTS[] GetChildren() {
-        return new NodeMCTS[0];
+    public INodeMCTS[] GetChildren() {
+        return new INodeMCTS[0];
     }
 
     @Override
-    public NodeMCTS GetParent() {
+    public INodeMCTS GetParent() {
         return null;
     }
 
     @Override
-    public NodeMCTS DeepCopy() {
+    public INodeMCTS DeepCopy() {
         return null;
     }
 

@@ -9,12 +9,12 @@ public interface ISelectionPolicy {
      * @param root from which we search from.
      * @return Next node to expand.
      */
-    NodeMCTS Select(NodeMCTS root);
+    INodeMCTS Select(INodeMCTS root);
 
     /**
      * Behaviour for selecting which node to simulate from after an expansion.
      * @param parent The parent node whose children we (potentially) select from.
      * @return The state we wish to simulate from.
      */
-    NodeMCTS SelectFromExpansion(NodeMCTS parent);
+    INodeMCTS SelectFromExpansion(INodeMCTS parent);
 }

@@ -2,9 +2,9 @@ package main.mcts;
 
 import main.mcts.base.Action;
 import main.mcts.base.IResult;
-import main.mcts.base.NodeMCTS;
+import main.mcts.base.INodeMCTS;
 
-public class NodeTerminusEst implements NodeMCTS {
+public class NodeTerminusEst implements INodeMCTS {
 
     @Override
     public Action GetLastAction() {
@@ -22,17 +22,17 @@ public class NodeTerminusEst implements NodeMCTS {
     }
 
     @Override
-    public NodeMCTS[] GetChildren() {
+    public INodeMCTS[] GetChildren() {
         return null;
     }
 
     @Override
-    public NodeMCTS GetParent() {
+    public INodeMCTS GetParent() {
         return null;
     }
 
     @Override
-    public NodeMCTS DeepCopy() {
+    public INodeMCTS DeepCopy() {
         return null;
     }
 
