@@ -63,7 +63,7 @@ public class SelectUCT implements ISelectionPolicy {
 
         // Otherwise select first un-simulated option.
         for (int i = 0; i < parent.GetChildren().length; ++i) {
-            if ( HasBeenSimulatedFrom(parent.GetChildren()[i]) )
+            if ( !HasBeenSimulatedFrom(parent.GetChildren()[i]) )
                 return parent.GetChildren()[i];
         }
 
@@ -89,7 +89,7 @@ public class SelectUCT implements ISelectionPolicy {
     }
 
     public boolean HasBeenSimulatedFrom(NodeMCTS node) {
-        return ((ResultUCT) node.GetResult()).simulations == 0;
+        return ((ResultUCT) node.GetResult()).simulations != 0;
     }
 
     public double GetUCT(NodeMCTS node) {
