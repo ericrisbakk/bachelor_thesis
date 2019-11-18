@@ -4,16 +4,20 @@ import main.mcts.base.Action;
 import main.mcts.base.INodeMCTS;
 import main.mcts.base.IResult;
 import main.mcts.base.State;
+import org.w3c.dom.Node;
 
 public class NodeMCTS implements INodeMCTS {
+    // Properties related to the problem.
     public State root;
-    public int depth;
     public Action lastAction;
     public IResult result;
 
+    // Properties related to rest of tree.
     public NodeMCTS parent;
     public NodeMCTS[] children;
+    public int depth;
 
+    // Node-specific properties.
     public boolean expanded;
     public boolean leaf;
 
@@ -26,8 +30,9 @@ public class NodeMCTS implements INodeMCTS {
         else
             depth = parent.depth + 1;
 
+        // All new nodes are assumed to be leaf nodes.
         expanded = false;
-        leaf = false;
+        leaf = true;
     }
 
     public State ConstructNodeState() {
@@ -61,6 +66,18 @@ public class NodeMCTS implements INodeMCTS {
     public void Expand() {
         State temp = ConstructNodeState();
         Action[] actions = temp.GetLegalActions();
+
+        children = new NodeMCTS[actions.length];
+
+        for (int i = 0; i < children.length; ++i) {
+            children[i] = new NodeMCTS(root, actions[i], this);
+        }
+
+        expanded = true;
+        if (actions.length == 0)
+            leaf = true;
+        else
+            leaf = false;
     }
 
     @Override
@@ -71,6 +88,16 @@ public class NodeMCTS implements INodeMCTS {
     @Override
     public INodeMCTS GetParent() {
         return parent;
+    }
+
+    @Override
+    public INodeMCTS GetRootNode() {
+        INodeMCTS node = this;
+        while (parent != null) {
+            node = node.GetParent();
+        }
+
+        return node;
     }
 
     @Override
@@ -91,6 +118,11 @@ public class NodeMCTS implements INodeMCTS {
     @Override
     public boolean IsTerminal() {
         return expanded && leaf;
+    }
+
+    @Override
+    public boolean IsRoot() {
+        return (parent == null);
     }
 
     @Override

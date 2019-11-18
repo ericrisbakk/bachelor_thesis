@@ -34,6 +34,8 @@ public interface INodeMCTS {
      */
     INodeMCTS GetParent();
 
+    INodeMCTS GetRootNode();
+
     /**
      * Creates a deep copy of this object.
      * @return Deep copy.
@@ -58,6 +60,8 @@ public interface INodeMCTS {
      * @return True if terminal, false otherwise.
      */
     boolean IsTerminal();
+
+    boolean IsRoot();
 
     /**
      * @return The number of children that have been expanded.
