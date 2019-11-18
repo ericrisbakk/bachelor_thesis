@@ -1,12 +1,10 @@
 package main.mcts.base;
 
-import java.util.Collection;
-
 /**
  * Represents the collection of values which defines an instance of some object, as well
  * as an MCTS node.
  */
-public interface NodeMCTS {
+public interface INodeMCTS {
 
     /**
      * Returns the action which was last taken, and so created the state of this node.
@@ -28,19 +26,19 @@ public interface NodeMCTS {
      * Fetch results from expansion.
      * @return Some collection of
      */
-    NodeMCTS[] GetChildren();
+    INodeMCTS[] GetChildren();
 
     /**
      * Get parent in search tree.
      * @return parent state-node.
      */
-    NodeMCTS GetParent();
+    INodeMCTS GetParent();
 
     /**
      * Creates a deep copy of this object.
      * @return Deep copy.
      */
-    NodeMCTS DeepCopy();
+    INodeMCTS DeepCopy();
 
     /**
      * See whether node has been expanded.
