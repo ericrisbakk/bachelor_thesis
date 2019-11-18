@@ -7,7 +7,7 @@ import main.mcts.NodeMCTS;
  */
 public class MCTS {
     public int maxIterations = 0;
-    public INodeMCTS root;
+    public NodeMCTS root;
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
 
@@ -29,17 +29,17 @@ public class MCTS {
         while (iteration < maxIterations) {
 
             // Select
-            INodeMCTS select = selectionPolicy.Select(root);
+            NodeMCTS select = selectionPolicy.Select(root);
 
             // Expand
             if (!select.IsExpanded()) select.Expand();
-            INodeMCTS next = selectionPolicy.SelectFromExpansion(select);
+            NodeMCTS next = selectionPolicy.SelectFromExpansion(select);
 
             // Simulate
             IResult result = simulationPolicy.Simulate(next);
 
             // Back-propagation.
-            INodeMCTS bpNode = next;
+            NodeMCTS bpNode = next;
             while (bpNode != null) {
                 bpNode.GetResult().Update(result);
                 bpNode = bpNode.GetParent();
