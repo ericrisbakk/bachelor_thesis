@@ -11,8 +11,7 @@ public class MCTS {
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
 
-    public MCTS(State rootState, int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy) {
-        root = new NodeMCTS(rootState, null, null);
+    public MCTS(int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy) {
         this.maxIterations = maxIterations;
         this.selectionPolicy = selectionPolicy;
         this.simulationPolicy = simulationPolicy;
@@ -22,7 +21,9 @@ public class MCTS {
      * Builds the search tree.
      * During the expansion stage, all states are simulated from once, to get an initial result.
      */
-    public void BuildTree() {
+    public void BuildTree(State state) {
+        root = new NodeMCTS(state, null, null);
+
         int iteration = 0;
 
         while (iteration < maxIterations) {
@@ -45,5 +46,9 @@ public class MCTS {
             }
         }
     } // End building tree.
+
+    public Action GetBestAction() {
+        return selectionPolicy.SelectBestChildAction(root);
+    }
 
 }
