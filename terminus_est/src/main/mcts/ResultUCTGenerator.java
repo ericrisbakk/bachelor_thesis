@@ -7,7 +7,7 @@ import javax.xml.transform.Result;
 /**
  * Generates result instances for UCT.
  */
-public class ResultUCTGenerator implements IResultGenerator<ResultUCT> {
+public class ResultUCTGenerator implements IResultGenerator {
 
     @Override
     public ResultUCT Generate() {
