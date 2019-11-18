@@ -31,7 +31,7 @@ public class MCTS {
 
         while (iteration < maxIterations) {
             ++iteration;
-            
+
             // Select
             NodeMCTS select = selectionPolicy.Select(root);
 
