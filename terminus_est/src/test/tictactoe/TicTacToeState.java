@@ -38,7 +38,7 @@ public class TicTacToeState implements State {
 
     @Override
     public Action[] GetLegalActions() {
-        if (movesTotal == 9) return new Action[0];
+        if (EndState()) return new Action[0];
 
         TicTacToeAction[] actions = new TicTacToeAction[9-movesTotal];
         int added = 0;
