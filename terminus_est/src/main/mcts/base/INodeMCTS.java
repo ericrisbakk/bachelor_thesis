@@ -37,12 +37,6 @@ public interface INodeMCTS {
     INodeMCTS GetRootNode();
 
     /**
-     * Creates a deep copy of this object.
-     * @return Deep copy.
-     */
-    INodeMCTS DeepCopy();
-
-    /**
      * See whether node has been expanded.
      * @return True if it has been expanded, false otherwise.
      */

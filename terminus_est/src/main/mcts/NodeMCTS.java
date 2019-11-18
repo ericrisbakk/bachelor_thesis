@@ -16,10 +16,13 @@ public class NodeMCTS implements INodeMCTS {
     public NodeMCTS parent;
     public NodeMCTS[] children;
     public int depth;
+    public int expandedChildren;
 
     // Node-specific properties.
     public boolean expanded;
     public boolean leaf;
+
+    private NodeMCTS() {}
 
     public NodeMCTS(State root, Action lastAction, NodeMCTS parent) {
         this.root = root;
@@ -29,6 +32,8 @@ public class NodeMCTS implements INodeMCTS {
             depth = 0;
         else
             depth = parent.depth + 1;
+
+        expandedChildren = 0;
 
         // All new nodes are assumed to be leaf nodes.
         expanded = false;
@@ -78,6 +83,9 @@ public class NodeMCTS implements INodeMCTS {
             leaf = true;
         else
             leaf = false;
+
+        if (parent != null)
+            parent.expandedChildren += 1;
     }
 
     @Override
@@ -98,11 +106,6 @@ public class NodeMCTS implements INodeMCTS {
         }
 
         return node;
-    }
-
-    @Override
-    public INodeMCTS DeepCopy() {
-        return null;
     }
 
     @Override
@@ -127,7 +130,7 @@ public class NodeMCTS implements INodeMCTS {
 
     @Override
     public int ExpandedChildCount() {
-        return 0;
+        return expandedChildren;
     }
 
     @Override
