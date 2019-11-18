@@ -13,7 +13,7 @@ public class TicTacToeState implements State {
 
     public TicTacToeState() {
         board = new int[3][3];
-        player = 0;
+        player = 1;
         movesTotal = 0;
     }
 
