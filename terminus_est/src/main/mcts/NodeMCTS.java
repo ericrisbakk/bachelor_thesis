@@ -44,6 +44,9 @@ public class NodeMCTS {
 
     public State ConstructNodeState() {
         State newState = (State) root.DeepCopy();
+        if (depth == 0)
+            return newState;
+
         Action[] actions = new Action[depth];
         NodeMCTS toRoot = this;
         for (int i = 0; i < actions.length; ++i) {
@@ -139,4 +142,5 @@ public class NodeMCTS {
     public int ChildCount() {
         return children.length;
     }
+
 }
