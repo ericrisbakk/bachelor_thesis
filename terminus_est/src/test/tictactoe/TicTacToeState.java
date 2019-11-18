@@ -2,6 +2,7 @@ package test.tictactoe;
 
 import main.mcts.base.Action;
 import main.mcts.base.State;
+import main.utility.IDeepCopy;
 
 public class TicTacToeState implements State {
     public int[][] board;
@@ -43,5 +44,10 @@ public class TicTacToeState implements State {
         }
 
         return actions;
+    }
+
+    @Override
+    public IDeepCopy DeepCopy() {
+        return null;
     }
 }
