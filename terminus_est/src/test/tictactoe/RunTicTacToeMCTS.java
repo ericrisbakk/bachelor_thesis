@@ -16,7 +16,9 @@ public class RunTicTacToeMCTS {
         TicTacToeState game = new TicTacToeState();
         MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(h));
 
+        System.out.println("Tic Tac Toe.");
         s.next();
+        System.out.println("Start!.");
 
         while (!game.EndState()) {
             System.out.println(game.toString());
