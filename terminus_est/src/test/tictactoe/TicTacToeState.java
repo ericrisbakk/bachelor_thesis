@@ -47,6 +47,15 @@ public class TicTacToeState implements State {
     }
 
     @Override
+    public boolean EndState() {
+        if (Winner() > 0 || movesTotal == 9)
+            return true;
+
+
+        return false;
+    }
+
+    @Override
     public IDeepCopy DeepCopy() {
         if (movesTotal == 0)
             return new TicTacToeState();
@@ -77,5 +86,46 @@ public class TicTacToeState implements State {
         s +="\nPlayer: " + player;
 
         return s;
+    }
+
+    /**
+     * @param s
+     * @param x
+     * @param y
+     * @param dx
+     * @param dy
+     * @return True if non-zero three-in-a-row.
+     */
+    public static boolean Row3(TicTacToeState s, int x, int y, int dx, int dy) {
+        if (s.board[x][y] == s.board[x+dx][y+dy]
+                && s.board[x+dx][y+dy] == s.board[x+(2*dx)][y+(2*dy)]
+                && s.board[x][y] != 0)
+            return true;
+
+        return false;
+    }
+
+    /**
+     *
+     * @return 0 if no win, 1 if P1 wins, 2 if P2 wins.
+     */
+    public int Winner() {
+        // Vertical and horizontal.
+        for (int i = 0; i < 3; ++i) {
+            if (Row3(this, i, 0, 0, 1))
+                return board[i][0];
+
+            if (Row3(this, 0, i, 1, 0))
+                return board[0][i];
+        }
+
+        // Diagonals
+        if (Row3(this, 0, 0, 1, 1))
+            return board[0][0];
+
+        if (Row3(this, 0, 2, 1, -1))
+            return board[0][2];
+
+        return 0;
     }
 }
