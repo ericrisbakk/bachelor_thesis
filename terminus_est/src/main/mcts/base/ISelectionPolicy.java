@@ -1,5 +1,7 @@
 package main.mcts.base;
 
+import main.mcts.NodeMCTS;
+
 /**
  * Interface for class which selects the next node to expand and simulate.
  */
@@ -9,19 +11,19 @@ public interface ISelectionPolicy {
      * @param root from which we search from.
      * @return Next node to expand.
      */
-    INodeMCTS Select(INodeMCTS root);
+    NodeMCTS Select(NodeMCTS root);
 
     /**
      * Behaviour for selecting which node to simulate from after an expansion.
      * @param parent The parent node whose children we (potentially) select from.
      * @return The state we wish to simulate from.
      */
-    INodeMCTS SelectFromExpansion(INodeMCTS parent);
+    NodeMCTS SelectFromExpansion(NodeMCTS parent);
 
     /**
      * Choose child according to best value, that has been simulated at least once.
      * @param node Node from which we pick a child from.
      * @return Action.
      */
-    Action SelectBestChildAction(INodeMCTS node);
+    Action SelectBestChildAction(NodeMCTS node);
 }

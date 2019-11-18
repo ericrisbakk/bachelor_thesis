@@ -1,12 +1,10 @@
 package main.mcts;
 
 import main.mcts.base.Action;
-import main.mcts.base.INodeMCTS;
 import main.mcts.base.IResult;
 import main.mcts.base.State;
-import org.w3c.dom.Node;
 
-public class NodeMCTS implements INodeMCTS {
+public class NodeMCTS {
     // Properties related to the problem.
     public State root;
     public Action lastAction;
@@ -57,17 +55,17 @@ public class NodeMCTS implements INodeMCTS {
         return newState;
     }
 
-    @Override
+
     public Action GetLastAction() {
         return lastAction;
     }
 
-    @Override
+
     public IResult GetResult() {
         return result;
     }
 
-    @Override
+
     public void Expand() {
         State temp = ConstructNodeState();
         Action[] actions = temp.GetLegalActions();
@@ -88,19 +86,19 @@ public class NodeMCTS implements INodeMCTS {
             parent.expandedChildren += 1;
     }
 
-    @Override
-    public INodeMCTS[] GetChildren() {
+
+    public NodeMCTS[] GetChildren() {
         return children;
     }
 
-    @Override
-    public INodeMCTS GetParent() {
+
+    public NodeMCTS GetParent() {
         return parent;
     }
 
-    @Override
-    public INodeMCTS GetRootNode() {
-        INodeMCTS node = this;
+
+    public NodeMCTS GetRootNode() {
+        NodeMCTS node = this;
         while (parent != null) {
             node = node.GetParent();
         }
@@ -108,32 +106,32 @@ public class NodeMCTS implements INodeMCTS {
         return node;
     }
 
-    @Override
+
     public boolean IsExpanded() {
         return expanded;
     }
 
-    @Override
+
     public boolean IsLeaf() {
         return leaf;
     }
 
-    @Override
+
     public boolean IsTerminal() {
         return expanded && leaf;
     }
 
-    @Override
+
     public boolean IsRoot() {
         return (parent == null);
     }
 
-    @Override
+
     public int ExpandedChildCount() {
         return expandedChildren;
     }
 
-    @Override
+
     public int ChildCount() {
         return children.length;
     }

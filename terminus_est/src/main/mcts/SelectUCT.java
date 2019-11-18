@@ -2,7 +2,6 @@ package main.mcts;
 
 import main.mcts.base.Action;
 import main.mcts.base.ISelectionPolicy;
-import main.mcts.base.INodeMCTS;
 
 /**
  * This is a selection policy which uses `ResultUCT` for choosing nodes.
@@ -21,8 +20,8 @@ public class SelectUCT implements ISelectionPolicy {
      * @return Node from which we expand from.
      */
     @Override
-    public INodeMCTS Select(INodeMCTS root) {
-        INodeMCTS current = root;
+    public NodeMCTS Select(NodeMCTS root) {
+        NodeMCTS current = root;
 
         // Find best and most immediate unexpanded node.
         while (current.IsExpanded()) {
@@ -31,9 +30,9 @@ public class SelectUCT implements ISelectionPolicy {
             }
 
             // Get child with highest UCT value, or the one which has not been expanded (if it exists).
-            INodeMCTS best = current.GetChildren()[0];
+            NodeMCTS best = current.GetChildren()[0];
             for (int i = 0; i < current.GetChildren().length; ++i) {
-                INodeMCTS option = current.GetChildren()[i];
+                NodeMCTS option = current.GetChildren()[i];
                 // Check whether child is unexpanded first.
                 if (!HasBeenSimulatedFrom(option)) {
                     return current;
@@ -57,7 +56,7 @@ public class SelectUCT implements ISelectionPolicy {
      * @return Node to simulate from.
      */
     @Override
-    public INodeMCTS SelectFromExpansion(INodeMCTS parent) {
+    public NodeMCTS SelectFromExpansion(NodeMCTS parent) {
         // Know this has no children.
         if (parent.IsTerminal())
             return parent;
@@ -78,8 +77,8 @@ public class SelectUCT implements ISelectionPolicy {
      * @return
      */
     @Override
-    public Action SelectBestChildAction(INodeMCTS node) {
-        INodeMCTS best = node.GetChildren()[0];
+    public Action SelectBestChildAction(NodeMCTS node) {
+        NodeMCTS best = node.GetChildren()[0];
         for (int i = 0; i < node.GetChildren().length; ++i) {
                 if (GetVisits(best) < GetVisits(node.GetChildren()[i])) {
                     best = node.GetChildren()[i];
@@ -89,11 +88,11 @@ public class SelectUCT implements ISelectionPolicy {
         return best.GetLastAction();
     }
 
-    public boolean HasBeenSimulatedFrom(INodeMCTS node) {
+    public boolean HasBeenSimulatedFrom(NodeMCTS node) {
         return ((ResultUCT) node.GetResult()).simulations == 0;
     }
 
-    public double GetUCT(INodeMCTS node) {
+    public double GetUCT(NodeMCTS node) {
         ResultUCT values = (ResultUCT) node.GetResult();
         ResultUCT parentValues = (ResultUCT) node.GetParent().GetResult();
 
@@ -101,7 +100,7 @@ public class SelectUCT implements ISelectionPolicy {
                 + (param_c*Math.sqrt( (Math.log(parentValues.simulations))/values.simulations ));
     }
 
-    public int GetVisits(INodeMCTS node) {
+    public int GetVisits(NodeMCTS node) {
         return ((ResultUCT) node.GetResult()).simulations;
     }
 }
