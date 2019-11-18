@@ -1,5 +1,6 @@
 package main.mcts;
 
+import main.mcts.base.Action;
 import main.mcts.base.ISelectionPolicy;
 import main.mcts.base.INodeMCTS;
 
@@ -71,6 +72,23 @@ public class SelectUCT implements ISelectionPolicy {
         return null;
     }
 
+    /**
+     * Selects best child action by number of visits.
+     * @param node Node from which we pick a child from.
+     * @return
+     */
+    @Override
+    public Action SelectBestChildAction(INodeMCTS node) {
+        INodeMCTS best = node.GetChildren()[0];
+        for (int i = 0; i < node.GetChildren().length; ++i) {
+                if (GetVisits(best) < GetVisits(node.GetChildren()[i])) {
+                    best = node.GetChildren()[i];
+            }
+        }
+
+        return best.GetLastAction();
+    }
+
     public boolean HasBeenSimulatedFrom(INodeMCTS node) {
         return ((ResultUCT) node.GetResult()).simulations == 0;
     }
@@ -81,5 +99,9 @@ public class SelectUCT implements ISelectionPolicy {
 
         return ( (double) values.wins / (double) values.simulations)
                 + (param_c*Math.sqrt( (Math.log(parentValues.simulations))/values.simulations ));
+    }
+
+    public int GetVisits(INodeMCTS node) {
+        return ((ResultUCT) node.GetResult()).simulations;
     }
 }
