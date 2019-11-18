@@ -7,6 +7,11 @@ import main.mcts.base.Action;
 import main.mcts.base.MCTS;
 import java.util.Scanner;  // Import the Scanner class
 
+/**
+ * Test class to try MCTS. I'm fully aware that SelectUCT doesn't work work for 2 players (when it is player 2 turn,
+ * it tries to maximize UCT, when it should minimize). Because my problem is "single-player", this is not something I
+ * have to take into account right now, and this code is only meant to show that MCTS can run on a basic problem.
+ */
 public class RunTicTacToeMCTS {
 
 
