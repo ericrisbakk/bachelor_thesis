@@ -17,4 +17,11 @@ public interface ISelectionPolicy {
      * @return The state we wish to simulate from.
      */
     INodeMCTS SelectFromExpansion(INodeMCTS parent);
+
+    /**
+     * Choose child according to best value, that has been simulated at least once.
+     * @param node Node from which we pick a child from.
+     * @return Action.
+     */
+    Action SelectBestChildAction(INodeMCTS node);
 }
