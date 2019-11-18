@@ -19,7 +19,6 @@ public class RunTicTacToeMCTS {
         MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(30, h), gen);
 
         System.out.println("Tic Tac Toe.");
-        s.next();
         System.out.println("Start!.");
 
         while (!game.EndState()) {
@@ -39,14 +38,16 @@ public class RunTicTacToeMCTS {
 
                 int inp;
                 do {
+                    System.out.println("Enter: ");
                     inp = s.nextInt();
-                } while (inp >= 0 && inp < legal.length);
+                } while (!(inp >= 0 && inp < legal.length));
                 a = (TicTacToeAction) legal[inp];
             }
 
             game.Apply(a);
         }
 
+        System.out.println("Final board:\n" + game + "\n0");
         System.out.println("\nWINNER: " + game.Winner());
     }
 }
