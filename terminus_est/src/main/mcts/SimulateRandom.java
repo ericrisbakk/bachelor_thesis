@@ -15,7 +15,7 @@ public class SimulateRandom implements ISimulationPolicy {
     }
 
     @Override
-    public IResult Simulate(INodeMCTS node) {
+    public IResult Simulate(NodeMCTS node) {
         State s = ((NodeMCTS) node).ConstructNodeState();
         ResultUCT r = new ResultUCT();
 
