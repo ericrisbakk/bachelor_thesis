@@ -15,6 +15,11 @@ public class TicTacToeAction implements Action {
 
     @Override
     public IDeepCopy DeepCopy() {
-        return null;
+        return new TicTacToeAction(x, y, player);
+    }
+
+    @Override
+    public String toString() {
+        return "(P" + player + ": " + x + ", " + y + ")";
     }
 }

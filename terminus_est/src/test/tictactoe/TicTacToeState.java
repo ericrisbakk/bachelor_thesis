@@ -48,6 +48,34 @@ public class TicTacToeState implements State {
 
     @Override
     public IDeepCopy DeepCopy() {
-        return null;
+        if (movesTotal == 0)
+            return new TicTacToeState();
+
+        TicTacToeState newState = new TicTacToeState();
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[i].length; ++j) {
+                newState.board[i][j] = board[i][j];
+            }
+        }
+
+        newState.player = player;
+        newState.movesTotal = movesTotal;
+
+        return newState;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[i].length; ++j) {
+                s += " " + board[i][j] + " ";
+            }
+
+            s += "\n";
+        }
+        s +="\nPlayer: " + player;
+
+        return s;
     }
 }
