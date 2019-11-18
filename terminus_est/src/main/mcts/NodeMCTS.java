@@ -42,6 +42,10 @@ public class NodeMCTS {
         result = resultGenerator.Generate();
     }
 
+    /**
+     * Creates a deep copy of the root, then applies all the actions from root to the current node.
+     * @return State in this node (does not affect root).
+     */
     public State ConstructNodeState() {
         State newState = (State) root.DeepCopy();
         if (depth == 0)
@@ -62,17 +66,9 @@ public class NodeMCTS {
         return newState;
     }
 
-
-    public Action GetLastAction() {
-        return lastAction;
-    }
-
-
-    public IResult GetResult() {
-        return result;
-    }
-
-
+    /**
+     * Creates the children of this node using all the legal actions of the current state.
+     */
     public void Expand() {
         State temp = ConstructNodeState();
         Action[] actions = temp.GetLegalActions();
@@ -104,6 +100,15 @@ public class NodeMCTS {
     }
 
 
+    public Action GetLastAction() {
+        return lastAction;
+    }
+
+
+    public IResult GetResult() {
+        return result;
+    }
+
     public NodeMCTS GetRootNode() {
         NodeMCTS node = this;
         while (parent != null) {
@@ -118,7 +123,11 @@ public class NodeMCTS {
         return expanded;
     }
 
-
+    /**
+     * Is true either if this node has not yet been expanded,
+     * or the node has no children left
+     * @return
+     */
     public boolean IsLeaf() {
         return leaf;
     }
