@@ -2,12 +2,14 @@ package main.mcts;
 
 import main.mcts.base.Action;
 import main.mcts.base.IResult;
+import main.mcts.base.IResultGenerator;
 import main.mcts.base.State;
 
 public class NodeMCTS {
     // Properties related to the problem.
     public State root;
     public Action lastAction;
+    public static IResultGenerator resultGenerator;
     public IResult result;
 
     // Properties related to rest of tree.
@@ -36,6 +38,8 @@ public class NodeMCTS {
         // All new nodes are assumed to be leaf nodes.
         expanded = false;
         leaf = true;
+
+        result = resultGenerator.Generate();
     }
 
     public State ConstructNodeState() {

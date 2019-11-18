@@ -1,5 +1,6 @@
 package test.tictactoe;
 
+import main.mcts.ResultUCTGenerator;
 import main.mcts.SelectUCT;
 import main.mcts.SimulateRandom;
 import main.mcts.base.Action;
@@ -14,7 +15,8 @@ public class RunTicTacToeMCTS {
 
         TicTacToePlayer1Wins h = new TicTacToePlayer1Wins();
         TicTacToeState game = new TicTacToeState();
-        MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(h));
+        ResultUCTGenerator gen = new ResultUCTGenerator();
+        MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(30, h), gen);
 
         System.out.println("Tic Tac Toe.");
         s.next();
