@@ -7,9 +7,9 @@ public interface ISimulationPolicy {
 
     /**
      * Run simulation and get results.
-     * @param state State we pass on.
+     * @param node State we pass on.
      * @return Results from having run simulation on given state.
      */
-    IResult Simulate(INodeMCTS state);
+    IResult Simulate(INodeMCTS node);
 
 }
