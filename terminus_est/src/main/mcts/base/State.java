@@ -16,4 +16,9 @@ public interface State extends IDeepCopy {
      * @return Get all possible legal actions for the current state.
      */
     Action[] GetLegalActions();
+
+    /**
+     * @return True if this is an end-state from which no more moves should be done, false otherwise.
+     */
+    boolean EndState();
 }
