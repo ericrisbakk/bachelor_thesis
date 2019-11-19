@@ -21,11 +21,35 @@ public class TerminusEstState implements State {
         this.original1 = original1;
         this.original2 = original2;
         this.depth = depth;
+
+        // TODO: Consider if new state should be collapsed upon creation.
+        // CollapseTrees();
     }
 
     @Override
     public void Apply(Action a) {
+        CollapseTrees();
 
+        TerminusEstAction tea = (TerminusEstAction) a;
+
+        String zoekNaam = tea.taxon.getName();
+
+        Tree alpha[] = new Tree [1];
+        Tree beta[] = new Tree [1];
+
+        Tree newGuyA = t1.copy(alpha,zoekNaam);
+        Tree newGuyB = t2.copy(beta, zoekNaam);
+
+        Tree killA = alpha[0].delete();
+        if( killA == null )
+            killA = newGuyA;
+
+        Tree killB = beta[0].delete();
+        if( killB == null )
+            killB = newGuyB;
+
+        t1 = killA;
+        t2 = killB;
     }
 
     @Override
@@ -53,5 +77,10 @@ public class TerminusEstState implements State {
     @Override
     public IDeepCopy DeepCopy() {
         return null;
+    }
+
+    private void CollapseTrees() {
+        Vector ST = Tree.computeMaxSTsets(t1,t2);
+        Tree.collapseMaxSTsets(t1,t2,ST);
     }
 }
