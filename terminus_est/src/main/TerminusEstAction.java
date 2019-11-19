@@ -12,8 +12,6 @@ public class TerminusEstAction implements Action {
         this.taxon = taxon;
     }
 
-    private TerminusEstAction() { }
-
     @Override
     public IDeepCopy DeepCopy() {
         return new TerminusEstAction(taxon);
