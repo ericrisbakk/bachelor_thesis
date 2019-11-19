@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class TerminusEstInputHandler {
-    public TerminusEstV4 te4;
 
     // Tree construction.
     public Tree tree;
@@ -17,13 +16,8 @@ public class TerminusEstInputHandler {
     public int leaves = 0;
     public int trees = 0;
 
-    public TerminusEstInputHandler(TerminusEstV4 te4) {
-        this.te4 = te4;
-    }
-
     public static void main(String[] args) {
-        TerminusEstV4 test = new TerminusEstV4();
-        TerminusEstInputHandler ih = new TerminusEstInputHandler(test);
+        TerminusEstInputHandler ih = new TerminusEstInputHandler();
         System.out.println("Interpreting file.");
         ih.InterpretFile(args[0]);
         System.out.println("Done interpreting file.");
@@ -39,28 +33,31 @@ public class TerminusEstInputHandler {
                 s2 = br.readLine();
 
             } catch (IOException e) {
-                System.out.println("Reading file failed.");
+                System.out.println("// Reading file failed.");
                 e.printStackTrace();
             }
 
         } catch (FileNotFoundException e) {
-            System.out.println("File reading failed.");
+            System.out.println("// File reading failed.");
             e.printStackTrace();
         }
 
         System.out.println("Trees: \n" + s1 + "\n" + s2);
         if (s1 == "" || s1 == "") {
-            System.out.println("Trees given are empty...");
+            System.out.println("// Trees given are empty...");
             System.exit(0);
         }
 
-        System.out.println("\nFinal Trees: ");
         SetTree(s1);
-        te4.t1.dump();
-        System.out.println();
         SetTree(s2);
-        te4.t2.dump();
+
+        if (TerminusEstV4.VERBOSE) {
+        System.out.println("\nVerifying trees from input handler: ");
+        TerminusEstV4.t1.dump();
         System.out.println();
+        TerminusEstV4.t2.dump();
+        System.out.println("\n");
+        }
 
     }
 
@@ -80,12 +77,12 @@ public class TerminusEstInputHandler {
         */
         if( trees == 0 )
         {
-            te4.t1 = tree;
+            TerminusEstV4.t1 = tree;
         }
         else
         if( trees == 1 )
         {
-            te4.t2 = tree;
+            TerminusEstV4.t2 = tree;
         }
         else
         {
@@ -135,14 +132,14 @@ public class TerminusEstInputHandler {
                     ++i;
                     current = s.charAt(i);
                 }
-                
+
                 ++leaves;
                 // Build leaf node.
                 Tree leafNode = new Tree();
                 leafNode.setParent(current_node);
                 leafNode.parent.addChild(leafNode);
 
-                int x = te4.getLeafNumber(label);
+                int x = TerminusEstV4.getLeafNumber(label);
                 leafNode.setName(label);
                 leafNode.setNumber(x);
 

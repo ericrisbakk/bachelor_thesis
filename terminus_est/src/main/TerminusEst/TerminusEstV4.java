@@ -910,32 +910,27 @@ public class TerminusEstV4 {
 
     public static void main(String args[])
     {
-
-        if( args.length != 0 )
+        if( args.length == 0 || args[0].equals("-help") )
         {
-            if( args[0].equals("-help") )
-            {
-                System.out.println("// Usage: java TerminusEstV4 [optional switches] treeFile.txt");
-                System.out.println("// Optional switches:");
-                System.out.println("// -nonetwork : only compute hybridization number, do not generate a network. (The default is to generate a network.)");
-                System.out.println("// -nohash : do not use look-up table to store intermediate solutions. (The default is to use the hash table, which potentially uses an exponential amount of memory.");
-                System.exit(0);
-            }
-
+            System.out.println("// This is TerminusEstV4, version 30th December 2019.");
+            System.out.println("// Usage: java TerminusEstV4 [optional switches] treeFile.txt");
+            System.out.println("// Optional switches:");
+            System.out.println("// -nonetwork : only compute hybridization number, do not generate a network. (The default is to generate a network.)");
+            System.out.println("// -nohash : do not use look-up table to store intermediate solutions. (The default is to use the hash table, which potentially uses an exponential amount of memory.");
+            System.exit(0);
         }
 
-        System.out.println("// This is TerminusEstV4, version 30th December 2019.");
-        System.out.println("// Usage: java TerminusEstV4 [optional switches] < treeFile.txt");
-        System.out.println("// (If the program seems to have hung, you have probably");
-        System.out.println("// forgotten the '<' operator).");
+        System.out.println("// Begin TerminusEst.");
         System.out.println("// -------------------------------------");
 
 
         // TODO: FIX THIS.
-        // parseTrees();
+        if (args.length > 0){
+            TerminusEstInputHandler ih = new TerminusEstInputHandler();
+            ih.InterpretFile(args[args.length-1]);
+        }
 
         System.out.println("// We saw "+TerminusEstV4.seenLeaves+" taxa in total.");
-
 
         //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
         intObjects = new Integer [seenLeaves+1];
