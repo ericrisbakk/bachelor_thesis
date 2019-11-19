@@ -64,6 +64,7 @@ public class TerminusEstV4 {
     }
 
 
+    /* TODO: Consider if these are needed at all here.
     public static Tree tree;
 
     public static Tree current_node;
@@ -72,10 +73,13 @@ public class TerminusEstV4 {
 
     public static int leaves = 0;
     public static int trees = 0;
+    */
 
     public static Tree t1;
     public static Tree t2;
 
+
+    /* TODO: FIX THIS.
     public static void parseTrees()
     {
         TerminusEstV4 n = new TerminusEstV4(System.in);
@@ -88,7 +92,7 @@ public class TerminusEstV4 {
             System.exit(0);
         }
 
-    }
+    } // */
 
     public static String VERSION = "TerminusEstV4.jj Version 3, 30th March 2015";
 
@@ -911,7 +915,7 @@ public class TerminusEstV4 {
         {
             if( args[0].equals("-help") )
             {
-                System.out.println("// Usage: java TerminusEstV4 [optional switches] < treeFile.txt");
+                System.out.println("// Usage: java TerminusEstV4 [optional switches] treeFile.txt");
                 System.out.println("// Optional switches:");
                 System.out.println("// -nonetwork : only compute hybridization number, do not generate a network. (The default is to generate a network.)");
                 System.out.println("// -nohash : do not use look-up table to store intermediate solutions. (The default is to use the hash table, which potentially uses an exponential amount of memory.");
@@ -920,14 +924,15 @@ public class TerminusEstV4 {
 
         }
 
-        System.out.println("// This is TerminusEstV4, version 30th March 2015.");
+        System.out.println("// This is TerminusEstV4, version 30th December 2019.");
         System.out.println("// Usage: java TerminusEstV4 [optional switches] < treeFile.txt");
         System.out.println("// (If the program seems to have hung, you have probably");
         System.out.println("// forgotten the '<' operator).");
         System.out.println("// -------------------------------------");
 
 
-        parseTrees();
+        // TODO: FIX THIS.
+        // parseTrees();
 
         System.out.println("// We saw "+TerminusEstV4.seenLeaves+" taxa in total.");
 
