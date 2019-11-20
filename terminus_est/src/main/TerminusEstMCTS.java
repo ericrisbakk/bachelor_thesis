@@ -13,7 +13,7 @@ import main.mcts.base.MCTS;
 public class TerminusEstMCTS {
 
     public static void main(String[] args) {
-        SelectUCT select = new SelectUCT;
+        SelectUCT select = new SelectUCT();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
         SimulateRandom sim = new SimulateRandom(30, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
@@ -27,5 +27,8 @@ public class TerminusEstMCTS {
         Tree T2 = TerminusEstV4.t2.copy(null, null);
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
+        System.out.println("Beginning MCTS: ");
+        mcts.BuildTree(state);
+        System.out.println("\n\nMCTS completed.");
     }
 }
