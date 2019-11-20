@@ -18,11 +18,14 @@ public class SimulateRandom implements ISimulationPolicy {
     public IResult Simulate(NodeMCTS node) {
         State s = ((NodeMCTS) node).ConstructNodeState();
         ResultUCT r = new ResultUCT();
-
+        System.out.println("\n--------------------------------------------");
+        System.out.println("------------- START SIMULATION -------------");
+        System.out.println("--------------------------------------------\n");
         for (int i = 0; i < simulations; ++i) {
+            System.out.println("\n------------- NEW SIMULATION -------------\n");
             State sim = (State) s.DeepCopy();
             while (!sim.EndState()) {
-                System.out.println("\n------------- NEW SIMULATION -------------\n");
+                System.out.println("---");
                 Action[] actions = sim.GetLegalActions();
                 sim.Apply( GetRandomAction(actions) );
             }

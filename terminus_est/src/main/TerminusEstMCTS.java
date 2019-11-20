@@ -8,12 +8,13 @@ import main.mcts.HeuristicAvgDepth;
 import main.mcts.ResultUCTGenerator;
 import main.mcts.SelectUCT;
 import main.mcts.SimulateRandom;
+import main.mcts.base.Action;
 import main.mcts.base.MCTS;
 
 public class TerminusEstMCTS {
 
     public static void main(String[] args) {
-        SelectUCT select = new SelectUCT();
+        /*SelectUCT select = new SelectUCT();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
         SimulateRandom sim = new SimulateRandom(30, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
@@ -29,6 +30,25 @@ public class TerminusEstMCTS {
 
         System.out.println("Beginning MCTS: ");
         mcts.BuildTree(state);
-        System.out.println("\n\nMCTS completed.");
+        System.out.println("\n\nMCTS completed.");*/
+
+        Testing(args[0]);
+    }
+
+    public static void Testing(String file) {
+        TerminusEstInputHandler inp = new TerminusEstInputHandler();
+        inp.InterpretFile(file);
+        Tree T1 = TerminusEstV4.t1.copy(null, null);
+        Tree T2 = TerminusEstV4.t2.copy(null, null);
+        TerminusEstState state = new TerminusEstState(T1, T2, 0);
+
+        Action[] a = state.GetLegalActions();
+        state.Apply(a[0]);
+        a = state.GetLegalActions();
+        state.Apply(a[2]);
+        a = state.GetLegalActions();
+        state.Apply(a[2]);
+        a = state.GetLegalActions();
+        a.toString();
     }
 }
