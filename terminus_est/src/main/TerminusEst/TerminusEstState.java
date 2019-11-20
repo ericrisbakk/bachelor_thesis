@@ -41,6 +41,12 @@ public class TerminusEstState implements State {
 
         TerminusEstAction tea = (TerminusEstAction) a;
 
+        System.out.println("\nDeleting: " + tea.taxon.getName() + "\nTrees before: ");
+        t1.dump();
+        System.out.println();
+        t2.dump();
+        System.out.println();
+
         String zoekNaam = tea.taxon.getName();
 
         Tree alpha[] = new Tree [1];
@@ -59,6 +65,13 @@ public class TerminusEstState implements State {
 
         t1 = killA;
         t2 = killB;
+        ++depth;
+
+        System.out.println("\nTrees after: ");
+        t1.dump();
+        System.out.println();
+        t2.dump();
+        System.out.println();
     }
 
     @Override

@@ -22,7 +22,8 @@ public class SimulateRandom implements ISimulationPolicy {
         for (int i = 0; i < simulations; ++i) {
             State sim = (State) s.DeepCopy();
             while (!sim.EndState()) {
-                sim.Apply( GetRandomAction(sim.GetLegalActions()) );
+                Action[] actions = sim.GetLegalActions();
+                sim.Apply( GetRandomAction(actions) );
             }
 
             double val = heuristicP1Wins.Calculate(sim);
