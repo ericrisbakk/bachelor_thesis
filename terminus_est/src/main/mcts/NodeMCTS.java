@@ -152,4 +152,25 @@ public class NodeMCTS {
         return children.length;
     }
 
+    /**
+     * Returns (recursively) the search tree from this node, represented in Newick format.
+     * @return
+     */
+    public String GetNewick() {
+        if (leaf)
+            return lastAction.toString() + "  " + ((ResultUCT) result).wins + ".." + ((ResultUCT) result).simulations;
+        String s = "(";
+        boolean first = true;
+        for (int i = 0; i < children.length; ++i) {
+            if (!first)
+                s += ",";
+            s += children[i].GetNewick();
+            first = false;
+        }
+
+        s += ")" + (parent == null ? "Root" : lastAction.toString());
+        s += "  " + ((ResultUCT) result).wins + ".." + ((ResultUCT) result).simulations;
+        if (parent == null) s += ";";
+        return s;
+    }
 }
