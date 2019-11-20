@@ -8,6 +8,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 public class TerminusEstState implements State {
+    public final boolean USEMINCLUS = true; // If false, we're using all taxa instead - we always use size-2 conflicting clusters, however.
+
     public Tree t1;
     public Tree t2;
     // public Tree original1;
@@ -138,7 +140,7 @@ public class TerminusEstState implements State {
 
         }
 
-        Vector guessSet = null;
+        Vector guessSet = taxa;
 
         boolean SeenTwoClus = false;
 
@@ -197,7 +199,7 @@ public class TerminusEstState implements State {
 
         //! -----------------------------------------------
 
-        if((!SeenTwoClus))
+        if((!SeenTwoClus) && USEMINCLUS)
         {
             //! Ok, let's build the stuff from minimal clusters...
 
