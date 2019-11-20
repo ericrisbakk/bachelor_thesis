@@ -63,36 +63,8 @@ public class TerminusEstV4 {
         return s;
     }
 
-
-    /* TODO: Consider if these are needed at all here.
-    public static Tree tree;
-
-    public static Tree current_node;
-
-    private static Tree tn;
-
-    public static int leaves = 0;
-    public static int trees = 0;
-    */
-
     public static Tree t1;
     public static Tree t2;
-
-
-    /* TODO: FIX THIS.
-    public static void parseTrees()
-    {
-        TerminusEstV4 n = new TerminusEstV4(System.in);
-
-        try{ n.Input(); }
-        catch( ParseException e )
-        {
-            System.out.println("Parsing error!");
-            e.printStackTrace();
-            System.exit(0);
-        }
-
-    } // */
 
     public static String VERSION = "TerminusEstV4.jj Version 3, 30th March 2015";
 
