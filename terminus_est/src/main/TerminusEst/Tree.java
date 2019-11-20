@@ -221,7 +221,8 @@ public class Tree {
 
         if( (me.name != null) && (huntMe != null))
         {
-            if( me.name.equals(huntMe) ) findMe[0] = me;
+            if( me.name.equals(huntMe) )
+                findMe[0] = me;
         }
 
         if( this.children == null )
@@ -390,7 +391,7 @@ public class Tree {
 
     @Override
     public String toString() {
-        return System.identityHashCode(this) + " | " + GetDump();
+        return GetDump();
     }
 
 

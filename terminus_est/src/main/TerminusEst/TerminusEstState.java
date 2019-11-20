@@ -37,16 +37,9 @@ public class TerminusEstState implements State {
 
     @Override
     public void Apply(Action a) {
-        UpdateMainScript();
-        CollapseTrees();
+        // UpdateMainScript();
 
         TerminusEstAction tea = (TerminusEstAction) a;
-
-        System.out.println("\nDeleting: " + tea.taxon.getName() + "\nTrees before: ");
-        t1.dump();
-        System.out.println();
-        t2.dump();
-        System.out.println();
 
         String zoekNaam = tea.taxon.getName();
 
@@ -68,19 +61,16 @@ public class TerminusEstState implements State {
         t2 = killB;
         ++depth;
 
-        System.out.println("\nTrees after: ");
-        t1.dump();
-        System.out.println();
-        t2.dump();
-        System.out.println();
-
-        UpdateMainScript();
+        CollapseTrees();
+        // UpdateMainScript();
     }
 
     @Override
     public Action[] GetLegalActions() {
         Vector taxa = new Vector();
         t1.getLeafDescendants(taxa);
+
+        if (taxa.size() == 1) return new Action[0];
 
         Hashtable ht = new Hashtable();
 

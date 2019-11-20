@@ -14,7 +14,7 @@ import main.mcts.base.MCTS;
 public class TerminusEstMCTS {
 
     public static void main(String[] args) {
-        /*SelectUCT select = new SelectUCT();
+        SelectUCT select = new SelectUCT();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
         SimulateRandom sim = new SimulateRandom(30, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
@@ -30,11 +30,10 @@ public class TerminusEstMCTS {
 
         System.out.println("Beginning MCTS: ");
         mcts.BuildTree(state);
-        System.out.println("\n\nMCTS completed.");*/
-
-        Testing(args[0]);
+        System.out.println("\n\nMCTS completed.");
     }
 
+    
     public static void Testing(String file) {
         TerminusEstInputHandler inp = new TerminusEstInputHandler();
         inp.InterpretFile(file);
@@ -49,6 +48,5 @@ public class TerminusEstMCTS {
         a = state.GetLegalActions();
         state.Apply(a[2]);
         a = state.GetLegalActions();
-        a.toString();
     }
 }
