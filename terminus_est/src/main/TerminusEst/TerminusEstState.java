@@ -7,8 +7,14 @@ import main.utility.IDeepCopy;
 import java.util.Hashtable;
 import java.util.Vector;
 
+/**
+ * Represents an instance in a TerminusEst search tree, without the context of what hybridization number
+ * we are currently trying to find.
+ *
+ * TODO: Consider, also keep track of global upper bound on the hybridization number?
+ */
 public class TerminusEstState implements State {
-    public final boolean USEMINCLUS = true; // If false, we're using all taxa instead - we always use size-2 conflicting clusters, however.
+    public static boolean USEMINCLUS = true; // If false, we're using all taxa instead - we always use size-2 conflicting clusters, however.
 
     public Tree t1;
     public Tree t2;
