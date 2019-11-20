@@ -18,7 +18,7 @@ public class TerminusEstMCTS {
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
         SimulateRandom sim = new SimulateRandom(30, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
-        MCTS mcts = new MCTS(1000, select, sim, gen);
+        MCTS mcts = new MCTS(10000, select, sim, gen);
 
         TerminusEstInputHandler inp = new TerminusEstInputHandler();
         inp.InterpretFile(args[0]);
@@ -31,6 +31,8 @@ public class TerminusEstMCTS {
         System.out.println("Beginning MCTS: ");
         mcts.BuildTree(state);
         System.out.println("\n\nMCTS completed.");
+
+        System.out.println(mcts.root.GetNewick());
     }
 
     
