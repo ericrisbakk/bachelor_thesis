@@ -10,15 +10,17 @@ import java.util.Vector;
 public class TerminusEstState implements State {
     public Tree t1;
     public Tree t2;
-    public Tree original1;
-    public Tree original2;
+    // public Tree original1;
+    // public Tree original2;
     public int depth; // Number of actions taken.
 
-    public TerminusEstState(Tree t1, Tree t2, Tree original1, Tree original2, int depth) {
+    public TerminusEstState(Tree t1, Tree t2,
+                            // Tree original1, Tree original2,
+                            int depth) {
         this.t1 = t1;
         this.t2 = t2;
-        this.original1 = original1;
-        this.original2 = original2;
+        // this.original1 = original1;
+        // this.original2 = original2;
         this.depth = depth;
 
         // TODO: Consider if new state should be collapsed upon creation.
@@ -326,7 +328,8 @@ public class TerminusEstState implements State {
     @Override
     public IDeepCopy DeepCopy() {
         return new TerminusEstState(t1.copy(null, null), t2.copy(null, null),
-                original1, original2, depth);
+                // original1, original2,
+                depth);
     }
 
     private void CollapseTrees() {
