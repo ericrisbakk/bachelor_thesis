@@ -322,7 +322,8 @@ public class Tree {
 
         p.children.removeElement( this );
 
-        if( p.children.size() > 1 ) return null;
+        if( p.children.size() > 1 )
+            return null;
 
         if( p.children.size() == 0 )
         {
@@ -366,6 +367,30 @@ public class Tree {
 
         if( this.isLeaf() ) System.out.print(name);
         if(!isLeaf()) System.out.print(")");
+    }
+
+    public String GetDump() {
+        String s = "";
+        if(!isLeaf()) s += "(";
+        boolean begun = false;
+        if(!isLeaf())
+            for(int x=0; x<children.size();x++)
+            {
+                if( begun ) s += ",";
+                Tree t = (Tree) children.elementAt(x);
+                s += t.GetDump();
+                begun = true;
+            }
+
+        if( this.isLeaf() ) s += name;
+        if(!isLeaf()) s += ")";
+
+        return s;
+    }
+
+    @Override
+    public String toString() {
+        return System.identityHashCode(this) + " | " + GetDump();
     }
 
 
