@@ -15,4 +15,9 @@ public class TerminusEstAction implements Action {
     public IDeepCopy DeepCopy() {
         return new TerminusEstAction(taxon);
     }
+
+    @Override
+    public String toString() {
+        return taxon.getName();
+    }
 }

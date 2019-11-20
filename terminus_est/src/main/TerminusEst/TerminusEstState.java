@@ -31,12 +31,13 @@ public class TerminusEstState implements State {
         // this.original2 = original2;
         this.depth = depth;
 
-        // TODO: Consider if new state should be collapsed upon creation.
+        UpdateMainScript();
         CollapseTrees();
     }
 
     @Override
     public void Apply(Action a) {
+        UpdateMainScript();
         CollapseTrees();
 
         TerminusEstAction tea = (TerminusEstAction) a;
@@ -72,6 +73,8 @@ public class TerminusEstState implements State {
         System.out.println();
         t2.dump();
         System.out.println();
+
+        UpdateMainScript();
     }
 
     @Override
@@ -356,5 +359,10 @@ public class TerminusEstState implements State {
     private void CollapseTrees() {
         Vector ST = Tree.computeMaxSTsets(t1,t2);
         Tree.collapseMaxSTsets(t1,t2,ST);
+    }
+
+    private void UpdateMainScript() {
+        TerminusEstV4.t1 = t1;
+        TerminusEstV4.t2 = t2;
     }
 }

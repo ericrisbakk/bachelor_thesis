@@ -22,6 +22,7 @@ public class SimulateRandom implements ISimulationPolicy {
         for (int i = 0; i < simulations; ++i) {
             State sim = (State) s.DeepCopy();
             while (!sim.EndState()) {
+                System.out.println("\n------------- NEW SIMULATION -------------\n");
                 Action[] actions = sim.GetLegalActions();
                 sim.Apply( GetRandomAction(actions) );
             }
