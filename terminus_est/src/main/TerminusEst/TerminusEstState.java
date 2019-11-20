@@ -1,11 +1,10 @@
-package main;
+package main.TerminusEst;
 
-import main.TerminusEst.Network;
-import main.TerminusEst.Tree;
 import main.mcts.base.Action;
 import main.mcts.base.State;
 import main.utility.IDeepCopy;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 public class TerminusEstState implements State {
@@ -54,6 +53,55 @@ public class TerminusEstState implements State {
 
     @Override
     public Action[] GetLegalActions() {
+        Vector taxa = new Vector();
+        t1.getLeafDescendants(taxa);
+
+        Hashtable ht = new Hashtable();
+
+        Tree numToTaxonT1[] = new Tree[taxa.size()];
+        Tree numToTaxonT2[] = new Tree[taxa.size()];
+
+        for(int x=0; x<taxa.size(); x++)
+        {
+            Tree leaf = (Tree) taxa.elementAt(x);
+            leaf.num = x;	//! This assigns a number to the leaf.
+            numToTaxonT1[x] = leaf;
+            ht.put( leaf.name, leaf );	//! So we can find the corresponding node in the second tree
+        }
+
+        Vector taxaSecondTree = new Vector();
+        t2.getLeafDescendants(taxaSecondTree);
+
+        if( taxaSecondTree.size() != taxa.size() )
+        {
+            System.out.println("Catastrophic error. Trees have different numbers of taxa.");
+            System.exit(0);
+        }
+
+        int n = taxa.size();
+
+        for(int x=0; x<n; x++)
+        {
+            Tree leaf = (Tree) taxaSecondTree.elementAt(x);
+
+            Tree co = (Tree) ht.get(leaf.name);
+            if( co == null )
+            {
+                System.out.println("Catastrophic error. Couldn't find taxon from second tree in first tree.");
+                System.exit(0);
+            }
+            if( !leaf.name.equals(co.name) )
+            {
+                System.out.println("Catastrophic error. Hashing problem lining up taxa.");
+                System.exit(0);
+            }
+            leaf.num = co.num;
+            numToTaxonT2[leaf.num] = leaf;
+        }
+
+        t1.buildClusters( n );
+        t2.buildClusters( n );
+
         return new Action[0];
     }
 

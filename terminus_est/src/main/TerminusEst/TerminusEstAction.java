@@ -1,6 +1,5 @@
-package main;
+package main.TerminusEst;
 
-import main.TerminusEst.Tree;
 import main.mcts.base.Action;
 import main.utility.IDeepCopy;
 
