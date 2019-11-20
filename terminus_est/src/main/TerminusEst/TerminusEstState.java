@@ -13,7 +13,7 @@ public class TerminusEstState implements State {
     public Tree t2;
     public Tree original1;
     public Tree original2;
-    public int depth;
+    public int depth; // Number of actions taken.
 
     public TerminusEstState(Tree t1, Tree t2, Tree original1, Tree original2, int depth) {
         this.t1 = t1;
@@ -23,7 +23,7 @@ public class TerminusEstState implements State {
         this.depth = depth;
 
         // TODO: Consider if new state should be collapsed upon creation.
-        // CollapseTrees();
+        CollapseTrees();
     }
 
     @Override
@@ -69,14 +69,15 @@ public class TerminusEstState implements State {
             return true;
         }
 
-        // TODO: Other finish states.
+        // TODO: Other finish states?
 
         return false;
     }
 
     @Override
     public IDeepCopy DeepCopy() {
-        return null;
+        return new TerminusEstState(t1.copy(null, null), t2.copy(null, null),
+                original1, original2, depth);
     }
 
     private void CollapseTrees() {
