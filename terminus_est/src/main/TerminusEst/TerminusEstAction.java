@@ -5,7 +5,7 @@ import main.utility.IDeepCopy;
 
 
 public class TerminusEstAction implements Action {
-    Tree taxon;
+    public Tree taxon;
 
     public TerminusEstAction(Tree taxon) {
         this.taxon = taxon;
