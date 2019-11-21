@@ -19,6 +19,38 @@ public class TerminusEstV4 {
 
     public int seenLeaves = 0;
 
+    public TerminusEstSolution solution = null;
+
+    public TerminusEstV4(String file) {
+        TerminusEstInputHandler ih = new TerminusEstInputHandler();
+        ih.InterpretFile(file, this);
+
+        System.out.println("// We saw "+seenLeaves+" taxa in total.");
+
+        //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
+        intObjects = new Integer [seenLeaves+1];
+
+        for(int x=0; x< intObjects.length; x++ )
+        {
+            intObjects[x] = new Integer(x);
+        }
+        //! ------------------------------------
+
+        lookup = new Hashtable();
+
+        if(VERBOSE)
+        {
+            System.out.println("// Finished reading the two trees in.");
+            System.out.println("// The trees are now stored internally as follows");
+
+            t1.dump();
+            System.out.println(";");
+
+            t2.dump();
+            System.out.println(";");
+        }
+    }
+
     public int getLeafNumber( String leaf )
     {
         if( nameToNum == null ) nameToNum = new Hashtable();
@@ -1044,6 +1076,60 @@ public class TerminusEstV4 {
 
     public static long timeNow = 0;
 
+    public TerminusEstSolution ComputeSolution() {
+
+        timeNow = System.currentTimeMillis();
+
+        for( int l=0; l <= seenLeaves; l++ )
+        {
+            Tree T1 = t1.copy(null,null);
+            Tree T2 = t2.copy(null,null);
+
+            System.out.println("// Trying r="+l);
+            Network net = hybNumAtMost( T1, T2, l, t1, t2, 0 );
+            if( net != null )
+            {
+                //! get rid of the fake root
+
+                if( net.root.children.size() != 1 )
+                {
+                    System.out.println("CATASTROPHIC ERROR, we lost the fake root...");
+                    System.exit(0);
+                }
+
+                long timeEnd = System.currentTimeMillis();
+                double seconds =  ((double)(timeEnd - timeNow))/1000.0;
+
+                net.root = (Tree) net.root.children.elementAt(0);
+
+                net.resetNetwork();
+
+                //! ------------------- As a final check, check that the trees are actually displayed
+
+                net.buildLeftRightClusters();
+
+                boolean success = false;
+                success = net.checkDisplay( t1, 0 );
+                if(!success)
+                {
+                    System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
+                    System.exit(0);
+                }
+                else System.out.println("// First tree displayed by network!");
+
+                success = net.checkDisplay( t2, 1 );
+                if(!success)
+                {
+                    System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
+                    System.exit(0);
+                }
+
+                return new TerminusEstSolution(net, l, seconds);
+            }
+        }
+        return null;
+    }
+
     public static void main(String args[])
     {
         if( args.length == 0 || args[0].equals("-help") )
@@ -1054,42 +1140,6 @@ public class TerminusEstV4 {
             System.out.println("// -nonetwork : only compute hybridization number, do not generate a network. (The default is to generate a network.)");
             System.out.println("// -nohash : do not use look-up table to store intermediate solutions. (The default is to use the hash table, which potentially uses an exponential amount of memory.");
             System.exit(0);
-        }
-
-        System.out.println("// Begin TerminusEst.");
-        System.out.println("// -------------------------------------");
-
-        TerminusEstV4 te4 = new TerminusEstV4();
-
-        // TODO: FIX THIS.
-        if (args.length > 0){
-            TerminusEstInputHandler ih = new TerminusEstInputHandler();
-            ih.InterpretFile(args[args.length-1], te4);
-        }
-
-        System.out.println("// We saw "+te4.seenLeaves+" taxa in total.");
-
-        //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
-        te4.intObjects = new Integer [te4.seenLeaves+1];
-
-        for(int x=0; x< te4.intObjects.length; x++ )
-        {
-            te4.intObjects[x] = new Integer(x);
-        }
-        //! ------------------------------------
-
-        te4.lookup = new Hashtable();
-
-        if(VERBOSE)
-        {
-            System.out.println("// Finished reading the two trees in.");
-            System.out.println("// The trees are now stored internally as follows");
-
-            te4.t1.dump();
-            System.out.println(";");
-
-            te4.t2.dump();
-            System.out.println(";");
         }
 
         if( args.length != 0 )
@@ -1110,9 +1160,6 @@ public class TerminusEstV4 {
             }
         }
 
-        timeNow = System.currentTimeMillis();
-
-
         System.out.print("// SETTING: ");
         if(BUILDNETWORK) System.out.println("A network WILL be constructed.");
         else System.out.println("A network will NOT be constructed.");
@@ -1121,71 +1168,61 @@ public class TerminusEstV4 {
         if(USEHASH) System.out.println("Hash tables WILL be used.");
         else System.out.println("Hash tables will NOT be used.");
 
+        System.out.println("// Begin TerminusEst.");
+        System.out.println("// -------------------------------------");
 
-        for( int l=0; l <= te4.seenLeaves; l++ )
-        {
-            Tree T1 = te4.t1.copy(null,null);
-            Tree T2 = te4.t2.copy(null,null);
+        TerminusEstV4 te4 = null;
+        if (args.length > 0){
+            te4 = new TerminusEstV4(args[args.length-1]);
 
-            System.out.println("// Trying r="+l);
-            Network net = te4.hybNumAtMost( T1, T2, l, te4.t1, te4.t2, 0 );
-            if( net != null )
-            {
-                //! get rid of the fake root
-
-                if( net.root.children.size() != 1 )
-                {
-                    System.out.println("CATASTROPHIC ERROR, we lost the fake root...");
-                    System.exit(0);
-                }
-
-                long timeEnd = System.currentTimeMillis();
-                double seconds =  ((double)(timeEnd - timeNow))/1000.0;
-
-                net.root = (Tree) net.root.children.elementAt(0);
-
-                net.resetNetwork();
-
-                net.root.dumpNetwork();
-                net.root.dumpNetworkTreeImage(0);
-                net.root.dumpNetworkTreeImage(1);
-
-                net.root.dumpEnewick();
-
-                //! ------------------- As a final check, check that the trees are actually displayed
-
-                net.buildLeftRightClusters();
-
-                boolean success = false;
-                success = net.checkDisplay( te4.t1, 0 );
-                if(!success)
-                {
-                    System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
-                    System.exit(0);
-                }
-                else System.out.println("// First tree displayed by network!");
-
-                success = net.checkDisplay( te4.t2, 1 );
-                if(!success)
-                {
-                    System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
-                    System.exit(0);
-                }
-                else System.out.println("// Second tree displayed by network!");
-
-
-
-                System.out.println("// -----------------------------");
-                System.out.println("// HYBRIDIZATION NUMBER = "+l);
-                System.out.println("// -----------------------------");
-                System.out.println("// Real-time elapsed in seconds: "+seconds);
-
-                //! Finished!
-                System.exit(0);
-            }
         }
 
+        TerminusEstSolution solution = te4.ComputeSolution();
 
+        Network net = solution.root;
+        int l = solution.hyb;
+        double seconds = solution.runtime;
+
+        net.root = (Tree) net.root.children.elementAt(0);
+
+        net.resetNetwork();
+
+        net.root.dumpNetwork();
+        net.root.dumpNetworkTreeImage(0);
+        net.root.dumpNetworkTreeImage(1);
+
+        net.root.dumpEnewick();
+
+        //! ------------------- As a final check, check that the trees are actually displayed
+
+        net.buildLeftRightClusters();
+
+        boolean success = false;
+        success = net.checkDisplay( te4.t1, 0 );
+        if(!success)
+        {
+            System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
+            System.exit(0);
+        }
+        else System.out.println("// First tree displayed by network!");
+
+        success = net.checkDisplay( te4.t2, 1 );
+        if(!success)
+        {
+            System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
+            System.exit(0);
+        }
+        else System.out.println("// Second tree displayed by network!");
+
+
+
+        System.out.println("// -----------------------------");
+        System.out.println("// HYBRIDIZATION NUMBER = "+l);
+        System.out.println("// -----------------------------");
+        System.out.println("// Real-time elapsed in seconds: "+seconds);
+
+        //! Finished!
+        System.exit(0);
     }
 
 
