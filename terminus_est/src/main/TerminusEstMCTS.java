@@ -21,11 +21,11 @@ public class TerminusEstMCTS {
         MCTS mcts = new MCTS(10000, select, sim, gen);
 
         TerminusEstInputHandler inp = new TerminusEstInputHandler();
-        inp.InterpretFile(args[0]);
         TerminusEstV4 te4 = new TerminusEstV4();
+        inp.InterpretFile(args[0], te4);
 
-        Tree T1 = TerminusEstV4.t1.copy(null, null);
-        Tree T2 = TerminusEstV4.t2.copy(null, null);
+        Tree T1 = te4.t1.copy(null, null);
+        Tree T2 = te4.t2.copy(null, null);
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
         System.out.println("Beginning MCTS: ");
@@ -36,7 +36,7 @@ public class TerminusEstMCTS {
     }
 
     
-    public static void Testing(String file) {
+    /*public static void Testing(String file) {
         TerminusEstInputHandler inp = new TerminusEstInputHandler();
         inp.InterpretFile(file);
         Tree T1 = TerminusEstV4.t1.copy(null, null);
@@ -50,5 +50,5 @@ public class TerminusEstMCTS {
         a = state.GetLegalActions();
         state.Apply(a[2]);
         a = state.GetLegalActions();
-    }
+    }*/
 }

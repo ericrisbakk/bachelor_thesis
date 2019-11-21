@@ -1,5 +1,7 @@
 package main.TerminusEst;
 
+import main.utility.Tuple2;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -16,14 +18,7 @@ public class TerminusEstInputHandler {
     public int leaves = 0;
     public int trees = 0;
 
-    public static void main(String[] args) {
-        TerminusEstInputHandler ih = new TerminusEstInputHandler();
-        System.out.println("Interpreting file.");
-        ih.InterpretFile(args[0]);
-        System.out.println("Done interpreting file.");
-    }
-
-    public void InterpretFile(String file) {
+    public void InterpretFile(String file, TerminusEstV4 te4) {
         String s1 = "", s2 = "";
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -48,14 +43,14 @@ public class TerminusEstInputHandler {
             System.exit(0);
         }
 
-        SetTree(s1);
-        SetTree(s2);
+        SetTree(s1, te4);
+        SetTree(s2, te4);
 
         if (TerminusEstV4.VERBOSE) {
         System.out.println("\nVerifying trees from input handler: ");
-        TerminusEstV4.t1.dump();
+        te4.t1.dump();
         System.out.println();
-        TerminusEstV4.t2.dump();
+        te4.t2.dump();
         System.out.println("\n");
         }
 
@@ -65,11 +60,11 @@ public class TerminusEstInputHandler {
      * Adds one of the Tree objects in TerminusEstV4.
      * @param s Tree in Newick format.
      */
-    public void SetTree(String s) {
+    public void SetTree(String s, TerminusEstV4 te4) {
         tree = new Tree();
         current_node = tree;
         leaves = 0;
-        ConstructTree(s);
+        ConstructTree(s, te4);
         /*
         ( s = label() {}  )?
         ( ":" len = branch_length()   )?
@@ -77,12 +72,12 @@ public class TerminusEstInputHandler {
         */
         if( trees == 0 )
         {
-            TerminusEstV4.t1 = tree;
+            te4.t1 = tree;
         }
         else
         if( trees == 1 )
         {
-            TerminusEstV4.t2 = tree;
+            te4.t2 = tree;
         }
         else
         {
@@ -93,7 +88,7 @@ public class TerminusEstInputHandler {
         trees++;
     }
 
-    public void ConstructTree(String s) {
+    public void ConstructTree(String s, TerminusEstV4 te4) {
         int i = 1;
         char current;
         while (i < s.length()-2) {
@@ -139,7 +134,7 @@ public class TerminusEstInputHandler {
                 leafNode.setParent(current_node);
                 leafNode.parent.addChild(leafNode);
 
-                int x = TerminusEstV4.getLeafNumber(label);
+                int x = te4.getLeafNumber(label);
                 leafNode.setName(label);
                 leafNode.setNumber(x);
 

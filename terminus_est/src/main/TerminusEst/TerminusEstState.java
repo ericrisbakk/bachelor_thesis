@@ -31,7 +31,7 @@ public class TerminusEstState implements State {
         // this.original2 = original2;
         this.depth = depth;
 
-        UpdateMainScript();
+        // UpdateMainScript();
         CollapseTrees();
     }
 
@@ -351,8 +351,8 @@ public class TerminusEstState implements State {
         Tree.collapseMaxSTsets(t1,t2,ST);
     }
 
-    private void UpdateMainScript() {
+    /*private void UpdateMainScript() {
         TerminusEstV4.t1 = t1;
         TerminusEstV4.t2 = t2;
-    }
+    }*/
 }

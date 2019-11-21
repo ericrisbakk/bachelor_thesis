@@ -7,19 +7,19 @@ import java.util.Vector;
 
 public class TerminusEstV4 {
 
-    public static Hashtable nameToNum;
-    public static Hashtable numToName;
+    public Hashtable nameToNum;
+    public Hashtable numToName;
 
     //! VERSION 3: HASHING IS BY DEFAULT SWITCHED ON
     //! VERSION 2: LOOKUP TABLE FOR ALREADY COMPUTED SOLUTIONS
-    public static Hashtable lookup;
+    public Hashtable lookup;
 
 
-    public static Integer intObjects[];
+    public Integer intObjects[];
 
-    public static int seenLeaves = 0;
+    public int seenLeaves = 0;
 
-    public static int getLeafNumber( String leaf )
+    public int getLeafNumber( String leaf )
     {
         if( nameToNum == null ) nameToNum = new Hashtable();
 
@@ -49,7 +49,7 @@ public class TerminusEstV4 {
     }
 
 
-    public static String getLeafName( int num )
+    public String getLeafName( int num )
     {
         Integer i = new Integer(num);
 
@@ -63,8 +63,8 @@ public class TerminusEstV4 {
         return s;
     }
 
-    public static Tree t1;
-    public static Tree t2;
+    public Tree t1;
+    public Tree t2;
 
     public static String VERSION = "TerminusEstV4.jj Version 3, 30th March 2015";
 
@@ -78,7 +78,7 @@ public class TerminusEstV4 {
 
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
-    public static Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
+    public Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
     {
         if(VERBOSE) System.out.println("Entering with hyb="+hyb);
 
@@ -877,7 +877,6 @@ public class TerminusEstV4 {
 
     }
 
-
     public static long timeNow = 0;
 
     public static void main(String args[])
@@ -895,35 +894,36 @@ public class TerminusEstV4 {
         System.out.println("// Begin TerminusEst.");
         System.out.println("// -------------------------------------");
 
+        TerminusEstV4 te4 = new TerminusEstV4();
 
         // TODO: FIX THIS.
         if (args.length > 0){
             TerminusEstInputHandler ih = new TerminusEstInputHandler();
-            ih.InterpretFile(args[args.length-1]);
+            ih.InterpretFile(args[args.length-1], te4);
         }
 
-        System.out.println("// We saw "+TerminusEstV4.seenLeaves+" taxa in total.");
+        System.out.println("// We saw "+te4.seenLeaves+" taxa in total.");
 
         //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
-        intObjects = new Integer [seenLeaves+1];
+        te4.intObjects = new Integer [te4.seenLeaves+1];
 
-        for(int x=0; x<intObjects.length; x++ )
+        for(int x=0; x< te4.intObjects.length; x++ )
         {
-            intObjects[x] = new Integer(x);
+            te4.intObjects[x] = new Integer(x);
         }
         //! ------------------------------------
 
-        lookup = new Hashtable();
+        te4.lookup = new Hashtable();
 
         if(VERBOSE)
         {
             System.out.println("// Finished reading the two trees in.");
             System.out.println("// The trees are now stored internally as follows");
 
-            t1.dump();
+            te4.t1.dump();
             System.out.println(";");
 
-            t2.dump();
+            te4.t2.dump();
             System.out.println(";");
         }
 
@@ -957,13 +957,13 @@ public class TerminusEstV4 {
         else System.out.println("Hash tables will NOT be used.");
 
 
-        for( int l=0; l <= TerminusEstV4.seenLeaves; l++ )
+        for( int l=0; l <= te4.seenLeaves; l++ )
         {
-            Tree T1 = t1.copy(null,null);
-            Tree T2 = t2.copy(null,null);
+            Tree T1 = te4.t1.copy(null,null);
+            Tree T2 = te4.t2.copy(null,null);
 
             System.out.println("// Trying r="+l);
-            Network net = hybNumAtMost( T1, T2, l, t1, t2, 0 );
+            Network net = te4.hybNumAtMost( T1, T2, l, te4.t1, te4.t2, 0 );
             if( net != null )
             {
                 //! get rid of the fake root
@@ -992,7 +992,7 @@ public class TerminusEstV4 {
                 net.buildLeftRightClusters();
 
                 boolean success = false;
-                success = net.checkDisplay( t1, 0 );
+                success = net.checkDisplay( te4.t1, 0 );
                 if(!success)
                 {
                     System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
@@ -1000,7 +1000,7 @@ public class TerminusEstV4 {
                 }
                 else System.out.println("// First tree displayed by network!");
 
-                success = net.checkDisplay( t2, 1 );
+                success = net.checkDisplay( te4.t2, 1 );
                 if(!success)
                 {
                     System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
