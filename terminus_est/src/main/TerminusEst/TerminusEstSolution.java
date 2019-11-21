@@ -13,4 +13,15 @@ public class TerminusEstSolution {
         this.hyb = hyb;
         this.runtime = runtime;
     }
+
+    @Override
+    public String toString() {
+        String s = "";
+        if (root == null)
+            s += "NULL";
+        else
+            s += "NETWORK";
+
+        return s + ", " + hyb + ", " + runtime;
+    }
 }
