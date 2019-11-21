@@ -25,7 +25,7 @@ public class TerminusEstV4 {
         TerminusEstInputHandler ih = new TerminusEstInputHandler();
         ih.InterpretFile(file, this);
 
-        System.out.println("// We saw "+seenLeaves+" taxa in total.");
+        if (VERBOSE) System.out.println("// We saw "+seenLeaves+" taxa in total.");
 
         //! ----- This is just so we don't have to constantly create new Integer() objects for the lookup hashtable
         intObjects = new Integer [seenLeaves+1];
