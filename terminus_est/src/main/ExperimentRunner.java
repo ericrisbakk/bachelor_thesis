@@ -7,7 +7,10 @@ import main.graphs.InputHandler;
 import main.utility.Tuple2;
 
 import javax.xml.crypto.Data;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ExperimentRunner {
 
@@ -58,20 +61,65 @@ public class ExperimentRunner {
         public String GetFileName(int ni, int ri, int ci, int inst) {
             return folderPath + "n" + n[ni] + "r" + r[ri] + "c" + c[ci] + "_" + inst + ".txt";
         }
+    }
 
+    public class DataWriter {
+        FileWriter fr = null;
+        BufferedWriter br = null;
+
+        public DataWriter(String filename) {
+            File file = new File(filename);
+            try {
+                fr = new FileWriter(file);
+                br = new BufferedWriter(fr);
+                Write("ID, REGULAR_HYB, REGULAR_RUNTIME, MCTS_HYB, MCTS_RUNTIME\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void Write(String s) {
+            try {
+                br.write(s);
+                br.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void WriteResult (String fileName, TerminusEstSolution regular, TerminusEstSolution mcts){
+            Write(fileName + ", " + regular.hyb + ", " + regular.runtime + ", " + mcts.hyb + ", " + mcts.runtime + "\n");
+        }
+
+        public void Close () {
+            try {
+                br.close();
+                fr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
      * Q: For simple data-sets (r <= 15), does TerminusEstMCTS always find a solution? And is it optimal?
      */
     public void RunExperimentA() {
-        DataFetcher df = new DataFetcher(dataFolder, new int[]{20, 50, 100}, new int[]{10, 15}, new int[]{25, 50, 75});
+        String outputFile = "D:/Uni/DataOutput/BasicMCTSResultsN100.csv";
+
+        DataFetcher df = new DataFetcher(dataFolder, new int[]{100}, new int[]{15}, new int[]{25, 50, 75});
+        DataWriter dw = new DataWriter(outputFile);
+
         for (int i = 0; i < df.files.length; ++i) {
+            System.out.print(df.files[i]);
             TerminusEstSolution s_normal = (new TerminusEstV4(df.files[i])).ComputeSolution();
+            System.out.print("\t" + s_normal.hyb + ", " + s_normal.runtime);
             TerminusEstSolution s_mcts = TerminusEstMCTS.AttemptSolution(df.files[i]);
-            System.out.println("(Regular) - Hyb: " + s_normal.hyb + ", Runtime: " + s_normal.runtime
-                + "\t(MCTS) - Hyb: " + s_mcts.hyb + ", Runtime: " + s_mcts.runtime);
+            System.out.println("\t" + s_mcts.hyb + ", " + s_mcts.runtime);
+            dw.WriteResult(df.files[i], s_normal, s_mcts);
         }
+
+        dw.Close();
     }
 
     public static void main(String[] args) {
