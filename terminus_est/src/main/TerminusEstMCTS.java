@@ -1,9 +1,6 @@
 package main;
 
-import main.TerminusEst.TerminusEstInputHandler;
-import main.TerminusEst.TerminusEstState;
-import main.TerminusEst.TerminusEstV4;
-import main.TerminusEst.Tree;
+import main.TerminusEst.*;
 import main.mcts.*;
 import main.mcts.base.Action;
 import main.mcts.base.MCTS;
@@ -33,13 +30,49 @@ public class TerminusEstMCTS {
         return mcts.root;
     }
 
+    public static NodeMCTS GetBestFound(NodeMCTS node) {
+        if (node.IsTerminal()) {
+            return node;
+        }
+
+        if (!node.expanded && node.leaf) {
+            return null;
+        }
+
+        NodeMCTS bestChild = null;
+        for (int i = 0; i < node.children.length; ++i) {
+            NodeMCTS option = GetBestFound(node.children[i]);
+            if (option != null) {
+                if (bestChild == null)
+                    bestChild = option;
+                else {
+                    if (option.depth < bestChild.depth)
+                        bestChild = option;
+                }
+            }
+        }
+
+        return bestChild;
+    }
+
     public static void RunSingleInstance(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
         System.out.println("Beginning MCTS: ");
         NodeMCTS searchTree = tem.GetSearchTree(file);
         System.out.println("\n\nMCTS completed.");
-        System.out.println("\n\nNewick format search tree:");
+        NodeMCTS bestFound = GetBestFound(searchTree);
 
+        if (bestFound != null) {
+        System.out.println("Best solution found has depth: " + bestFound.depth);
+        Action[] actionSequence = bestFound.GetActionSequenceFromRoot();
+            for (int i = 0; i < actionSequence.length; ++i) {
+                System.out.println(i + ": " + actionSequence[i].toString());
+            }
+        } else {
+            System.out.println("Didn't find a solution.");
+        }
+
+        System.out.println("\n\nNewick format search tree:");
         System.out.println(searchTree.GetNewick());
     }
 
