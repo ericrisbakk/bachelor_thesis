@@ -6,9 +6,11 @@ package main.TerminusEst;
 public class TerminusEstSolution {
     public Network root;
     public int hyb;
+    public double runtime;
 
-    public TerminusEstSolution(Network root, int hyb) {
+    public TerminusEstSolution(Network root, int hyb, double runtime) {
         this.root = root;
         this.hyb = hyb;
+        this.runtime = runtime;
     }
 }
