@@ -1,13 +1,17 @@
 package main;
 
 import main.TerminusEst.TerminusEstInputHandler;
+import main.TerminusEst.TerminusEstSolution;
+import main.TerminusEst.TerminusEstV4;
 import main.graphs.InputHandler;
 import main.utility.Tuple2;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 
 public class ExperimentRunner {
 
+    public static String dataFolder = "D:/Uni/TreeGen/Data/";
     /**
      * Fetches files from the relevant folder. All files are assumed to follow a pattern of
      * n[X]r[Y]c[Z]_[Inst], where X is the taxa size, Y the number of rSPR moves, Z the percent of
@@ -60,9 +64,18 @@ public class ExperimentRunner {
     /**
      * Q: For simple data-sets (r <= 15), does TerminusEstMCTS always find a solution? And is it optimal?
      */
-    public static void ExperimentA() {
-
+    public void RunExperimentA() {
+        DataFetcher df = new DataFetcher(dataFolder, new int[]{20, 50, 100}, new int[]{10, 15}, new int[]{25, 50, 75});
+        for (int i = 0; i < df.files.length; ++i) {
+            TerminusEstSolution s_normal = (new TerminusEstV4(df.files[i])).ComputeSolution();
+            TerminusEstSolution s_mcts = TerminusEstMCTS.AttemptSolution(df.files[i]);
+            System.out.println("(Regular) - Hyb: " + s_normal.hyb + ", Runtime: " + s_normal.runtime
+                + "\t(MCTS) - Hyb: " + s_mcts.hyb + ", Runtime: " + s_mcts.runtime);
+        }
     }
 
-
+    public static void main(String[] args) {
+        ExperimentRunner er = new ExperimentRunner();
+        er.RunExperimentA();
+    }
 }
