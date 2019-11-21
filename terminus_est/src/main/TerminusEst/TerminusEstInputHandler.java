@@ -37,7 +37,7 @@ public class TerminusEstInputHandler {
             e.printStackTrace();
         }
 
-        System.out.println("Trees: \n" + s1 + "\n" + s2);
+        // System.out.println("Trees: \n" + s1 + "\n" + s2);
         if (s1 == "" || s1 == "") {
             System.out.println("// Trees given are empty...");
             System.exit(0);

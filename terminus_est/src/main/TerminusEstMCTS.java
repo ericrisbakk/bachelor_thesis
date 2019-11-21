@@ -4,35 +4,47 @@ import main.TerminusEst.TerminusEstInputHandler;
 import main.TerminusEst.TerminusEstState;
 import main.TerminusEst.TerminusEstV4;
 import main.TerminusEst.Tree;
-import main.mcts.HeuristicAvgDepth;
-import main.mcts.ResultUCTGenerator;
-import main.mcts.SelectUCT;
-import main.mcts.SimulateRandom;
+import main.mcts.*;
 import main.mcts.base.Action;
 import main.mcts.base.MCTS;
 
 public class TerminusEstMCTS {
 
-    public static void main(String[] args) {
+    public static int iterations = 10000;
+    public static int simulations = 30;
+
+    public NodeMCTS GetSearchTree(String file) {
         SelectUCT select = new SelectUCT();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
-        SimulateRandom sim = new SimulateRandom(30, heuristic);
+        SimulateRandom sim = new SimulateRandom(simulations, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
-        MCTS mcts = new MCTS(10000, select, sim, gen);
+        MCTS mcts = new MCTS(iterations, select, sim, gen);
 
         TerminusEstInputHandler inp = new TerminusEstInputHandler();
         TerminusEstV4 te4 = new TerminusEstV4();
-        inp.InterpretFile(args[0], te4);
+        inp.InterpretFile(file, te4);
 
         Tree T1 = te4.t1.copy(null, null);
         Tree T2 = te4.t2.copy(null, null);
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
-        System.out.println("Beginning MCTS: ");
         mcts.BuildTree(state);
-        System.out.println("\n\nMCTS completed.");
 
-        System.out.println(mcts.root.GetNewick());
+        return mcts.root;
+    }
+
+    public static void RunSingleInstance(String file) {
+        TerminusEstMCTS tem = new TerminusEstMCTS();
+        System.out.println("Beginning MCTS: ");
+        NodeMCTS searchTree = tem.GetSearchTree(file);
+        System.out.println("\n\nMCTS completed.");
+        System.out.println("\n\nNewick format search tree:");
+
+        System.out.println(searchTree.GetNewick());
+    }
+
+    public static void main(String[] args) {
+        RunSingleInstance(args[0]);
     }
 
     
