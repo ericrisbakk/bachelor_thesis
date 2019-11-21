@@ -846,6 +846,171 @@ public class TerminusEstV4 {
         return null;
     }
 
+    /**
+     * Given a sequence of deletions (represented by an array of strings that are the names of the taxa),
+     * the method performs these deletions to check whether they correctly lead to a valid end-state..
+     * @param T1
+     * @param T2
+     * @param deletions
+     * @return False if the sequence of deletions cannot create a valid end-state, or creates it too early.
+     */
+    public static boolean verifyHybNum( Tree T1, Tree T2, String[] deletions)
+    {
+        // Ensure that we don't make any changes to original t1 and t2.
+        T1 = T1.copy(null, null);
+        T2 = T2.copy(null, null);
+
+        Vector ST = Tree.computeMaxSTsets(T1, T2);
+        Tree.collapseMaxSTsets(T1, T2, ST);
+
+        for (int del = 0; del < deletions.length; ++del) {
+
+            // We get to the finish earlier than intended.
+            if (ST.size() == 1) {
+                return false;
+            }
+
+            //! --------------------------------------------
+            //! Building possible options.
+
+            Vector taxa = new Vector();
+            T1.getLeafDescendants(taxa);
+
+            Hashtable ht = new Hashtable();
+
+            Tree numToTaxonT1[] = new Tree[taxa.size()];
+            Tree numToTaxonT2[] = new Tree[taxa.size()];
+
+            for (int x = 0; x < taxa.size(); x++) {
+                Tree leaf = (Tree) taxa.elementAt(x);
+                leaf.num = x;    //! This assigns a number to the leaf.
+                numToTaxonT1[x] = leaf;
+                ht.put(leaf.name, leaf);    //! So we can find the corresponding node in the second tree
+            }
+
+            Vector taxaSecondTree = new Vector();
+            T2.getLeafDescendants(taxaSecondTree);
+
+            if (taxaSecondTree.size() != taxa.size()) {
+                System.out.println("Catastrophic error. Trees have different numbers of taxa.");
+                System.exit(0);
+            }
+
+            int n = taxa.size();
+
+            for (int x = 0; x < n; x++) {
+                Tree leaf = (Tree) taxaSecondTree.elementAt(x);
+
+                Tree co = (Tree) ht.get(leaf.name);
+                if (co == null) {
+                    System.out.println("Catastrophic error. Couldn't find taxon from second tree in first tree.");
+                    System.exit(0);
+                }
+                if (!leaf.name.equals(co.name)) {
+                    System.out.println("Catastrophic error. Hashing problem lining up taxa.");
+                    System.exit(0);
+                }
+                leaf.num = co.num;
+                numToTaxonT2[leaf.num] = leaf;
+            }
+
+            T1.buildClusters(n);
+            T2.buildClusters(n);
+
+            //! --------------------------------------------
+            //! Ok, now let's count the terminals...
+
+            int terminals = 0;
+            Vector termVec = new Vector();
+
+            boolean isTerminal[] = new boolean[n];
+
+            for (int x = 0; x < n; x++) {
+                Tree u = numToTaxonT1[x].parent;
+                Tree v = numToTaxonT2[x].parent;
+
+                int intersect = 0;
+                for (int y = 0; y < n; y++) {
+                    if (u.cluster[y] && v.cluster[y]) intersect++;
+                    if (intersect > 1) break;
+                }
+                if (intersect == 0) {
+                    System.out.println("Catastrophic error, somehow a taxon is not in the intersection of its witness sets.");
+                    System.exit(0);
+                }
+                if (intersect == 1) {
+                    terminals++;
+                    termVec.addElement(numToTaxonT1[x]);    //! records it's position in T1
+                    isTerminal[x] = true;    //! let's us quickly determine if something is a terminal
+                }
+
+            }
+
+            //! ----------------------------------------------------------------
+            // Does the taxa to delete exist?
+            Vector guessSet = taxa;
+            Tree option = null;
+            for (int i = 0; i < taxa.size(); ++i) {
+                if (((Tree) taxa.elementAt(i)).name.equals(deletions[del])) {
+                    option = (Tree) taxa.elementAt(i);
+                }
+            }
+
+            if (option == null) {
+                return false;
+            }
+
+            String zoekNaam = option.name;
+
+            Tree alpha[] = new Tree [1];
+            Tree beta[] = new Tree [1];
+
+
+            Tree newGuyA = T1.copy(alpha,zoekNaam);
+            Tree newGuyB = T2.copy(beta, zoekNaam);
+
+            Tree killA = alpha[0].delete();
+            if( killA != null )
+            {
+                if(VERBOSE) System.out.println("New root in T1...");
+            }
+            else killA = newGuyA;
+
+
+            Tree killB = beta[0].delete();
+
+            if( killB != null )
+            {
+                if(VERBOSE) System.out.println("New root in T2...");
+            }
+            else killB = newGuyB;
+
+            if(VERBOSE)
+            {
+                killA.dump();
+                System.out.println();
+            }
+            if(VERBOSE)
+            {
+                killB.dump();
+                System.out.println();
+            }
+
+            T1 = killA;
+            T2 = killB;
+
+            ST = Tree.computeMaxSTsets(T1, T2);
+            Tree.collapseMaxSTsets(T1, T2, ST);
+        } // End for-loop
+
+        if (ST.size() == 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+
     public static String[] getTaxaFromString(String s)
     {
         String a = s.replace('{',' ');
