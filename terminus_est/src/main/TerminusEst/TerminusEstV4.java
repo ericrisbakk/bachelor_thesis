@@ -1123,6 +1123,8 @@ public class TerminusEstV4 {
                     System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
                     System.exit(0);
                 }
+                else System.out.println("// Second tree displayed by network!");
+
 
                 return new TerminusEstSolution(net, l, seconds);
             }
@@ -1183,10 +1185,6 @@ public class TerminusEstV4 {
         int l = solution.hyb;
         double seconds = solution.runtime;
 
-        net.root = (Tree) net.root.children.elementAt(0);
-
-        net.resetNetwork();
-
         net.root.dumpNetwork();
         net.root.dumpNetworkTreeImage(0);
         net.root.dumpNetworkTreeImage(1);
@@ -1196,25 +1194,6 @@ public class TerminusEstV4 {
         //! ------------------- As a final check, check that the trees are actually displayed
 
         net.buildLeftRightClusters();
-
-        boolean success = false;
-        success = net.checkDisplay( te4.t1, 0 );
-        if(!success)
-        {
-            System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
-            System.exit(0);
-        }
-        else System.out.println("// First tree displayed by network!");
-
-        success = net.checkDisplay( te4.t2, 1 );
-        if(!success)
-        {
-            System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
-            System.exit(0);
-        }
-        else System.out.println("// Second tree displayed by network!");
-
-
 
         System.out.println("// -----------------------------");
         System.out.println("// HYBRIDIZATION NUMBER = "+l);

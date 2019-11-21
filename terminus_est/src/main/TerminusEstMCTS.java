@@ -17,9 +17,7 @@ public class TerminusEstMCTS {
         ResultUCTGenerator gen = new ResultUCTGenerator();
         MCTS mcts = new MCTS(iterations, select, sim, gen);
 
-        TerminusEstInputHandler inp = new TerminusEstInputHandler();
-        TerminusEstV4 te4 = new TerminusEstV4();
-        inp.InterpretFile(file, te4);
+        TerminusEstV4 te4 = new TerminusEstV4(file);
 
         Tree T1 = te4.t1.copy(null, null);
         Tree T2 = te4.t2.copy(null, null);
