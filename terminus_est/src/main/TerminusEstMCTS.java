@@ -28,6 +28,38 @@ public class TerminusEstMCTS {
         return mcts.root;
     }
 
+    public static TerminusEstSolution AttemptSolution(String file) {
+        TerminusEstMCTS tem = new TerminusEstMCTS();
+
+        double timeNow = System.currentTimeMillis();
+
+        NodeMCTS searchTree = tem.GetSearchTree(file);
+        NodeMCTS bestFound = GetBestFound(searchTree);
+
+        double timeEnd = System.currentTimeMillis();
+        double seconds =  ((double)(timeEnd - timeNow))/1000.0;
+
+        if (bestFound != null) {
+            Action[] actionSequence = bestFound.GetActionSequenceFromRoot();
+
+            // Verify. If we are not able to, return empty.
+            String[] taxons = new String[actionSequence.length];
+            for (int i = 0; i < actionSequence.length; ++i) {
+                taxons[i] = ((TerminusEstAction) actionSequence[i]).taxon.getName();
+            }
+
+            TerminusEstState s = (TerminusEstState) searchTree.root;
+            if (!TerminusEstV4.verifyHybNum(s.t1, s.t2, taxons)) {
+                return new TerminusEstSolution(null, -2, seconds);
+            }
+
+            // TODO: Also extract the network.
+            return new TerminusEstSolution(null, bestFound.depth, seconds);
+        } else {
+            return new TerminusEstSolution(null, -1, seconds);
+        }
+    }
+
     public static NodeMCTS GetBestFound(NodeMCTS node) {
         if (node.IsTerminal()) {
             return node;
@@ -86,7 +118,8 @@ public class TerminusEstMCTS {
     }
 
     public static void main(String[] args) {
-        RunSingleInstance(args[0]);
+        TerminusEstSolution solution = AttemptSolution(args[0]);
+        System.out.println(solution.toString());
     }
 
     
