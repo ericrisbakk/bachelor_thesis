@@ -135,11 +135,12 @@ public class TerminusEstV4 {
             long timeEnd = System.currentTimeMillis();
             double seconds =  ((double)(timeEnd - timeNow))/1000.0;
 
-            System.out.println("// -----------------------------");
-            System.out.println("// HYBRIDIZATION NUMBER = "+depth);
-            System.out.println("// -----------------------------");
-            if(BUILDNETWORK==false) System.out.println("// Real-time elapsed in seconds: "+seconds);
-
+            if (VERBOSE) {
+                System.out.println("// -----------------------------");
+                System.out.println("// HYBRIDIZATION NUMBER = " + depth);
+                System.out.println("// -----------------------------");
+                if (BUILDNETWORK == false) System.out.println("// Real-time elapsed in seconds: " + seconds);
+            }
 
             if(BUILDNETWORK == false) System.exit(0);
 
@@ -1082,10 +1083,11 @@ public class TerminusEstV4 {
 
         for( int l=0; l <= seenLeaves; l++ )
         {
+            // System.out.println("Trying hybridization number: " + l);
             Tree T1 = t1.copy(null,null);
             Tree T2 = t2.copy(null,null);
 
-            System.out.println("// Trying r="+l);
+            if (VERBOSE) System.out.println("// Trying r="+l);
             Network net = hybNumAtMost( T1, T2, l, t1, t2, 0 );
             if( net != null )
             {
@@ -1115,7 +1117,7 @@ public class TerminusEstV4 {
                     System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
                     System.exit(0);
                 }
-                else System.out.println("// First tree displayed by network!");
+                else if (VERBOSE) System.out.println("// First tree displayed by network!");
 
                 success = net.checkDisplay( t2, 1 );
                 if(!success)
@@ -1123,7 +1125,7 @@ public class TerminusEstV4 {
                     System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
                     System.exit(0);
                 }
-                else System.out.println("// Second tree displayed by network!");
+                else if (VERBOSE) System.out.println("// Second tree displayed by network!");
 
 
                 return new TerminusEstSolution(net, l, seconds);
