@@ -67,6 +67,28 @@ public class NodeMCTS {
     }
 
     /**
+     * @return Array that is sequence of actions to apply to root to get this state,
+     * where index 0 is first action, index 1 is second action, and so on.
+     */
+    public Action[] GetActionSequenceFromRoot() {
+        Action[] actions = new Action[depth];
+        NodeMCTS toRoot = this;
+        for (int i = 0; i < actions.length; ++i) {
+            actions[i] = toRoot.lastAction;
+            toRoot = toRoot.parent;
+        }
+
+        Action temp;
+        for (int i = 0; i < actions.length/2; ++i) {
+            temp = actions[i];
+            actions[i] = actions[actions.length-i-1];
+            actions[actions.length-i-1] = temp;
+        }
+
+        return actions;
+    }
+
+    /**
      * Creates the children of this node using all the legal actions of the current state.
      */
     public void Expand() {
