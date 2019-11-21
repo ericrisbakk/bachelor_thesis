@@ -68,6 +68,17 @@ public class TerminusEstMCTS {
             for (int i = 0; i < actionSequence.length; ++i) {
                 System.out.println(i + ": " + actionSequence[i].toString());
             }
+
+            // Verify
+            System.out.println("Verifying solution: ");
+            String[] taxons = new String[actionSequence.length];
+            for (int i = 0; i < actionSequence.length; ++i) {
+                taxons[i] = ((TerminusEstAction) actionSequence[i]).taxon.getName();
+            }
+
+            TerminusEstState s = (TerminusEstState) searchTree.root;
+            System.out.println(" > " +TerminusEstV4.verifyHybNum(s.t1, s.t2, taxons));
+
         } else {
             System.out.println("Didn't find a solution.");
         }
