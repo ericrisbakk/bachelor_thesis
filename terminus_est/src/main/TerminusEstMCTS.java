@@ -58,8 +58,15 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
+        // Use upper depth+1
+        NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound);
 
-        // Search from lowest to highest.
+        for (int i = 0; i < searchNodes.length; ++i) {
+
+            for (int j = 0; j < searchNodes[i].length; ++j) {
+                te4.ComputePartialSolution(i,)
+            }
+        }
     }
 
     private static class SortByVisits implements Comparator<NodeMCTS> {
@@ -79,6 +86,24 @@ public class TerminusEstMCTS {
     public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth) {
         ArrayList<NodeMCTS> n = new ArrayList<>();
         SortByVisits comp = new SortByVisits();
+        int[] depthCount = new int[maxDepth];
+        DFSWithSort(root, n, comp, maxDepth, depthCount);
+
+        // Create array container.
+        NodeMCTS[][] nodeByDepth = new NodeMCTS[maxDepth][];
+        for (int i = 0; i < nodeByDepth.length; ++i) {
+            nodeByDepth[i] = new NodeMCTS[depthCount[i]];
+        }
+
+        int[] count = new int[maxDepth];
+
+        // Add everything!
+        for (NodeMCTS node : n) {
+            nodeByDepth[node.depth][count[node.depth]] = node;
+            count[node.depth] += 1;
+        }
+
+        return nodeByDepth;
     }
 
     /**
@@ -87,19 +112,20 @@ public class TerminusEstMCTS {
      * @param list
      * @param comp
      */
-    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp, int maxDepth) {
+    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp, int maxDepth, int[] depthCount) {
         if (node.IsTerminal()) {
-            System.out.println("ERROR: Node is terminal, but no terminal node should have been encountered.");
+            System.out.println("Terminal hit!");
             return;
         }
 
         // Only add nodes below the maxDepth
-        if (node.depth >= maxDepth)
+        if (node.depth > maxDepth)
             return;
 
         // Only add if leaf and under max depth.
         if (node.IsLeaf()) {
             list.add(node);
+            depthCount[node.depth] += 1;
             return;
         }
 
