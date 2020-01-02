@@ -1134,6 +1134,56 @@ public class TerminusEstV4 {
         return null;
     }
 
+    public TerminusEstSolution ComputePartialSolution(int depth, int target) {
+            // System.out.println("Trying hybridization number: " + l);
+            Tree T1 = t1.copy(null,null);
+            Tree T2 = t2.copy(null,null);
+
+            Network net = hybNumAtMost( T1, T2, target, t1, t2, depth );
+            if( net != null )
+            {
+                //! get rid of the fake root
+
+                if( net.root.children.size() != 1 )
+                {
+                    System.out.println("CATASTROPHIC ERROR, we lost the fake root...");
+                    System.exit(0);
+                }
+
+                long timeEnd = System.currentTimeMillis();
+                double seconds =  ((double)(timeEnd - timeNow))/1000.0;
+
+                net.root = (Tree) net.root.children.elementAt(0);
+
+                net.resetNetwork();
+
+                //! ------------------- As a final check, check that the trees are actually displayed
+
+                net.buildLeftRightClusters();
+
+                boolean success = false;
+                success = net.checkDisplay( t1, 0 );
+                if(!success)
+                {
+                    System.out.println("CATASTROPHIC ERROR, first tree not displayed by the network.");
+                    System.exit(0);
+                }
+                else if (VERBOSE) System.out.println("// First tree displayed by network!");
+
+                success = net.checkDisplay( t2, 1 );
+                if(!success)
+                {
+                    System.out.println("CATASTROPHIC ERROR, second tree not displayed by the network.");
+                    System.exit(0);
+                }
+                else if (VERBOSE) System.out.println("// Second tree displayed by network!");
+
+
+                return new TerminusEstSolution(net, target, seconds);
+            }
+        return null;
+    }
+
     public static void main(String args[])
     {
         if( args.length == 0 || args[0].equals("-help") )
