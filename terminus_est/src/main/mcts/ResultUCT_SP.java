@@ -26,11 +26,11 @@ public class ResultUCT_SP implements IResult {
     @Override
     public String ToString() {
         if (simulations > 0) {
-            double ratio = (double) score / (double) simulations;
-            return String.valueOf((float) ratio);
+        double avg = (double) -score / simulations;
+        return String.valueOf(avg) + ".." + String.valueOf(simulations);
         }
         else {
-            return "X";
+            return "X.." + String.valueOf(simulations);
         }
     }
 
