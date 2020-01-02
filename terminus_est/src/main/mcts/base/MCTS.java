@@ -10,13 +10,13 @@ public class MCTS {
     public NodeMCTS root;
     public ISelectionPolicy selectionPolicy;
     public ISimulationPolicy simulationPolicy;
-    public IResultGenerator resultgenerator;
+    public IResultGenerator resultGenerator;
 
     public MCTS(int maxIterations, ISelectionPolicy selectionPolicy, ISimulationPolicy simulationPolicy, IResultGenerator resultGenerator) {
         this.maxIterations = maxIterations;
         this.selectionPolicy = selectionPolicy;
         this.simulationPolicy = simulationPolicy;
-        this.resultgenerator = resultGenerator;
+        this.resultGenerator = resultGenerator;
     }
 
     /**
@@ -24,7 +24,7 @@ public class MCTS {
      * During the expansion stage, all states are simulated from once, to get an initial result.
      */
     public void BuildTree(State state) {
-        NodeMCTS.resultGenerator = resultgenerator;
+        NodeMCTS.resultGenerator = resultGenerator;
         root = new NodeMCTS(state, null, null);
 
         int iteration = 0;
