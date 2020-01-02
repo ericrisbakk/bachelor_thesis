@@ -11,9 +11,9 @@ public class TerminusEstMCTS {
     public static int simulations = 30;
 
     public NodeMCTS GetSearchTree(String file) {
-        SelectUCT select = new SelectUCT();
+        SelectUCT_SP select = new SelectUCT_SP();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
-        ResultUCTGenerator gen = new ResultUCTGenerator();
+        ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
         SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
         MCTS mcts = new MCTS(iterations, select, sim, gen);
 
@@ -118,10 +118,10 @@ public class TerminusEstMCTS {
     }
 
     public static void main(String[] args) {
-        TerminusEstSolution solution = AttemptSolution(args[0]);
-        System.out.println(solution.toString());
+        // TerminusEstSolution solution = AttemptSolution(args[0]);
+        // System.out.println(solution.toString());
 
-        // RunSingleInstance(args[0]);
+        RunSingleInstance(args[0]);
     }
 
     
