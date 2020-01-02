@@ -180,7 +180,7 @@ public class NodeMCTS {
      */
     public String GetNewick() {
         if (leaf)
-            return lastAction.toString() + "  " + ((ResultUCT) result).wins + ".." + ((ResultUCT) result).simulations;
+            return lastAction.toString() + "  " + result.ToString();
         String s = "(";
         boolean first = true;
         for (int i = 0; i < children.length; ++i) {
@@ -191,7 +191,7 @@ public class NodeMCTS {
         }
 
         s += ")" + (parent == null ? "Root" : lastAction.toString());
-        s += "  " + ((ResultUCT) result).wins + ".." + ((ResultUCT) result).simulations;
+        s += "  " + result.ToString();
         if (parent == null) s += ";";
         return s;
     }
