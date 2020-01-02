@@ -11,6 +11,8 @@ import java.util.Comparator;
 
 public class TerminusEstMCTS {
 
+    public static boolean VERBOSE = true;
+
     public static int iterations = 100000;
     public static int simulations = 30;
 
@@ -33,13 +35,14 @@ public class TerminusEstMCTS {
         return mcts.root;
     }
 
-    public TerminusEstSolution GetExactSolution(String file) {
+    public static TerminusEstSolution GetExactSolution(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
         double timeStart = System.currentTimeMillis();
 
         NodeMCTS searchTree = tem.GetSearchTree(file);
         double timeEndSearchTree = System.currentTimeMillis();
+        if (VERBOSE) System.out.println("Search tree constructed.");
 
         NodeMCTS bestFound = GetBestFound(searchTree);
 
@@ -50,7 +53,8 @@ public class TerminusEstMCTS {
         int upperBound;
         if (bestFound == null) {
             // No solution found at all.
-            upperBound = te4.seenLeaves;
+            // (Increase by one to ensure we also check for the case in which we have do delete *all* leaves).
+            upperBound = te4.seenLeaves + 1;
         }
         else {
             // Best solution in tree is upper bound.
@@ -58,15 +62,31 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
-        // Use upper depth+1
         NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound);
+        if (VERBOSE) System.out.println("Nodes to search from collected.");
 
-        for (int i = 0; i < searchNodes.length; ++i) {
+        // i = the current depth we're trying to compute at
+        for (int i = 0; i < upperBound; ++i) {
+            if (VERBOSE) System.out.println("Attempting hyb = " + i);
+            // j = All search nodes at depth i which we wish to investigate.
+            for (int j = 0; j < searchNodes.length; ++j) {
+                for (int k = 0; k < searchNodes[j].length; ++k) {
+                    TerminusEstSolution solution = te4.ComputePartialSolution(searchNodes[j][k].depth, i);
 
-            for (int j = 0; j < searchNodes[i].length; ++j) {
-                te4.ComputePartialSolution(i,)
+                    if (solution != null) {
+                        if (VERBOSE) {
+                            System.out.println("A solution was found!");
+                            System.out.println(solution.toString());
+                            System.out.println("At level: " + i);
+                            System.out.println("Node:\n" + searchNodes[j][k].GetNewick());
+                        }
+
+                        break;
+                    }
+                }
             }
         }
+        return null;
     }
 
     private static class SortByVisits implements Comparator<NodeMCTS> {
@@ -83,6 +103,12 @@ public class TerminusEstMCTS {
         }
     }
 
+    /**
+     * Method to get all leaves that are less than max-depth.
+     * @param root
+     * @param maxDepth
+     * @return
+     */
     public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth) {
         ArrayList<NodeMCTS> n = new ArrayList<>();
         SortByVisits comp = new SortByVisits();
@@ -114,12 +140,11 @@ public class TerminusEstMCTS {
      */
     private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp, int maxDepth, int[] depthCount) {
         if (node.IsTerminal()) {
-            System.out.println("Terminal hit!");
             return;
         }
 
         // Only add nodes below the maxDepth
-        if (node.depth > maxDepth)
+        if (node.depth >= maxDepth)
             return;
 
         // Only add if leaf and under max depth.
@@ -134,7 +159,7 @@ public class TerminusEstMCTS {
         Arrays.sort(children, comp);
 
         for (int i = 0; i < children.length; ++i) {
-            DFSWithSort(children[i], list, comp, maxDepth);
+            DFSWithSort(children[i], list, comp, maxDepth, depthCount);
         }
     }
 
@@ -231,7 +256,9 @@ public class TerminusEstMCTS {
         // TerminusEstSolution solution = AttemptSolution(args[0]);
         // System.out.println(solution.toString());
 
-        RunSingleInstance(args[0]);
+        // RunSingleInstance(args[0]);
+
+        GetExactSolution(args[0]);
     }
 
     
