@@ -23,5 +23,16 @@ public class ResultUCT_SP implements IResult {
         simulations += 1;
     }
 
+    @Override
+    public String ToString() {
+        if (simulations > 0) {
+            double ratio = (double) score / (double) simulations;
+            return String.valueOf((float) ratio);
+        }
+        else {
+            return "X";
+        }
+    }
+
 
 }

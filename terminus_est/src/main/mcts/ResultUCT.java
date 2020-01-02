@@ -25,4 +25,17 @@ public class ResultUCT implements IResult {
         wins += score;
         simulations += 1;
     }
+
+    @Override
+    public String ToString() {
+        if (simulations > 0) {
+            double ratio = (double) wins / (double) simulations;
+            return  String.valueOf((float) ratio);
+        }
+        else {
+            return "X";
+        }
+    }
+
+
 }
