@@ -120,6 +120,8 @@ public class TerminusEstMCTS {
     public static void main(String[] args) {
         TerminusEstSolution solution = AttemptSolution(args[0]);
         System.out.println(solution.toString());
+
+        // RunSingleInstance(args[0]);
     }
 
     
