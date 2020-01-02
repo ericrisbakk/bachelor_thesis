@@ -12,7 +12,8 @@ public class TerminusEstMCTS {
 
     public NodeMCTS GetSearchTree(String file) {
         SelectUCT_SP select = new SelectUCT_SP();
-        HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
+        SelectUCT_SP.param_d = 50;
+        HeuristicNegativeDepth  heuristic = new HeuristicNegativeDepth();
         ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
         SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
         MCTS mcts = new MCTS(iterations, select, sim, gen);
