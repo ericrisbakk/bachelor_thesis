@@ -13,8 +13,8 @@ public class TerminusEstMCTS {
     public NodeMCTS GetSearchTree(String file) {
         SelectUCT select = new SelectUCT();
         HeuristicAvgDepth heuristic = new HeuristicAvgDepth();
-        SimulateRandom sim = new SimulateRandom(simulations, heuristic);
         ResultUCTGenerator gen = new ResultUCTGenerator();
+        SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
         MCTS mcts = new MCTS(iterations, select, sim, gen);
 
         TerminusEstV4 te4 = new TerminusEstV4(file);
