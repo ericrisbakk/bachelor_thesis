@@ -10,4 +10,10 @@ public interface IResult {
      * @param newResult newResult from which values will be carried over to this.
      */
     void Update(IResult newResult);
+
+    /**
+     * Update with a single result.
+     * @param score
+     */
+    void Update(double score);
 }

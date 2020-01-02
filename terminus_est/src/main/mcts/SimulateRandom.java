@@ -8,16 +8,18 @@ public class SimulateRandom implements ISimulationPolicy {
     Random r = new Random();
     IHeuristic heuristicP1Wins;
     int simulations;
+    IResultGenerator resultGenerator;
 
-    public SimulateRandom(int simulations, IHeuristic heuristicP1Wins) {
+    public SimulateRandom(int simulations, IHeuristic heuristicP1Wins, IResultGenerator resultGenerator) {
         this.heuristicP1Wins = heuristicP1Wins;
         this.simulations = simulations;
+        this.resultGenerator = resultGenerator;
     }
 
     @Override
     public IResult Simulate(NodeMCTS node) {
         State s = ((NodeMCTS) node).ConstructNodeState();
-        ResultUCT r = new ResultUCT();
+        IResult r = resultGenerator.Generate();
 //        System.out.println("\n--------------------------------------------");
 //        System.out.println("------------- START SIMULATION -------------");
 //        System.out.println("--------------------------------------------\n");
@@ -31,8 +33,8 @@ public class SimulateRandom implements ISimulationPolicy {
             }
 
             double val = heuristicP1Wins.Calculate(sim);
-            r.wins += val;
-            r.simulations += 1;
+
+            r.Update(val);
         }
 
         return r;
