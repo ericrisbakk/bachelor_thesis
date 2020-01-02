@@ -4,6 +4,7 @@ import main.mcts.ResultUCTGenerator;
 import main.mcts.SelectUCT;
 import main.mcts.SimulateRandom;
 import main.mcts.base.Action;
+import main.mcts.base.IResultGenerator;
 import main.mcts.base.MCTS;
 import java.util.Scanner;  // Import the Scanner class
 
@@ -21,7 +22,7 @@ public class RunTicTacToeMCTS {
         TicTacToePlayer1Wins h = new TicTacToePlayer1Wins();
         TicTacToeState game = new TicTacToeState();
         ResultUCTGenerator gen = new ResultUCTGenerator();
-        MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(30, h), gen);
+        MCTS mcts = new MCTS(100, new SelectUCT(), new SimulateRandom(30, h, gen), gen);
 
         System.out.println("Tic Tac Toe.");
         System.out.println("Start!.");
