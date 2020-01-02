@@ -16,4 +16,6 @@ public interface IResult {
      * @param score
      */
     void Update(double score);
+
+    String ToString();
 }
