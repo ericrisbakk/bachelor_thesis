@@ -26,8 +26,9 @@ public class ResultUCT_SP implements IResult {
     @Override
     public String ToString() {
         if (simulations > 0) {
+            // (The minus sign is a quick fix so the eNewick doesn't have it).
         double avg = (double) -score / simulations;
-        return String.valueOf(avg) + ".." + String.valueOf(simulations);
+        return String.valueOf(IResult.GetRoundedScore(avg, 5)) + ".." + String.valueOf(simulations);
         }
         else {
             return "X.." + String.valueOf(simulations);

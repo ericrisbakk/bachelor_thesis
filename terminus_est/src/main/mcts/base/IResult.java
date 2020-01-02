@@ -18,4 +18,9 @@ public interface IResult {
     void Update(double score);
 
     String ToString();
+
+    static double GetRoundedScore(double score, int decimals) {
+        double dec = Math.pow(10, decimals);
+        return Math.floor(score * dec) / (double) dec;
+    }
 }
