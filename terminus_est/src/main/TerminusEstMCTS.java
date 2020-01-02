@@ -5,14 +5,18 @@ import main.mcts.*;
 import main.mcts.base.Action;
 import main.mcts.base.MCTS;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+
 public class TerminusEstMCTS {
 
-    public static int iterations = 10000;
+    public static int iterations = 100000;
     public static int simulations = 30;
 
     public NodeMCTS GetSearchTree(String file) {
         SelectUCT_SP select = new SelectUCT_SP();
-        SelectUCT_SP.param_d = 50;
+        SelectUCT_SP.param_d = 20000;
         HeuristicNegativeDepth  heuristic = new HeuristicNegativeDepth();
         ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
         SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
@@ -27,6 +31,85 @@ public class TerminusEstMCTS {
         mcts.BuildTree(state);
 
         return mcts.root;
+    }
+
+    public TerminusEstSolution GetExactSolution(String file) {
+        TerminusEstMCTS tem = new TerminusEstMCTS();
+
+        double timeStart = System.currentTimeMillis();
+
+        NodeMCTS searchTree = tem.GetSearchTree(file);
+        double timeEndSearchTree = System.currentTimeMillis();
+
+        NodeMCTS bestFound = GetBestFound(searchTree);
+
+        double seconds =  ((double)(timeEndSearchTree - timeStart))/1000.0;
+
+        TerminusEstV4 te4 = new TerminusEstV4(file);
+
+        int upperBound;
+        if (bestFound == null) {
+            // No solution found at all.
+            upperBound = te4.seenLeaves;
+        }
+        else {
+            // Best solution in tree is upper bound.
+            upperBound = bestFound.depth;
+        }
+
+        // Find all candidate tree nodes to search from.
+
+        // Search from lowest to highest.
+    }
+
+    private static class SortByVisits implements Comparator<NodeMCTS> {
+        @Override
+        public int compare(NodeMCTS o1, NodeMCTS o2) {
+            if ( ((ResultUCT_SP) o1.GetResult()).simulations > ((ResultUCT_SP) o2.GetResult()).simulations ) {
+                return 1;
+            }
+            else if ( ((ResultUCT_SP) o1.GetResult()).simulations < ((ResultUCT_SP) o2.GetResult()).simulations ) {
+                return -1;
+            }
+
+            return 0;
+        }
+    }
+
+    public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth) {
+        ArrayList<NodeMCTS> n = new ArrayList<>();
+        SortByVisits comp = new SortByVisits();
+    }
+
+    /**
+     * Adds all leaf nodes, traversing in a DFS manner, visiting according to order imposed by the given comparator.
+     * @param node
+     * @param list
+     * @param comp
+     */
+    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp, int maxDepth) {
+        if (node.IsTerminal()) {
+            System.out.println("ERROR: Node is terminal, but no terminal node should have been encountered.");
+            return;
+        }
+
+        // Only add nodes below the maxDepth
+        if (node.depth >= maxDepth)
+            return;
+
+        // Only add if leaf and under max depth.
+        if (node.IsLeaf()) {
+            list.add(node);
+            return;
+        }
+
+        NodeMCTS[] children = new NodeMCTS[node.children.length];
+        System.arraycopy(node.children, 0, children, 0, node.children.length);
+        Arrays.sort(children, comp);
+
+        for (int i = 0; i < children.length; ++i) {
+            DFSWithSort(children[i], list, comp, maxDepth);
+        }
     }
 
     public static TerminusEstSolution AttemptSolution(String file) {
