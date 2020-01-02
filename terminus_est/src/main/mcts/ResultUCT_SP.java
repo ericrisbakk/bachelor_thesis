@@ -1,4 +1,4 @@
 package main.mcts;
 
-public class ResultSP_UCT {
+public class ResultUCT_SP extends ResultUCT {
 }

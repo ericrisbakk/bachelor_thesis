@@ -2,7 +2,7 @@ package main.mcts;
 
 import main.mcts.base.Action;
 
-public class SelectSP_UCT extends SelectUCT {
+public class SelectUCT_SP extends SelectUCT {
 
     @Override
     public double GetUCT(NodeMCTS node) {
