@@ -130,66 +130,7 @@ public class TerminusEstV4 {
 
         if( ST.size() == 1 )
         {
-            if(VERBOSE) System.out.println("Compatibility detected.");
-
-            long timeEnd = System.currentTimeMillis();
-            double seconds =  ((double)(timeEnd - timeNow))/1000.0;
-
-            if (VERBOSE) {
-                System.out.println("// -----------------------------");
-                System.out.println("// HYBRIDIZATION NUMBER = " + depth);
-                System.out.println("// -----------------------------");
-                if (BUILDNETWORK == false) System.out.println("// Real-time elapsed in seconds: " + seconds);
-            }
-
-            if(BUILDNETWORK == false) System.exit(0);
-
-            Tree.collapseMaxSTsets(t1,t2,ST);
-
-            Network net = null;
-
-            if(t1.isLeaf())
-            {
-                if(BUILD_VERBOSE) System.out.println("Will output MAAF components in hanging-back order (first is the base tree):" );
-                String s[] = getTaxaFromString(t1.name);
-                // for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
-                // System.out.println();
-
-                Tree stripT1 = Tree.restrict(origT1, s);
-                Tree stripT2 = Tree.restrict(origT2, s);
-
-                if(BUILD_VERBOSE)
-                {
-                    System.out.print("T1: ");
-                    stripT1.dump();	System.out.println(";");
-
-                    System.out.print("T2: ");
-                    stripT2.dump(); System.out.println(";");
-
-                    System.out.print("Common binary refinement: ");
-                }
-
-                Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
-
-                if(BUILD_VERBOSE)
-                {
-                    commonrf.dump(); System.out.println(";");
-                }
-
-                Tree fakeRoot = new Tree();
-                fakeRoot.addChild(commonrf);
-                commonrf.netParent[0] = fakeRoot;
-                commonrf.netParent[1] = null;
-
-                net = new Network(fakeRoot);
-            }
-            else
-            {
-                System.out.println("ERROR! Compatible ST-set not a leaf.");
-                System.exit(0);
-            }
-
-            return net;
+            return ConstructInitialNetwork(ST, t1, t2, origT1, origT2, depth);
         }
 
         //! We reach this point if the two trees are not compatible.
@@ -682,201 +623,269 @@ public class TerminusEstV4 {
 
             if( net != null )
             {
-                String s[] = getTaxaFromString(del.name);
-                //! for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
-                //! System.out.println();
-
-                Tree stripT1 = Tree.restrict(origT1, s);
-                Tree stripT2 = Tree.restrict(origT2, s);
-
-                if(BUILD_VERBOSE)
-                {
-                    System.out.print("T1: ");
-                    stripT1.dump();	System.out.println(";");
-
-                    System.out.print("T2: ");
-                    stripT2.dump(); System.out.println(";");
-
-                    System.out.print("Common binary refinement: ");
-                }
-
-                Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
-
-                if(BUILD_VERBOSE)
-                {
-                    commonrf.dump(); System.out.println(";");
-                }
-
-                //! graft him onto the old network...
-                //! first we need to have the union of the two taxa sets...
-
-                Hashtable old = net.getTaxa();
-
-                Hashtable newTaxa = new Hashtable();
-
-                for(int y=0; y<s.length; y++)
-                {
-                    newTaxa.put(s[y],s[y]);
-                }
-                Enumeration e = old.keys();
-                while( e.hasMoreElements() )
-                {
-                    String k = (String) e.nextElement();
-                    newTaxa.put(k,k);
-                }
-
-                //! newTaxa now contains the union of the network taxa and the new guy to be grafted on...
-                //! -----------------------------
-
-                Tree locate[] = new Tree[2];
-
-                locate[0] = Tree.restrict(origT1, newTaxa);
-                locate[1] = Tree.restrict(origT2, newTaxa);
-
-                int t = newTaxa.size();
-
-                Hashtable zoekClus[] = new Hashtable[2];
-
-                for(int loop=0; loop<2; loop++)
-                {
-                    int counter[] = new int[1];
-                    counter[0] = 0;
-
-                    //! Build the 0 -> n-1 numbering, build the vertex clusters,
-                    //! get the leaf numbers of the to-graft taxa, put them in a search vector...
-
-                    locate[loop].assignLeafNumbersBuildClusters(t, counter);
-
-                    Hashtable l = locate[loop].getLeafToTreeMapping();
-
-                    boolean zoek[] = new boolean[t];
-
-                    for(int scan=0; scan<s.length; scan++)
-                    {
-                        Tree node = (Tree) l.get(s[scan]);
-                        zoek[ node.num ] = true;
-                    }
-
-                    //! Find an arbitrary starting point in the subtree we are grafting on
-                    Tree bottom = locate[loop].findLeaf(s[0]);
-
-                    //! Work up the tree until we have a vertex cluster that is a (not nec. strict) superset of 's'
-                    while( !Tree.superset(bottom.cluster,zoek) ) bottom = bottom.parent;
-
-                    //! Now, we've found the LCA...what now....
-                    Tree lca = bottom;
-
-                    //! if the lca cluster is exactly equal to the zoek cluster, go one higher.
-                    if( Tree.equalTo(lca.cluster,zoek) )
-                    {
-                        lca = lca.parent;
-                    }
-
-                    Hashtable difference = new Hashtable();
-
-                    Hashtable donotWant = new Hashtable();
-                    for(int x=0; x<s.length;x++ ) donotWant.put(s[x],s[x]);
-
-                    lca.getDifference( donotWant, difference );
-
-                    zoekClus[loop] = difference;	//! This is the cluster we need to look for in the network
-
-                }
-
-                //! Now we need to find out the re-grafting points
-
-
-
-                net.buildLeftRightClusters();
-
-                //! Ok, so now the pre-graft network has the vertex clusters for the two trees inside its nodes.
-
-                Tree graftAbove[] = new Tree[2];
-
-                for(int tree=0; tree<2; tree++)
-                {
-                    boolean kijkClus[] = new boolean[net.currentTaxa];
-
-                    Enumeration k = zoekClus[tree].keys();
-
-                    String nom = null;
-
-                    while(k.hasMoreElements())
-                    {
-                        nom = (String) k.nextElement();
-                        Tree netL = net.getNetworkLeaf(nom);
-                        int code = netL.num;
-                        kijkClus[code] = true;
-                    }
-
-                    //! So kijkClus has now got the correct numbering for the network
-                    //! The last 'nom' is fine...
-
-                    Tree base = net.getNetworkLeaf(nom);
-
-                    while( !Tree.superset(base.netClus[tree], kijkClus) )
-                    {
-                        if( base.netParent[1] == null )
-                        {
-                            //! split node
-                            base = base.netParent[0];
-                        }
-                        else
-                        {
-                            //! reticulation
-                            base = base.netParent[tree];
-                        }
-                    }
-                    graftAbove[tree] = base;
-                }
-
-                //! System.out.println("About to graft component onto network...");
-
-                if( graftAbove[0] == graftAbove[1] )
-                {
-                    System.out.println("CATASTROPHIC ERROR: It should never be necessary to graft two retic edges on the same edge.");
-                    System.exit(0);
-                }
-
-                if( (graftAbove[0].netParent[1] != null) || (graftAbove[1].netParent[1] != null) )
-                {
-                    System.out.println("CATASTROPHIC ERROR: It should never be necessary to graft on a reticulation edge.");
-                    System.exit(0);
-                }
-
-                Tree retic = new Tree();
-                retic.addChild( commonrf );	//! single child
-                commonrf.netParent[0] = retic;
-                commonrf.netParent[1] = null;
-
-                for(int graft=0;graft<2; graft++)
-                {
-                    Tree target = graftAbove[graft];
-
-                    Tree inbetween = new Tree();
-                    inbetween.addChild(target);
-                    inbetween.addChild(retic);
-                    retic.netParent[graft] = inbetween;
-
-                    inbetween.netParent[0] = target.netParent[0];
-                    inbetween.netParent[1] = null;
-
-                    target.netParent[0] = inbetween;
-                    target.netParent[1] = null;
-
-                    inbetween.netParent[0].deleteChild(target);
-                    inbetween.netParent[0].addChild(inbetween);
-                }
-
-                net.resetNetwork();
-
-                return net;
+                return GrowNetwork(del, net, origT1, origT2);
             }
         }
 
         //! PUT IT IN THE HASHTABLE
         if(USEHASH) lookup.put( myBitVec, intObjects[hyb] );
         return null;
+    }
+
+    public static Network GrowNetwork(Tree del, Network net, Tree origT1, Tree origT2) {
+        String s[] = getTaxaFromString(del.name);
+        //! for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
+        //! System.out.println();
+
+        Tree stripT1 = Tree.restrict(origT1, s);
+        Tree stripT2 = Tree.restrict(origT2, s);
+
+        if(BUILD_VERBOSE)
+        {
+            System.out.print("T1: ");
+            stripT1.dump();	System.out.println(";");
+
+            System.out.print("T2: ");
+            stripT2.dump(); System.out.println(";");
+
+            System.out.print("Common binary refinement: ");
+        }
+
+        Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
+
+        if(BUILD_VERBOSE)
+        {
+            commonrf.dump(); System.out.println(";");
+        }
+
+        //! graft him onto the old network...
+        //! first we need to have the union of the two taxa sets...
+
+        Hashtable old = net.getTaxa();
+
+        Hashtable newTaxa = new Hashtable();
+
+        for(int y=0; y<s.length; y++)
+        {
+            newTaxa.put(s[y],s[y]);
+        }
+        Enumeration e = old.keys();
+        while( e.hasMoreElements() )
+        {
+            String k = (String) e.nextElement();
+            newTaxa.put(k,k);
+        }
+
+        //! newTaxa now contains the union of the network taxa and the new guy to be grafted on...
+        //! -----------------------------
+
+        Tree locate[] = new Tree[2];
+
+        locate[0] = Tree.restrict(origT1, newTaxa);
+        locate[1] = Tree.restrict(origT2, newTaxa);
+
+        int t = newTaxa.size();
+
+        Hashtable zoekClus[] = new Hashtable[2];
+
+        for(int loop=0; loop<2; loop++)
+        {
+            int counter[] = new int[1];
+            counter[0] = 0;
+
+            //! Build the 0 -> n-1 numbering, build the vertex clusters,
+            //! get the leaf numbers of the to-graft taxa, put them in a search vector...
+
+            locate[loop].assignLeafNumbersBuildClusters(t, counter);
+
+            Hashtable l = locate[loop].getLeafToTreeMapping();
+
+            boolean zoek[] = new boolean[t];
+
+            for(int scan=0; scan<s.length; scan++)
+            {
+                Tree node = (Tree) l.get(s[scan]);
+                zoek[ node.num ] = true;
+            }
+
+            //! Find an arbitrary starting point in the subtree we are grafting on
+            Tree bottom = locate[loop].findLeaf(s[0]);
+
+            //! Work up the tree until we have a vertex cluster that is a (not nec. strict) superset of 's'
+            while( !Tree.superset(bottom.cluster,zoek) ) bottom = bottom.parent;
+
+            //! Now, we've found the LCA...what now....
+            Tree lca = bottom;
+
+            //! if the lca cluster is exactly equal to the zoek cluster, go one higher.
+            if( Tree.equalTo(lca.cluster,zoek) )
+            {
+                lca = lca.parent;
+            }
+
+            Hashtable difference = new Hashtable();
+
+            Hashtable donotWant = new Hashtable();
+            for(int x=0; x<s.length;x++ ) donotWant.put(s[x],s[x]);
+
+            lca.getDifference( donotWant, difference );
+
+            zoekClus[loop] = difference;	//! This is the cluster we need to look for in the network
+
+        }
+
+        //! Now we need to find out the re-grafting points
+
+
+
+        net.buildLeftRightClusters();
+
+        //! Ok, so now the pre-graft network has the vertex clusters for the two trees inside its nodes.
+
+        Tree graftAbove[] = new Tree[2];
+
+        for(int tree=0; tree<2; tree++)
+        {
+            boolean kijkClus[] = new boolean[net.currentTaxa];
+
+            Enumeration k = zoekClus[tree].keys();
+
+            String nom = null;
+
+            while(k.hasMoreElements())
+            {
+                nom = (String) k.nextElement();
+                Tree netL = net.getNetworkLeaf(nom);
+                int code = netL.num;
+                kijkClus[code] = true;
+            }
+
+            //! So kijkClus has now got the correct numbering for the network
+            //! The last 'nom' is fine...
+
+            Tree base = net.getNetworkLeaf(nom);
+
+            while( !Tree.superset(base.netClus[tree], kijkClus) )
+            {
+                if( base.netParent[1] == null )
+                {
+                    //! split node
+                    base = base.netParent[0];
+                }
+                else
+                {
+                    //! reticulation
+                    base = base.netParent[tree];
+                }
+            }
+            graftAbove[tree] = base;
+        }
+
+        //! System.out.println("About to graft component onto network...");
+
+        if( graftAbove[0] == graftAbove[1] )
+        {
+            System.out.println("CATASTROPHIC ERROR: It should never be necessary to graft two retic edges on the same edge.");
+            System.exit(0);
+        }
+
+        if( (graftAbove[0].netParent[1] != null) || (graftAbove[1].netParent[1] != null) )
+        {
+            System.out.println("CATASTROPHIC ERROR: It should never be necessary to graft on a reticulation edge.");
+            System.exit(0);
+        }
+
+        Tree retic = new Tree();
+        retic.addChild( commonrf );	//! single child
+        commonrf.netParent[0] = retic;
+        commonrf.netParent[1] = null;
+
+        for(int graft=0;graft<2; graft++)
+        {
+            Tree target = graftAbove[graft];
+
+            Tree inbetween = new Tree();
+            inbetween.addChild(target);
+            inbetween.addChild(retic);
+            retic.netParent[graft] = inbetween;
+
+            inbetween.netParent[0] = target.netParent[0];
+            inbetween.netParent[1] = null;
+
+            target.netParent[0] = inbetween;
+            target.netParent[1] = null;
+
+            inbetween.netParent[0].deleteChild(target);
+            inbetween.netParent[0].addChild(inbetween);
+        }
+
+        net.resetNetwork();
+
+        return net;
+    }
+
+    // Taes in computed MaxSTSet, and builds tree.
+    public static Network ConstructInitialNetwork(Vector ST, Tree t1, Tree t2, Tree origT1, Tree origT2, int depth) {
+        if(VERBOSE) System.out.println("Compatibility detected.");
+
+        long timeEnd = System.currentTimeMillis();
+        double seconds =  ((double)(timeEnd - timeNow))/1000.0;
+
+        if (VERBOSE) {
+            System.out.println("// -----------------------------");
+            System.out.println("// HYBRIDIZATION NUMBER = " + depth);
+            System.out.println("// -----------------------------");
+            if (BUILDNETWORK == false) System.out.println("// Real-time elapsed in seconds: " + seconds);
+        }
+
+        if(BUILDNETWORK == false) System.exit(0);
+
+        Tree.collapseMaxSTsets(t1,t2,ST);
+
+        Network net = null;
+
+        if(t1.isLeaf())
+        {
+            if(BUILD_VERBOSE) System.out.println("Will output MAAF components in hanging-back order (first is the base tree):" );
+            String s[] = getTaxaFromString(t1.name);
+            // for(int p=0; p<s.length; p++) System.out.print("["+s[p]+"] ");
+            // System.out.println();
+
+            Tree stripT1 = Tree.restrict(origT1, s);
+            Tree stripT2 = Tree.restrict(origT2, s);
+
+            if(BUILD_VERBOSE)
+            {
+                System.out.print("T1: ");
+                stripT1.dump();	System.out.println(";");
+
+                System.out.print("T2: ");
+                stripT2.dump(); System.out.println(";");
+
+                System.out.print("Common binary refinement: ");
+            }
+
+            Tree commonrf = Tree.commonRefinement(stripT1, stripT2);
+
+            if(BUILD_VERBOSE)
+            {
+                commonrf.dump(); System.out.println(";");
+            }
+
+            Tree fakeRoot = new Tree();
+            fakeRoot.addChild(commonrf);
+            commonrf.netParent[0] = fakeRoot;
+            commonrf.netParent[1] = null;
+
+            net = new Network(fakeRoot);
+        }
+        else
+        {
+            System.out.println("ERROR! Compatible ST-set not a leaf.");
+            System.exit(0);
+        }
+
+        return net;
     }
 
     /**
@@ -1134,10 +1143,10 @@ public class TerminusEstV4 {
         return null;
     }
 
-    public TerminusEstSolution ComputePartialSolution(int depth, int target) {
+    public TerminusEstSolution ComputePartialSolution(Tree t1Partial, Tree t2Partial, int depth, int target) {
             // System.out.println("Trying hybridization number: " + l);
-            Tree T1 = t1.copy(null,null);
-            Tree T2 = t2.copy(null,null);
+            Tree T1 = t1Partial.copy(null,null);
+            Tree T2 = t2Partial.copy(null,null);
 
             Network net = hybNumAtMost( T1, T2, target, t1, t2, depth );
             if( net != null )
