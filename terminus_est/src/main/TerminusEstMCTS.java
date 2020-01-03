@@ -66,7 +66,7 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound);
+        NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound, te4);
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
             System.out.println("Distribution: ");
@@ -179,7 +179,7 @@ public class TerminusEstMCTS {
      * @param maxDepth
      * @return
      */
-    public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth) {
+    public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth, TerminusEstV4 te4) {
         ArrayList<NodeMCTS> n = new ArrayList<>();
         SortByVisits comp = new SortByVisits();
         int[] depthCount = new int[maxDepth];
@@ -187,7 +187,14 @@ public class TerminusEstMCTS {
         // Let's keep track of only unique nodes!
         Hashtable<String, NodeMCTS> uniques = new Hashtable<>();
 
-        DFSWithSort(root, n, comp, maxDepth, depthCount, uniques);
+        DFSWithSort(root, n, comp, maxDepth, depthCount, uniques, te4);
+
+        if (VERBOSE) {
+            System.out.println("Candidate leaves collected. Information: ");
+            System.out.println("Total traversed: " + LeafCollection_NodesTraversed);
+            System.out.println("Duplicates detected " + LeafCollection_Duplicates);
+            System.out.println("Leaves added: " + n.size());
+        }
 
         // Create array container.
         NodeMCTS[][] nodeByDepth = new NodeMCTS[maxDepth][];
@@ -213,7 +220,8 @@ public class TerminusEstMCTS {
      * @param comp
      */
     private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp,
-                                    int maxDepth, int[] depthCount, Hashtable<String, NodeMCTS> uniques) {
+                                    int maxDepth, int[] depthCount, Hashtable<String, NodeMCTS> uniques, TerminusEstV4 te4) {
+        LeafCollection_NodesTraversed += 1;
         if (node.IsTerminal()) {
             return;
         }
@@ -224,9 +232,12 @@ public class TerminusEstMCTS {
 
         // Only add if leaf and under max depth.
         if (node.IsLeaf()) {
-            if (IsUnique(uniques, node)) {
+            if (IsUnique(uniques, node, te4)) {
                 list.add(node);
                 depthCount[node.depth] += 1;
+            }
+            else {
+                LeafCollection_Duplicates += 1;
             }
 
             return;
@@ -237,12 +248,18 @@ public class TerminusEstMCTS {
         Arrays.sort(children, comp);
 
         for (int i = 0; i < children.length; ++i) {
-            DFSWithSort(children[i], list, comp, maxDepth, depthCount, uniques);
+            DFSWithSort(children[i], list, comp, maxDepth, depthCount, uniques, te4);
         }
     }
 
-    public static boolean IsUnique(Hashtable<String, NodeMCTS> uniques, NodeMCTS n) {
+    public static boolean IsUnique(Hashtable<String, NodeMCTS> uniques, NodeMCTS n, TerminusEstV4 te4) {
+        TerminusEstState s = (TerminusEstState) n.ConstructNodeState();
+        String bitString = te4.GetBitString(s.t1, s.t2);
+        if (uniques.containsKey(bitString)) {
+            return false;
+        }
 
+        uniques.put(bitString, n);
         return true;
     }
 
