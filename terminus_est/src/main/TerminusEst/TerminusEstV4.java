@@ -888,6 +888,77 @@ public class TerminusEstV4 {
         return net;
     }
 
+    public String GetBitString(Tree t1, Tree t2) {
+        Vector ST = Tree.computeMaxSTsets(t1, t2);
+        return GetBitString(ST);
+    }
+
+    public String GetBitString(Vector ST) {
+
+        StringBuffer allTaxa = new StringBuffer();
+
+        for(int x=0;x<ST.size();x++)
+        {
+            STset s = (STset) ST.elementAt(x);
+            int count[] = new int[1];
+            String t = s.getTaxaString(count);
+            allTaxa.append(t);
+            //! System.out.println("max ST set "+x+" contains taxa "+t);
+            //! System.out.println(count[0]);
+        }
+
+        StringBuffer stripped = new StringBuffer();
+        String back = allTaxa.toString();
+        String forth = back.trim();
+        allTaxa = new StringBuffer( forth );
+
+        for(int x=0; x<allTaxa.length(); x++ )
+        {
+            char c = allTaxa.charAt(x);
+
+            if( (c == '{') || (c=='}') ) continue;
+
+            if( c == ' ' )
+            {
+                //! Only add a character to the end of stripped if there isn't one there already...
+                if( stripped.length() < 1 ) continue;
+                if( stripped.charAt( stripped.length() - 1 ) == ' ' ) continue;
+            }
+
+            stripped.append(c);
+        }
+
+        String taxaList[] = stripped.toString().split(" ");
+
+
+        if(VERBOSE)
+        {
+            System.out.println(" ---- TAXA AT THIS ITERATION --- ");
+            for(int x=0; x<taxaList.length; x++)
+            {
+                System.out.println(taxaList[x] + " = " + getLeafNumber(taxaList[x]));
+            }
+        }
+
+        //! This is going to become a bit vector denoting which taxa we have.
+        boolean got[] = new boolean[ seenLeaves + 1 ];
+
+        for(int x=0; x<taxaList.length; x++)
+        {
+            int tick = getLeafNumber(taxaList[x]);
+            got[tick] = true;
+        }
+
+        StringBuffer bitVec = new StringBuffer();
+        for(int x=1; x<=seenLeaves; x++ )
+        {
+            if( got[x] ) bitVec.append('1');
+            else bitVec.append('0');
+        }
+
+        return bitVec.toString();
+    }
+
     /**
      * Given a sequence of deletions (represented by an array of strings that are the names of the taxa),
      * the method performs these deletions to check whether they correctly lead to a valid end-state..
