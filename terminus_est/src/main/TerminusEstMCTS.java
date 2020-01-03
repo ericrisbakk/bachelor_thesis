@@ -94,10 +94,20 @@ public class TerminusEstMCTS {
             }
         } // End for-loop
 
-        Network initialNetwork = null;
+        // Construct the network.
+        TerminusEstState orig = (TerminusEstState) bestFound.root;
+        Network currentNetwork = null;
+        NodeMCTS nextNode = null;
         if (solution != null) {
-            // Initial tree has been  constructed.
-            initialNetwork = solution.root;
+            // Initial network already has been  constructed.
+            currentNetwork = solution.root;
+
+            if (solutionNode.IsRoot()) {
+                System.out.println("Solution node was root, somewhow.");
+                return new TerminusEstSolution(currentNetwork, 0, 0);
+            }
+
+            nextNode = solutionNode;
         }
         else if (bestFound != null) {
             // Construct using bestFound.
@@ -108,12 +118,28 @@ public class TerminusEstMCTS {
                 System.out.println("ERROR: best found trees not compatible.");
                 System.exit(0);
             }
-            initialNetwork = te4.ConstructInitialNetwork()
+
+            currentNetwork = te4.ConstructInitialNetwork(ST, finalState.t1, finalState.t2, orig.t1, orig.t2, finalState.depth);
+
+            if (bestFound.IsRoot()) { // Small subcase.
+                System.out.println("BestFound was root.");
+                return new TerminusEstSolution(currentNetwork, 0, 0);
+            }
+
+            nextNode = bestFound;
         }
 
-        // If we get here, we found no solution.
-        if (VERBOSE) System.out.println("ERROR: NO SOLUTION FOUND.");
-        return null;
+        // Use solution node to construct
+        do {
+            TerminusEstState nextState = ((TerminusEstState) nextNode.ConstructNodeState());
+            TerminusEstAction a = (TerminusEstAction) nextNode.GetLastAction();
+            currentNetwork = te4.GrowNetwork(a.taxon, currentNetwork, orig.t1, orig.t2);
+            nextNode = nextNode.parent;
+        } while (!nextNode.IsRoot());
+
+        if (VERBOSE) System.out.println("Network fully constructed.");
+
+        return new TerminusEstSolution(currentNetwork, 0, 0);
     }
 
     private static class SortByVisits implements Comparator<NodeMCTS> {
