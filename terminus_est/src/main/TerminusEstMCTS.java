@@ -62,6 +62,7 @@ public class TerminusEstMCTS {
             if (VERBOSE) System.out.println("A solution was found in the tree.");
             // Best solution in tree is upper bound.
             upperBound = bestFound.depth;
+            if (VERBOSE) System.out.println("At level: " + upperBound);
         }
 
         // Find all candidate tree nodes to search from.
