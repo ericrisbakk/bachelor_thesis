@@ -14,6 +14,9 @@ public class TerminusEstMCTS {
     public static int iterations = 10000;
     public static int simulations = 10;
 
+    public static int LeafCollection_NodesTraversed = 0;
+    public static int LeafCollection_Duplicates = 0;
+
     public NodeMCTS GetSearchTree(String file) {
         SelectUCT_SP select = new SelectUCT_SP();
         SelectUCT_SP.param_d = 20000;
