@@ -108,7 +108,6 @@ public class TerminusEstMCTS {
         } // End for-loop
 
         // Construct the network.
-        TerminusEstState orig = (TerminusEstState) bestFound.root;
         Network currentNetwork = null;
         NodeMCTS nextNode = null;
         if (solution != null) {
@@ -134,7 +133,7 @@ public class TerminusEstMCTS {
                 System.exit(0);
             }
 
-            currentNetwork = te4.ConstructInitialNetwork(ST, finalState.t1, finalState.t2, orig.t1, orig.t2, finalState.depth);
+            currentNetwork = TerminusEstV4.ConstructInitialNetwork(ST, finalState.t1, finalState.t2, te4.t1, te4.t2, finalState.depth);
 
             if (bestFound.IsRoot()) { // Small subcase.
                 System.out.println("BestFound was root.");
@@ -148,7 +147,7 @@ public class TerminusEstMCTS {
         do {
             TerminusEstState nextState = ((TerminusEstState) nextNode.ConstructNodeState());
             TerminusEstAction a = (TerminusEstAction) nextNode.GetLastAction();
-            currentNetwork = te4.GrowNetwork(a.taxon, currentNetwork, orig.t1, orig.t2);
+            currentNetwork = TerminusEstV4.GrowNetwork(a.taxon, currentNetwork, te4.t1, te4.t2);
             nextNode = nextNode.parent;
         } while (!nextNode.IsRoot());
 
