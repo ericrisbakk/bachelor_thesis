@@ -5,10 +5,7 @@ import main.mcts.*;
 import main.mcts.base.Action;
 import main.mcts.base.MCTS;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Vector;
+import java.util.*;
 
 public class TerminusEstMCTS {
 
@@ -183,7 +180,11 @@ public class TerminusEstMCTS {
         ArrayList<NodeMCTS> n = new ArrayList<>();
         SortByVisits comp = new SortByVisits();
         int[] depthCount = new int[maxDepth];
-        DFSWithSort(root, n, comp, maxDepth, depthCount);
+
+        // Let's keep track of only unique nodes!
+        Hashtable<String, NodeMCTS> uniques = new Hashtable<>();
+
+        DFSWithSort(root, n, comp, maxDepth, depthCount, uniques);
 
         // Create array container.
         NodeMCTS[][] nodeByDepth = new NodeMCTS[maxDepth][];
@@ -208,7 +209,8 @@ public class TerminusEstMCTS {
      * @param list
      * @param comp
      */
-    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp, int maxDepth, int[] depthCount) {
+    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp,
+                                    int maxDepth, int[] depthCount, Hashtable<String, NodeMCTS> uniques) {
         if (node.IsTerminal()) {
             return;
         }
@@ -219,8 +221,11 @@ public class TerminusEstMCTS {
 
         // Only add if leaf and under max depth.
         if (node.IsLeaf()) {
-            list.add(node);
-            depthCount[node.depth] += 1;
+            if (IsUnique(uniques, node)) {
+                list.add(node);
+                depthCount[node.depth] += 1;
+            }
+
             return;
         }
 
@@ -229,8 +234,13 @@ public class TerminusEstMCTS {
         Arrays.sort(children, comp);
 
         for (int i = 0; i < children.length; ++i) {
-            DFSWithSort(children[i], list, comp, maxDepth, depthCount);
+            DFSWithSort(children[i], list, comp, maxDepth, depthCount, uniques);
         }
+    }
+
+    public static boolean IsUnique(Hashtable<String, NodeMCTS> uniques, NodeMCTS n) {
+
+        return true;
     }
 
     public static TerminusEstSolution AttemptSolution(String file) {
