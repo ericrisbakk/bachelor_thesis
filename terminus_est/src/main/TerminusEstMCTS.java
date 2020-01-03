@@ -8,6 +8,7 @@ import main.mcts.base.MCTS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Vector;
 
 public class TerminusEstMCTS {
 
@@ -65,27 +66,53 @@ public class TerminusEstMCTS {
         NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound);
         if (VERBOSE) System.out.println("Nodes to search from collected.");
 
+        TerminusEstSolution solution = null;
+        NodeMCTS solutionNode = null;
         // i = the current depth we're trying to compute at
         for (int i = 0; i < upperBound; ++i) {
             if (VERBOSE) System.out.println("Attempting hyb = " + i);
             // j = All search nodes at depth i which we wish to investigate.
             for (int j = 0; j < searchNodes.length; ++j) {
                 for (int k = 0; k < searchNodes[j].length; ++k) {
-                    TerminusEstSolution solution = te4.ComputePartialSolution(searchNodes[j][k].depth, i);
+                    // Construct trees we are searching from.
+                    NodeMCTS node = searchNodes[j][k]; // Make it easier to reference this node.
+                    TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
+                    solution = te4.ComputePartialSolution(s.t1, s.t2, node.depth, i);
+                    solutionNode = node;
 
                     if (solution != null) {
                         if (VERBOSE) {
                             System.out.println("A solution was found!");
                             System.out.println(solution.toString());
                             System.out.println("At level: " + i);
-                            System.out.println("Node:\n" + searchNodes[j][k].GetNewick());
+                            System.out.println("Node:\n" + node.GetNewick());
                         }
 
                         break;
                     }
                 }
             }
+        } // End for-loop
+
+        Network initialNetwork = null;
+        if (solution != null) {
+            // Initial tree has been  constructed.
+            initialNetwork = solution.root;
         }
+        else if (bestFound != null) {
+            // Construct using bestFound.
+            // No solution was found through the search. construct initial solution from bestFound.
+            TerminusEstState finalState = ((TerminusEstState) bestFound.ConstructNodeState());
+            Vector ST = Tree.computeMaxSTsets(finalState.t1, finalState.t2);
+            if (ST.size() != 1) {
+                System.out.println("ERROR: best found trees not compatible.");
+                System.exit(0);
+            }
+            initialNetwork = te4.ConstructInitialNetwork()
+        }
+
+        // If we get here, we found no solution.
+        if (VERBOSE) System.out.println("ERROR: NO SOLUTION FOUND.");
         return null;
     }
 
