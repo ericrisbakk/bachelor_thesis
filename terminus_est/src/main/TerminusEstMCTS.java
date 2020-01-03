@@ -11,7 +11,7 @@ public class TerminusEstMCTS {
 
     public static boolean VERBOSE = true;
 
-    public static int iterations = 10000;
+    public static int iterations = 100000;
     public static int simulations = 10;
 
     public static int LeafCollection_NodesTraversed = 0;
@@ -83,7 +83,7 @@ public class TerminusEstMCTS {
             if (VERBOSE) System.out.println("Attempting hyb = " + i);
             if (VERBOSE) System.out.print("\tAt nodes of depth: ");
             // j = All search nodes at depth i which we wish to investigate.
-            for (int j = 0; j <= i; ++j) {
+            for (int j = i; j >= 0; --j) {
                 if (VERBOSE) System.out.print(j + ", ");
                 for (int k = 0; k < searchNodes[j].length; ++k) {
                     // Construct trees we are searching from.
@@ -96,16 +96,17 @@ public class TerminusEstMCTS {
                         if (VERBOSE) {
                             System.out.println("A solution was found!");
                             System.out.println(solution.toString());
-                            System.out.println("At level: " + i);
+                            System.out.println("Hyb: " + i + "\tAt depth: " + j);
                             System.out.println("Node:\n" + node.GetNewick());
                         }
 
                         break;
                     }
                 }
+                if (solution != null) break;
             }
             if (VERBOSE) System.out.println();
-
+            if (solution != null) break;
         } // End for-loop
 
         // Construct the network.
