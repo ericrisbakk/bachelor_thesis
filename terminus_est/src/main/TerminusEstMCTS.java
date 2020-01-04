@@ -19,6 +19,10 @@ public class TerminusEstMCTS {
     public int LeafCollection_NodesTraversed = 0;
     public int LeafCollection_Duplicates = 0;
 
+    private long timeStart;
+    private long timeSinceLastSearchTreeBuilt;
+    private long timeSinceLastSearchTreeCompleted;
+
     public TerminusEstMCTS() {}
 
     public TerminusEstMCTS(int iterations, int simulations, double param_c, double param_d) {
@@ -28,14 +32,23 @@ public class TerminusEstMCTS {
         this.param_d = param_d;
     }
 
-    public void RunExperiment(String fName) {
+    /**
+     * Runs a single experiment on the problem found in the given fName, for the duration given.
+     * @param fName filename of problem
+     * @param maxTime max duration for search in seconds.
+     */
+    public void RunExperiment(String fName, double maxTime) {
         if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
-        // TODO: BEGIN COLLECTING DATA
+        ExperimentData data = new ExperimentData();
+        data.fName = fName;
 
         Tuple2<NodeMCTS, TerminusEstV4> tup = GetSearchTree(fName);
         NodeMCTS searchTree = tup.item1;
         TerminusEstV4 te4 = tup.item2;
         NodeMCTS bestFound = GetBestFound(searchTree);
+
+        timeStart = timeSinceLastSearchTreeBuilt;
+        data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
 
         int upperBound;
         if (bestFound == null) {
@@ -46,9 +59,11 @@ public class TerminusEstMCTS {
         }
         else {
             if (VERBOSE) System.out.println("A solution was found in the tree.");
+            if (VERBOSE) System.out.println("At level: " + bestFound.depth);
+
             // Best solution in tree is upper bound.
             upperBound = bestFound.depth;
-            if (VERBOSE) System.out.println("At level: " + upperBound);
+            data.hybNumFromMCTS = bestFound.depth;
         }
 
         // Find all candidate tree nodes to search from.
@@ -83,9 +98,13 @@ public class TerminusEstMCTS {
                             System.out.println("A solution was found!");
                             System.out.println(solution.toString());
                             System.out.println("Hyb: " + i + "\tAt depth: " + j);
-                            System.out.println("Node:\n" + node.GetNewick());
                         }
 
+                        data.hybNumExact = i;
+                        data.solutionNodeDepth = j;
+                        data.solutionNodeInstance = k;
+                        data.solutionDepthTotalInstances = searchNodes[j].length;
+                        data.timeTotal = getIntervalInSeconds(System.currentTimeMillis(), timeStart);
                         break;
                     }
                 }
@@ -95,6 +114,23 @@ public class TerminusEstMCTS {
             if (solution != null) break;
         } // End for-loop
 
+        Network net = buildNetwork(solution, solutionNode, bestFound, te4);
+
+        if (VERBOSE) TerminusEstV4.DumpENewick(net);
+        if (VERBOSE) System.out.println("Network fully constructed.");
+
+        // return new  TerminusEstSolution(currentNetwork, 0, 0);
+    }
+
+    /**
+     * Builds a network after an exact solution is found.
+     * @param solution
+     * @param solutionNode
+     * @param bestFound
+     * @param te4
+     * @return
+     */
+    public Network buildNetwork(TerminusEstSolution solution, NodeMCTS solutionNode, NodeMCTS bestFound, TerminusEstV4 te4) {
         // Construct the network.
         Network currentNetwork = null;
         NodeMCTS nextNode = null;
@@ -139,12 +175,9 @@ public class TerminusEstMCTS {
             nextNode = nextNode.parent;
         } while (!nextNode.IsRoot());
 
-        Network net = te4.FixNetwork(currentNetwork);
-        if (VERBOSE) TerminusEstV4.DumpENewick(net);
-        if (VERBOSE) System.out.println("Network fully constructed.");
-
-        // return new  TerminusEstSolution(currentNetwork, 0, 0);
+        return te4.FixNetwork(currentNetwork);
     }
+
 
     public Tuple2<NodeMCTS, TerminusEstV4> GetSearchTree(String file) {
         SelectUCT_SP select = new SelectUCT_SP();
@@ -162,9 +195,29 @@ public class TerminusEstMCTS {
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
         if (VERBOSE) System.out.println("Building search tree.");
+        timeSinceLastSearchTreeBuilt = System.currentTimeMillis();
         mcts.BuildTree(state);
+        timeSinceLastSearchTreeCompleted = System.currentTimeMillis();
         if (VERBOSE) System.out.println("Search tree completed.");
         return new Tuple2<NodeMCTS, TerminusEstV4>(mcts.root, te4);
+    }
+
+    /**
+     * Class which contains data run by an experiment.
+     * Missing data definitions:
+     *  \n> String: empty string.
+     *  \n> Numeric: -1.
+     */
+    public class ExperimentData {
+        public String fName = "";
+        public double timeTotal = -1;
+        public double timeBuildingSearchTree = -1;
+        public int hybNumExact = -1;
+        public int hybNumFromMCTS = -1;
+        public int solutionNodeDepth = -1;
+        public int solutionNodeInstance = -1;
+        public int solutionDepthTotalInstances = -1;
+        public String network = "";
     }
 
     public static TerminusEstSolution GetExactSolution(String file) {
@@ -483,13 +536,27 @@ public class TerminusEstMCTS {
         System.out.println(searchTree.GetNewick());
     }
 
+    /**
+     * Retuurn time interval of (a-b) in seconds.
+     * @param a Time in milliseconds
+     * @param b Time in milliseconds.
+     * @return
+     */
+    public static double getIntervalInSeconds(long a, long b) {
+        return ((double) (a-b))/1000.0;
+    }
+
     public static void main(String[] args) {
         // TerminusEstSolution solution = AttemptSolution(args[0]);
         // System.out.println(solution.toString());
 
         // RunSingleInstance(args[0]);
 
-        GetExactSolution(args[0]);
+        // GetExactSolution(args[0]);
+
+        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 5), 10, Math.sqrt(2), 1000);
+
+        test.RunExperiment(args[0], 600);
     }
 
     
