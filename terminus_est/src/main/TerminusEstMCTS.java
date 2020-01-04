@@ -94,6 +94,11 @@ public class TerminusEstMCTS {
                     solution = te4.ComputePartialSolution(s.t1, s.t2, j, i-j);
                     solutionNode = node;
 
+                    if (te4.isCanceled()) {
+                        if (VERBOSE) System.out.println("Time-out occurred!");
+                        data.canceled = true; break;
+                    }
+
                     if (solution != null) {
                         if (VERBOSE) {
                             System.out.println("A solution was found!");
@@ -109,17 +114,17 @@ public class TerminusEstMCTS {
                         break;
                     }
                 }
-                if (solution != null) break;
+                if (solution != null || te4.isCanceled()) break;
             }
             if (VERBOSE) System.out.println();
-            if (solution != null) break;
+            if (solution != null || te4.isCanceled()) break;
         } // End for-loop
 
         if (solution != null || bestFound != null) {
             Network net = buildNetwork(solution, solutionNode, bestFound, te4);
 
             if (VERBOSE) TerminusEstV4.DumpENewick(net);
-            if (VERBOSE) System.out.println("Network fully constructed.");
+            if (VERBOSE) System.out.println("Network constructed.");
 
             data.network = TerminusEstV4.GetENewick(net);
         } else {
@@ -224,6 +229,7 @@ public class TerminusEstMCTS {
         public int solutionNodeDepth = -1;
         public int solutionNodeInstance = -1;
         public int solutionDepthTotalInstances = -1;
+        public boolean canceled = false;
         public String network = "";
     }
 
