@@ -1187,7 +1187,7 @@ public class TerminusEstV4 {
             Network net = hybNumAtMost( T1, T2, l, t1, t2, 0 );
             if (useRuntime && canceled) {
                 if (VERBOSE) System.out.println("Gone past runtime, canceled!");
-                return null;
+                return new TerminusEstSolution(null, -1, runtime);
             }
 
             if( net != null )
