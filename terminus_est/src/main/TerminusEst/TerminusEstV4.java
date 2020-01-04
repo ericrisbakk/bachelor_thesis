@@ -1166,6 +1166,13 @@ public class TerminusEstV4 {
 
     public static long timeNow = 0;
 
+    public TerminusEstSolution ComputeSolution(double runtime) {
+        startTime = System.currentTimeMillis();
+        setRuntime(runtime);
+
+        return ComputeSolution();
+    }
+
     public TerminusEstSolution ComputeSolution() {
 
         timeNow = System.currentTimeMillis();
@@ -1178,6 +1185,11 @@ public class TerminusEstV4 {
 
             if (VERBOSE) System.out.println("// Trying r="+l);
             Network net = hybNumAtMost( T1, T2, l, t1, t2, 0 );
+            if (useRuntime && canceled) {
+                if (VERBOSE) System.out.println("Gone past runtime, canceled!");
+                return null;
+            }
+
             if( net != null )
             {
                 //! get rid of the fake root
