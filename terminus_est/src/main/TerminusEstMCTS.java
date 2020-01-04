@@ -37,7 +37,7 @@ public class TerminusEstMCTS {
      * @param fName filename of problem
      * @param maxTime max duration for search in seconds.
      */
-    public void RunExperiment(String fName, double maxTime) {
+    public ExperimentData RunExperiment(String fName, double maxTime) {
         if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
         ExperimentData data = new ExperimentData();
         data.fName = fName;
@@ -114,14 +114,18 @@ public class TerminusEstMCTS {
             if (solution != null) break;
         } // End for-loop
 
-        Network net = buildNetwork(solution, solutionNode, bestFound, te4);
+        if (solution != null || bestFound != null) {
+            Network net = buildNetwork(solution, solutionNode, bestFound, te4);
 
-        if (VERBOSE) TerminusEstV4.DumpENewick(net);
-        if (VERBOSE) System.out.println("Network fully constructed.");
+            if (VERBOSE) TerminusEstV4.DumpENewick(net);
+            if (VERBOSE) System.out.println("Network fully constructed.");
 
-        data.network = TerminusEstV4.GetENewick(net);
+            data.network = TerminusEstV4.GetENewick(net);
+        } else {
+            if (VERBOSE) System.out.println("No network constructed.");
+        }
 
-        // return new  TerminusEstSolution(currentNetwork, 0, 0);
+        return data;
     }
 
     /**
