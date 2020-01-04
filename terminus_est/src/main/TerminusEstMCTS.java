@@ -77,6 +77,7 @@ public class TerminusEstMCTS {
 
         }
 
+        te4.startTime = timeStart;
         TerminusEstSolution solution = null;
         NodeMCTS solutionNode = null;
         // i = the current depth we're trying to compute at

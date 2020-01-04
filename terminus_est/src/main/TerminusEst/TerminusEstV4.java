@@ -20,6 +20,10 @@ public class TerminusEstV4 {
     public int seenLeaves = 0;
 
     public TerminusEstSolution solution = null;
+    public boolean useRuntime;
+    public double runtime;
+    private boolean canceled = false;
+    public long startTime;
 
     public TerminusEstV4(String file) {
         TerminusEstInputHandler ih = new TerminusEstInputHandler();
@@ -112,6 +116,11 @@ public class TerminusEstV4 {
 
     public Network hybNumAtMost( Tree t1, Tree t2, int hyb, Tree origT1, Tree origT2, int depth )
     {
+        if (useRuntime && runtime < getIntervalInSeconds(System.currentTimeMillis(), startTime)) {
+            canceled = true;
+            return null;
+        }
+
         if(VERBOSE) System.out.println("Entering with hyb="+hyb);
 
         //! origT1 and origT2 are just passed all the way down, as reference...they are never changed
@@ -1282,6 +1291,23 @@ public class TerminusEstV4 {
 
         return null;
     }
+
+    public void setRuntime(double seconds) {
+        useRuntime = true;
+        runtime = seconds;
+    }
+
+    /**
+     * Retuurn time interval of (a-b) in seconds.
+     * @param a Time in milliseconds
+     * @param b Time in milliseconds.
+     * @return
+     */
+    private static double getIntervalInSeconds(long a, long b) {
+        return ((double) (a-b))/1000.0;
+    }
+
+    public boolean isCanceled() { return canceled; }
 
     public static void main(String args[])
     {
