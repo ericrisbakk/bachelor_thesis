@@ -2,8 +2,8 @@ package main;
 
 import main.TerminusEst.*;
 import main.mcts.*;
-import main.mcts.base.Action;
-import main.mcts.base.MCTS;
+import main.mcts.base.*;
+import main.utility.Tuple2;
 
 import java.util.*;
 
@@ -11,15 +11,31 @@ public class TerminusEstMCTS {
 
     public static boolean VERBOSE = true;
 
-    public static int iterations = 100000;
-    public static int simulations = 10;
+    public int iterations = 100000;
+    public int simulations = 10;
+    public double param_c = Math.sqrt(2);
+    public double param_d = 10000;
 
-    public static int LeafCollection_NodesTraversed = 0;
-    public static int LeafCollection_Duplicates = 0;
+    public int LeafCollection_NodesTraversed = 0;
+    public int LeafCollection_Duplicates = 0;
 
-    public NodeMCTS GetSearchTree(String file) {
+    public TerminusEstMCTS() {}
+
+    public TerminusEstMCTS(int iterations, int simulations, double param_c, double param_d) {
+        this.iterations = iterations;
+        this.simulations = simulations;
+        this.param_c = param_c;
+        this.param_d = param_d;
+    }
+
+    public void RunExperiment(String fName) {
+        Tuple2<NodeMCTS, TerminusEstV4> tup = GetSearchTree(fName);
+    }
+
+    public Tuple2<NodeMCTS, TerminusEstV4> GetSearchTree(String file) {
         SelectUCT_SP select = new SelectUCT_SP();
-        SelectUCT_SP.param_d = 20000;
+        SelectUCT_SP.param_c = param_c;
+        SelectUCT_SP.param_d = param_d;
         HeuristicNegativeDepth  heuristic = new HeuristicNegativeDepth();
         ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
         SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
@@ -34,7 +50,7 @@ public class TerminusEstMCTS {
         if (VERBOSE) System.out.println("Building search tree.");
         mcts.BuildTree(state);
         if (VERBOSE) System.out.println("Search tree completed.");
-        return mcts.root;
+        return new Tuple2<NodeMCTS, TerminusEstV4>(mcts.root, te4);
     }
 
     public static TerminusEstSolution GetExactSolution(String file) {
@@ -42,7 +58,7 @@ public class TerminusEstMCTS {
 
         double timeStart = System.currentTimeMillis();
 
-        NodeMCTS searchTree = tem.GetSearchTree(file);
+        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
         double timeEndSearchTree = System.currentTimeMillis();
 
         NodeMCTS bestFound = GetBestFound(searchTree);
@@ -66,7 +82,7 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound, te4);
+        NodeMCTS[][] searchNodes = tem.GetCandidateLeaves(searchTree, upperBound, te4);
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
             System.out.println("Distribution: ");
@@ -180,7 +196,7 @@ public class TerminusEstMCTS {
      * @param maxDepth
      * @return
      */
-    public static NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth, TerminusEstV4 te4) {
+    public NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth, TerminusEstV4 te4) {
         ArrayList<NodeMCTS> n = new ArrayList<>();
         SortByVisits comp = new SortByVisits();
         int[] depthCount = new int[maxDepth];
@@ -220,7 +236,7 @@ public class TerminusEstMCTS {
      * @param list
      * @param comp
      */
-    private static void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp,
+    private void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp,
                                     int maxDepth, int[] depthCount, Hashtable<String, NodeMCTS> uniques, TerminusEstV4 te4) {
         LeafCollection_NodesTraversed += 1;
         if (node.IsTerminal()) {
@@ -269,7 +285,7 @@ public class TerminusEstMCTS {
 
         double timeNow = System.currentTimeMillis();
 
-        NodeMCTS searchTree = tem.GetSearchTree(file);
+        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         double timeEnd = System.currentTimeMillis();
@@ -324,7 +340,7 @@ public class TerminusEstMCTS {
     public static void RunSingleInstance(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
         System.out.println("Beginning MCTS: ");
-        NodeMCTS searchTree = tem.GetSearchTree(file);
+        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
         System.out.println("\n\nMCTS completed.");
         NodeMCTS bestFound = GetBestFound(searchTree);
 
