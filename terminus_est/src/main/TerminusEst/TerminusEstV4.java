@@ -1255,6 +1255,10 @@ public class TerminusEstV4 {
         net.root.dumpEnewick();
     }
 
+    public static String GetENewick(Network net) {
+        return net.root.getEnewick();
+    }
+
     public TerminusEstSolution ComputePartialSolution(Tree t1Partial, Tree t2Partial, int depth, int target) {
             // System.out.println("Trying hybridization number: " + l);
             Tree T1 = t1Partial.copy(null,null);

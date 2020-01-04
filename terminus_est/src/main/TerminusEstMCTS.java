@@ -119,6 +119,8 @@ public class TerminusEstMCTS {
         if (VERBOSE) TerminusEstV4.DumpENewick(net);
         if (VERBOSE) System.out.println("Network fully constructed.");
 
+        data.network = TerminusEstV4.GetENewick(net);
+
         // return new  TerminusEstSolution(currentNetwork, 0, 0);
     }
 
