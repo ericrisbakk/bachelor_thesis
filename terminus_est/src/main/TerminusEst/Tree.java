@@ -732,6 +732,60 @@ public class Tree {
 
     }
 
+    public String getEnewick()
+    {
+        int lab[] = new int[1];
+        lab[0] = 1;	//! numbering of hybridization nodes starts at 1
+
+        this.allocateHybLabel(lab);
+
+        return this.getInternalENewick() + "root;";
+    }
+
+    private String getInternalENewick()
+    {
+        if(this.isLeaf())
+        {
+            return name;
+        }
+
+        String s = "(";
+
+        for(int x=0; x<children.size();x++)
+        {
+            if( x!=0 ) s += ",";
+            Tree c =(Tree) children.elementAt(x);
+            if( c.netParent[0] == this ) c.internalENewickDump();
+            else
+            if( c.netParent[1] != null )
+            {
+                if( c.netParent[1] == this )
+                {
+                    s += "#H"+c.hybLabel;
+                }
+                else
+                {
+                    System.out.println("CATASTROPHIC ERROR (1) with reticulation node parent.");
+                    System.exit(0);
+                }
+            }
+            else
+            {
+                System.out.println("CATASTROPHIC ERROR (2) with reticulation node parent.");
+                System.exit(0);
+            }
+
+        }
+
+        s += ")";
+        if(this.netParent[1] != null)
+        {
+            s += "#H"+hybLabel;
+        }
+
+        return s;
+    }
+
     public void allocateHybLabel(int label[])
     {
         if( this.isLeaf() ) return;
