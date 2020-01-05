@@ -755,7 +755,7 @@ public class Tree {
         {
             if( x!=0 ) s += ",";
             Tree c =(Tree) children.elementAt(x);
-            if( c.netParent[0] == this ) c.internalENewickDump();
+            if( c.netParent[0] == this ) s += c.getInternalENewick();
             else
             if( c.netParent[1] != null )
             {
