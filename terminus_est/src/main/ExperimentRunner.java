@@ -33,7 +33,7 @@ public class ExperimentRunner {
             this.c = c;
             this.inst = inst;
 
-            files = new String[n.length*r.length*c.length*20];
+            files = new String[n.length*r.length*c.length*inst.length];
             int index = 0;
             // Get all the trees!
             for (int in = 0; in < n.length; ++in) {
@@ -94,6 +94,11 @@ public class ExperimentRunner {
             Write(line);
         }
 
+        public void WriteResult(TerminusEstMCTS.ExperimentData d) {
+            String line = d.GetData() + "\n";
+            Write(line);
+        }
+
         public void Close () {
             try {
                 br.close();
@@ -133,7 +138,7 @@ public class ExperimentRunner {
     }
 
     public void ExperimentBasicTerminusEst() {
-        String outputFile = "D:/Uni/DataOutput/BasicTerminusEst.csv";
+        String outputFile = "D:/Uni/DataOutput/BasicTerminusEst_1.csv";
 
         int num = 6;
         int[] instances = new int[num];
@@ -155,8 +160,32 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    public void ExperimentTerminusEstMCTS() {
+        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_BASIC.csv";
+
+        int num = 6;
+        int[] instances = new int[num];
+        for (int i = 1; i <= num; ++i) {
+            instances[i-1] = i;
+        }
+
+        DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
+        String hdr = "ID, BASIC_HYB, BASIC_RUNTIME\n";
+        DataWriter dw = new DataWriter(outputFile, hdr);
+
+        for (int i = 0; i < df.files.length; ++i) {
+            System.out.print(df.files[i] + ", ");
+            TerminusEstSolution s = (new TerminusEstV4(df.files[i])).ComputeSolution(600);
+            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS()).RunExperiment(df.files[i], 600);
+            System.out.println("Hyb Exact: " + d.hybNumExact + ", Hyb approx: " + d.hybNumFromMCTS + ", Runtime: " + d.timeTotal);
+            dw.WriteResult(d);
+        }
+
+        dw.Close();
+    }
+
     public static void main(String[] args) {
         ExperimentRunner er = new ExperimentRunner();
-        er.ExperimentBasicTerminusEst();
+        er.ExperimentTerminusEstMCTS();
     }
 }

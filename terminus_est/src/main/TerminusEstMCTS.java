@@ -9,12 +9,12 @@ import java.util.*;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = true;
+    public static boolean VERBOSE = false;
 
     public int iterations = 100000;
     public int simulations = 10;
     public double param_c = Math.sqrt(2);
-    public double param_d = 10000;
+    public double param_d = 1000;
 
     public int LeafCollection_NodesTraversed = 0;
     public int LeafCollection_Duplicates = 0;
@@ -232,6 +232,14 @@ public class TerminusEstMCTS {
         public int solutionDepthTotalInstances = -1;
         public boolean canceled = false;
         public String network = "";
+
+        public static final String hdr = "ID, TIME_TOTAL, TIME_BUILD_SEARCH_TREE, HYB_EXACT, HYB_APPROX, SOLUTION_NODE_DEPTH, SOLUTION_NODE_INSTANCE, SOLUTION_DEPTH_TOTAL, CANCELED";
+        public String GetData() {
+            String s = fName + ", " + timeTotal + ", " + timeBuildingSearchTree + ", " + hybNumExact + ", " + hybNumFromMCTS + ", " + solutionNodeDepth + ", " + solutionNodeInstance + ", " + solutionDepthTotalInstances + ", ";
+            if (canceled) s += "true";
+            else s += "false";
+            return s;
+        }
     }
 
     public static TerminusEstSolution GetExactSolution(String file) {
