@@ -170,14 +170,15 @@ public class ExperimentRunner {
         }
 
         DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
-        String hdr = "ID, BASIC_HYB, BASIC_RUNTIME\n";
+        String hdr = TerminusEstMCTS.ExperimentData.hdr + "\n";
+        System.out.println(hdr);
         DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = 0; i < df.files.length; ++i) {
             System.out.print(df.files[i] + ", ");
             TerminusEstSolution s = (new TerminusEstV4(df.files[i])).ComputeSolution(600);
             TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS()).RunExperiment(df.files[i], 600);
-            System.out.println("Hyb Exact: " + d.hybNumExact + ", Hyb approx: " + d.hybNumFromMCTS + ", Runtime: " + d.timeTotal);
+            System.out.println(d.GetData());
             dw.WriteResult(d);
         }
 
