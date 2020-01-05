@@ -65,12 +65,12 @@ public class ExperimentRunner {
         FileWriter fr = null;
         BufferedWriter br = null;
 
-        public DataWriter(String filename) {
+        public DataWriter(String filename, String csvHeader) {
             File file = new File(filename);
             try {
                 fr = new FileWriter(file);
                 br = new BufferedWriter(fr);
-                Write("ID, REGULAR_HYB, REGULAR_RUNTIME, MCTS_HYB, MCTS_RUNTIME\n");
+                Write(csvHeader);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -115,8 +115,10 @@ public class ExperimentRunner {
             instances[i-1] = i;
         }
 
+        String hdr = "ID, REGULAR_HYB, REGULAR_RUNTIME, MCTS_HYB, MCTS_RUNTIME\n";
+
         DataFetcher df = new DataFetcher(dataFolder, new int[]{100}, new int[]{15}, new int[]{25, 50, 75}, instances);
-        DataWriter dw = new DataWriter(outputFile);
+        DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = 0; i < df.files.length; ++i) {
             System.out.print(df.files[i]);
@@ -140,11 +142,13 @@ public class ExperimentRunner {
         }
 
         DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
-        DataWriter dw = new DataWriter(outputFile);
+        String hdr = "ID, BASIC_HYB, BASIC_RUNTIME\n";
+        DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = 0; i < df.files.length; ++i) {
-            System.out.print(df.files[i]);
+            System.out.print(df.files[i] + ", ");
             TerminusEstSolution s = (new TerminusEstV4(df.files[i])).ComputeSolution(600);
+            System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime);
             dw.WriteResult(df.files[i], s);
         }
 
