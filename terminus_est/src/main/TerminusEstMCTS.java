@@ -97,6 +97,7 @@ public class TerminusEstMCTS {
 
                     if (te4.isCanceled()) {
                         if (VERBOSE) System.out.println("Time-out occurred!");
+                        data.timeTotal = 600;
                         data.canceled = true; break;
                     }
 
@@ -111,7 +112,6 @@ public class TerminusEstMCTS {
                         data.solutionNodeDepth = j;
                         data.solutionNodeInstance = k;
                         data.solutionDepthTotalInstances = searchNodes[j].length;
-                        data.timeTotal = getIntervalInSeconds(System.currentTimeMillis(), timeStart);
                         break;
                     }
                 }
@@ -121,7 +121,13 @@ public class TerminusEstMCTS {
             if (solution != null || te4.isCanceled()) break;
         } // End for-loop
 
+        if (solution == null && bestFound != null && !te4.isCanceled()) {
+            data.hybNumExact = bestFound.depth;
+            data.solutionNodeDepth = bestFound.depth;
+        }
+
         if (solution != null || bestFound != null) {
+            data.timeTotal = getIntervalInSeconds(System.currentTimeMillis(), timeStart);
             Network net = buildNetwork(solution, solutionNode, bestFound, te4);
 
             if (VERBOSE) TerminusEstV4.DumpENewick(net);
