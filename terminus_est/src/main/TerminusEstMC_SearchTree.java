@@ -51,7 +51,7 @@ public class TerminusEstMC_SearchTree {
         return mcts.root;
     }
 
-    public NodeMCTS[] GetSearchTrees(TerminusEstV4 te4, int trees) {
+    public NodeMCTS[] GetSearchTrees(TerminusEstV4 te4) {
         NodeMCTS[] ar = new NodeMCTS[trees];
         for (int i = 0; i < ar.length; ++i) {
             ar[i] = GetSearchTree(te4);
@@ -60,7 +60,7 @@ public class TerminusEstMC_SearchTree {
         return ar;
     }
 
-    public static NodeMCTS GetBestFound(NodeMCTS node) {
+    public NodeMCTS GetBestFound(NodeMCTS node) {
         if (node.IsTerminal()) {
             return node;
         }
@@ -84,4 +84,27 @@ public class TerminusEstMC_SearchTree {
 
         return bestChild;
     }
+
+    public Tuple2<NodeMCTS, NodeMCTS> GetBestTreeAndLeaf(TerminusEstV4 te4) {
+        NodeMCTS[] trees = GetSearchTrees(te4);
+        NodeMCTS root = trees[0];
+        NodeMCTS child = GetBestFound(trees[0]);
+        for (int i = 1; i < trees.length; ++i) {
+            NodeMCTS next = GetBestFound(trees[i]);
+            if (next != null) {
+                if (child == null) {
+                    child = next;
+                    root = trees[i];
+                }
+                else if (child.depth > next.depth) {
+                    child = next;
+                    root = trees[i];
+                }
+            }
+        }
+
+        return new Tuple2<>(root, child);
+    }
+
+
 }
