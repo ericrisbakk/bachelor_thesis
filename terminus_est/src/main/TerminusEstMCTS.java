@@ -32,7 +32,7 @@ public class TerminusEstMCTS {
     public TerminusEstMC_SearchTree searchTreeUtil;
 
     public TerminusEstMCTS() {
-        searchTreeUtil = new TerminusEstMC_SearchTree(iterations, simulations, param_c, param_d, this);
+        searchTreeUtil = new TerminusEstMC_SearchTree(1, iterations, simulations, param_c, param_d, this);
     }
 
     public TerminusEstMCTS(int iterations, int simulations, double param_c, double param_d) {
@@ -41,7 +41,7 @@ public class TerminusEstMCTS {
         this.param_c = param_c;
         this.param_d = param_d;
 
-        searchTreeUtil = new TerminusEstMC_SearchTree(iterations, simulations, param_c, param_d, this);
+        searchTreeUtil = new TerminusEstMC_SearchTree(1, iterations, simulations, param_c, param_d, this);
     }
 
     /**
@@ -56,7 +56,7 @@ public class TerminusEstMCTS {
 
         TerminusEstV4 te4 = new TerminusEstV4(fName);
         NodeMCTS searchTree = searchTreeUtil.GetSearchTree(te4);
-        NodeMCTS bestFound = GetBestFound(searchTree);
+        NodeMCTS bestFound = searchTreeUtil.GetBestFound(searchTree);
 
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
@@ -306,7 +306,7 @@ public class TerminusEstMCTS {
         NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
         double timeEndSearchTree = System.currentTimeMillis();
 
-        NodeMCTS bestFound = GetBestFound(searchTree);
+        NodeMCTS bestFound = tem.searchTreeUtil.GetBestFound(searchTree);
 
         double seconds =  ((double)(timeEndSearchTree - timeStart))/1000.0;
 
@@ -530,7 +530,7 @@ public class TerminusEstMCTS {
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
         NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
-        NodeMCTS bestFound = GetBestFound(searchTree);
+        NodeMCTS bestFound = tem.searchTreeUtil.GetBestFound(searchTree);
 
         double timeEnd = System.currentTimeMillis();
         double seconds =  ((double)(timeEnd - timeNow))/1000.0;
@@ -556,30 +556,6 @@ public class TerminusEstMCTS {
         }
     }
 
-    public static NodeMCTS GetBestFound(NodeMCTS node) {
-        if (node.IsTerminal()) {
-            return node;
-        }
-
-        if (!node.expanded && node.leaf) {
-            return null;
-        }
-
-        NodeMCTS bestChild = null;
-        for (int i = 0; i < node.children.length; ++i) {
-            NodeMCTS option = GetBestFound(node.children[i]);
-            if (option != null) {
-                if (bestChild == null)
-                    bestChild = option;
-                else {
-                    if (option.depth < bestChild.depth)
-                        bestChild = option;
-                }
-            }
-        }
-
-        return bestChild;
-    }
 
     /**
      * Retuurn time interval of (a-b) in seconds.
