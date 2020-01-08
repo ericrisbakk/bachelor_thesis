@@ -1,5 +1,7 @@
 package main.TerminusEst;
 
+import main.mcts.NodeMCTS;
+
 import java.util.concurrent.Callable;
 
 /**
@@ -7,18 +9,22 @@ import java.util.concurrent.Callable;
  */
 public class TerminusEstParallel implements Callable<TerminusEstSolution> {
 
+    public NodeMCTS node;
     public TerminusEstV4 te4;
     public Tree t1;
     public Tree t2;
     public int target;
     public int depth;
+    public int instance;
 
-    public TerminusEstParallel(TerminusEstV4 te4, Tree t1, Tree t2, int depth, int target) {
+    public TerminusEstParallel(NodeMCTS node, TerminusEstV4 te4, Tree t1, Tree t2, int depth, int target, int instance) {
+        this.node = node;
         this.te4 = te4;
         this.t1 = t1;
         this.t2 = t2;
         this.target = target;
         this.depth = depth;
+        this.instance = instance;
     }
 
     @Override

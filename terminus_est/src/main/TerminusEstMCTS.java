@@ -111,7 +111,7 @@ public class TerminusEstMCTS {
                         ArrayList<TerminusEstParallel> l = new ArrayList<>(subset.length);
                         for (int m = 0; m < subset.length; ++m) {
                             TerminusEstState s = (TerminusEstState) subset[m].ConstructNodeState();
-                            l.add(new TerminusEstParallel(te4, s.t1, s.t2, j, i-j));
+                            l.add(new TerminusEstParallel(subset[m], te4, s.t1, s.t2, j, i-j, m));
                         }
 
                         try {
@@ -142,7 +142,7 @@ public class TerminusEstMCTS {
 
                                     data.hybNumExact = i;
                                     data.solutionNodeDepth = j;
-                                    data.solutionNodeInstance = m;
+                                    data.solutionNodeInstance = -1;
                                     data.solutionDepthTotalInstances = searchNodes[j].length;
                                     break;
                                 }
