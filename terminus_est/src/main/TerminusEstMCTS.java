@@ -48,9 +48,8 @@ public class TerminusEstMCTS {
         ExperimentData data = new ExperimentData();
         data.fName = fName;
 
-        Tuple2<NodeMCTS, TerminusEstV4> tup = GetSearchTree(fName);
-        NodeMCTS searchTree = tup.item1;
-        TerminusEstV4 te4 = tup.item2;
+        TerminusEstV4 te4 = new TerminusEstV4(fName);
+        NodeMCTS searchTree = GetSearchTree(te4);
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         timeStart = timeSinceLastSearchTreeBuilt;
@@ -266,7 +265,7 @@ public class TerminusEstMCTS {
     }
 
 
-    public Tuple2<NodeMCTS, TerminusEstV4> GetSearchTree(String file) {
+    public NodeMCTS GetSearchTree(TerminusEstV4 te4) {
         SelectUCT_SP select = new SelectUCT_SP();
         SelectUCT_SP.param_c = param_c;
         SelectUCT_SP.param_d = param_d;
@@ -274,8 +273,6 @@ public class TerminusEstMCTS {
         ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
         SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
         MCTS mcts = new MCTS(iterations, select, sim, gen);
-
-        TerminusEstV4 te4 = new TerminusEstV4(file);
 
         Tree T1 = te4.t1.copy(null, null);
         Tree T2 = te4.t2.copy(null, null);
@@ -286,7 +283,7 @@ public class TerminusEstMCTS {
         mcts.BuildTree(state);
         timeSinceLastSearchTreeCompleted = System.currentTimeMillis();
         if (VERBOSE) System.out.println("Search tree completed.");
-        return new Tuple2<NodeMCTS, TerminusEstV4>(mcts.root, te4);
+        return mcts.root;
     }
 
     /**
@@ -320,15 +317,14 @@ public class TerminusEstMCTS {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
         double timeStart = System.currentTimeMillis();
+        TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
+        NodeMCTS searchTree = tem.GetSearchTree(te4);
         double timeEndSearchTree = System.currentTimeMillis();
 
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         double seconds =  ((double)(timeEndSearchTree - timeStart))/1000.0;
-
-        TerminusEstV4 te4 = new TerminusEstV4(file);
 
         int upperBound;
         if (bestFound == null) {
@@ -547,8 +543,9 @@ public class TerminusEstMCTS {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
         double timeNow = System.currentTimeMillis();
+        TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
+        NodeMCTS searchTree = tem.GetSearchTree(te4);
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         double timeEnd = System.currentTimeMillis();
@@ -603,7 +600,8 @@ public class TerminusEstMCTS {
     public static void RunSingleInstance(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
         System.out.println("Beginning MCTS: ");
-        NodeMCTS searchTree = tem.GetSearchTree(file).item1;
+        TerminusEstV4 te4 = new TerminusEstV4(file);
+        NodeMCTS searchTree = tem.GetSearchTree(te4);
         System.out.println("\n\nMCTS completed.");
         NodeMCTS bestFound = GetBestFound(searchTree);
 
