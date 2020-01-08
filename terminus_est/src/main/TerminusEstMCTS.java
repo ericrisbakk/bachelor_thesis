@@ -596,7 +596,7 @@ public class TerminusEstMCTS {
 
         return bestChild;
     }
-    
+
     /**
      * Retuurn time interval of (a-b) in seconds.
      * @param a Time in milliseconds
