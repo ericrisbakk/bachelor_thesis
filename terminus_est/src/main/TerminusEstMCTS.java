@@ -5,11 +5,17 @@ import main.mcts.*;
 import main.mcts.base.*;
 import main.utility.Tuple2;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = false;
+    public static boolean VERBOSE = true;
+    public static boolean PARALLEL = true;
 
     public int iterations = 100000;
     public int simulations = 10;
@@ -56,8 +62,7 @@ public class TerminusEstMCTS {
             // No solution found at all.
             // (Increase by one to ensure we also check for the case in which we have do delete *all* leaves).
             upperBound = te4.seenLeaves + 1;
-        }
-        else {
+        } else {
             if (VERBOSE) System.out.println("A solution was found in the tree.");
             if (VERBOSE) System.out.println("At level: " + bestFound.depth);
 
@@ -77,10 +82,20 @@ public class TerminusEstMCTS {
 
         }
 
+        // Time to run!
         te4.startTime = timeStart;
         te4.setRuntime(maxTime);
         TerminusEstSolution solution = null;
         NodeMCTS solutionNode = null;
+
+        ExecutorService exec =  null;
+        if (PARALLEL) {
+            if (VERBOSE) System.out.println("Running parallel!");
+            exec = Executors.newWorkStealingPool();
+        } else {
+            if (VERBOSE) System.out.println("Running single-threaded!");
+        }
+
         // i = the current depth we're trying to compute at
         for (int i = 0; i < upperBound; ++i) {
             if (VERBOSE) System.out.println("Attempting hyb = " + i);
@@ -88,35 +103,88 @@ public class TerminusEstMCTS {
             // j = All search nodes at depth i which we wish to investigate.
             for (int j = i; j >= 0; --j) {
                 if (VERBOSE) System.out.print(j + ", ");
-                for (int k = 0; k < searchNodes[j].length; ++k) {
-                    // Construct trees we are searching from.
-                    NodeMCTS node = searchNodes[j][k]; // Make it easier to reference this node.
-                    TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
-                    solution = te4.ComputePartialSolution(s.t1, s.t2, j, i-j);
-                    solutionNode = node;
 
-                    if (te4.isCanceled()) {
-                        if (VERBOSE) System.out.println("Time-out occurred!");
-                        data.timeTotal = 600;
-                        data.canceled = true; break;
-                    }
-
-                    if (solution != null) {
-                        if (VERBOSE) {
-                            System.out.println("A solution was found!");
-                            System.out.println(solution.toString());
-                            System.out.println("Hyb: " + i + "\tAt depth: " + j);
+                if (PARALLEL) {
+                    // Create the parallell callables.
+                    NodeMCTS[] subset = searchNodes[j];
+                    if (subset.length > 0) {
+                        ArrayList<TerminusEstParallel> l = new ArrayList<>(subset.length);
+                        for (int m = 0; m < subset.length; ++m) {
+                            TerminusEstState s = (TerminusEstState) subset[m].ConstructNodeState();
+                            l.add(new TerminusEstParallel(te4, s.t1, s.t2, j, i-j));
                         }
 
-                        data.hybNumExact = i;
-                        data.solutionNodeDepth = j;
-                        data.solutionNodeInstance = k;
-                        data.solutionDepthTotalInstances = searchNodes[j].length;
-                        break;
+                        try {
+                            Stream<TerminusEstSolution> strm = exec.invokeAll(l)
+                                    .stream()
+                                    .map(
+                                            future -> {
+                                                try {
+                                                    return future.get();
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+
+                                                return null;
+                                            }
+                                    );
+
+                            ArrayList<TerminusEstSolution> possible = strm.collect(Collectors.toCollection(ArrayList::new));
+
+                            for (int m = 0; m < 0; ++m) {
+
+                                if (possible.get(m) != null) {
+                                    if (VERBOSE) {
+                                        System.out.println("A solution was found!");
+                                        System.out.println(solution.toString());
+                                        System.out.println("Hyb: " + i + "\tAt depth: " + j);
+                                    }
+
+                                    data.hybNumExact = i;
+                                    data.solutionNodeDepth = j;
+                                    data.solutionNodeInstance = m;
+                                    data.solutionDepthTotalInstances = searchNodes[j].length;
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-                if (solution != null || te4.isCanceled()) break;
-            }
+                else {
+                    for (int k = 0; k < searchNodes[j].length; ++k) {
+                        // Construct trees we are searching from.
+                        NodeMCTS node = searchNodes[j][k]; // Make it easier to reference this node.
+                        TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
+                        solution = te4.ComputePartialSolution(s.t1, s.t2, j, i - j);
+                        solutionNode = node;
+
+                        if (te4.isCanceled()) {
+                            if (VERBOSE) System.out.println("Time-out occurred!");
+                            data.timeTotal = 600;
+                            data.canceled = true;
+                            break;
+                        }
+
+                        if (solution != null) {
+                            if (VERBOSE) {
+                                System.out.println("A solution was found!");
+                                System.out.println(solution.toString());
+                                System.out.println("Hyb: " + i + "\tAt depth: " + j);
+                            }
+
+                            data.hybNumExact = i;
+                            data.solutionNodeDepth = j;
+                            data.solutionNodeInstance = k;
+                            data.solutionDepthTotalInstances = searchNodes[j].length;
+                            break;
+                        }
+                    }
+                }
+
+            if (solution != null || te4.isCanceled()) break;
+        }
             if (VERBOSE) System.out.println();
             if (solution != null || te4.isCanceled()) break;
         } // End for-loop
@@ -582,7 +650,7 @@ public class TerminusEstMCTS {
 
         // GetExactSolution(args[0]);
 
-        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 5), 10, Math.sqrt(2), 1000);
+        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000);
 
         test.RunExperiment(args[0], 600);
     }
