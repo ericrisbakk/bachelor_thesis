@@ -11,6 +11,8 @@ import java.io.IOException;
 public class ExperimentRunner {
 
     public static String dataFolder = "D:/Uni/TreeGen/Data/";
+    public static String finalDataFolder = "D:/Uni/TreeGen/FinalData/";
+
     /**
      * Fetches files from the relevant folder. All files are assumed to follow a pattern of
      * n[X]r[Y]c[Z]_[Inst], where X is the taxa size, Y the number of rSPR moves, Z the percent of
@@ -18,13 +20,46 @@ public class ExperimentRunner {
      */
     public class DataFetcher {
         String folderPath;
+        int[] b;
         int[] n;
         int[] r;
         int[] c;
         int[] inst;
 
+        int inst_lower, inst_upper;
+
         String[] files;
         int file;
+
+        public DataFetcher(int[] b, int[] n, int[] c, int inst_lower, int inst_upper) {
+            this.folderPath = finalDataFolder;
+            this.b = b;
+            this.n = n;
+            this.c = c;
+            this.inst_lower = inst_lower;
+            this.inst_upper = inst_upper;
+
+            files = new String[b.length*n.length*c.length*(inst_upper - inst_lower + 1)];
+            int index = 0;
+            for (int ib = 0; ib < b.length; ++ib) {
+                for (int in = 0; in < n.length; ++in) {
+                    for (int ic = 0; ic < c.length; ++ic) {
+                        for (int ii = inst_lower; ii <= inst_upper; ++ii) {
+                            String name = GetFinalFileName(ib, in, ic, ii);
+                            File f = new File(name);
+                            if (!f.exists()) {
+                                System.out.println("ERROR: File '" + f.getName() + "' does not exist.");
+                                System.exit(0);
+                            }
+                            else {
+                                files[index] = name;
+                                ++index;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         public DataFetcher(String folderPath, int[] n, int[] r, int[] c, int[] inst) {
             this.folderPath = folderPath;
@@ -54,6 +89,10 @@ public class ExperimentRunner {
                     }
                 }
             }
+        }
+
+        public String GetFinalFileName(int bi, int ni, int ci, int ii) {
+            return folderPath + "b" + b[bi] + "n" + n[ni] + "c" + c[ci] + "_" + ii + ".txt";
         }
 
         public String GetFileName(int ni, int ri, int ci, int ii) {
@@ -161,7 +200,7 @@ public class ExperimentRunner {
     }
 
     public void ExperimentTerminusEstMCTS() {
-        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_BASIC.csv";
+        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN.csv";
 
         int num = 6;
         int[] instances = new int[num];
@@ -169,15 +208,16 @@ public class ExperimentRunner {
             instances[i-1] = i;
         }
 
-        DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
+        // DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
+        DataFetcher df = new DataFetcher(new int[] {0, 1}, new int[]{50, 100}, new int[]{25, 50}, 1, 50);
+
         String hdr = TerminusEstMCTS.ExperimentData.hdr + "\n";
         System.out.println(hdr);
         DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = 0; i < df.files.length; ++i) {
             System.out.print(df.files[i] + ", ");
-            TerminusEstSolution s = (new TerminusEstV4(df.files[i])).ComputeSolution(600);
-            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS()).RunExperiment(df.files[i], 600);
+            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS()).RunExperiment(df.files[i], 120);
             System.out.println(d.GetData());
             dw.WriteResult(d);
         }

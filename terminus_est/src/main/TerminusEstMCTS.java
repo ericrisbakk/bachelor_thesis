@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = true;
+    public static boolean VERBOSE = false;
     public static boolean PARALLEL = false;
 
     public int iterations = 100000;
@@ -198,6 +198,7 @@ public class TerminusEstMCTS {
                     }
                 }
 
+                data.hybLowerBound = i;
             if (solution != null || te4.isCanceled()) break;
         }
             if (VERBOSE) System.out.println();
@@ -291,6 +292,7 @@ public class TerminusEstMCTS {
         public double timeTotal = -1;
         public double timeBuildingSearchTree = -1;
         public int hybNumExact = -1;
+        public int hybLowerBound = -1;
         public int hybNumFromMCTS = -1;
         public int solutionNodeDepth = -1;
         public int solutionNodeInstance = -1;
@@ -298,9 +300,9 @@ public class TerminusEstMCTS {
         public boolean canceled = false;
         public String network = "";
 
-        public static final String hdr = "ID, TIME_TOTAL, TIME_BUILD_SEARCH_TREE, HYB_EXACT, HYB_APPROX, SOLUTION_NODE_DEPTH, SOLUTION_NODE_INSTANCE, SOLUTION_DEPTH_TOTAL, CANCELED";
+        public static final String hdr = "ID, TIME_TOTAL, TIME_BUILD_SEARCH_TREE, HYB_EXACT, HYB_LOWER, HYB_UPPER, SOLUTION_NODE_DEPTH, SOLUTION_NODE_INSTANCE, SOLUTION_DEPTH_TOTAL, CANCELED";
         public String GetData() {
-            String s = fName + ", " + timeTotal + ", " + timeBuildingSearchTree + ", " + hybNumExact + ", " + hybNumFromMCTS + ", " + solutionNodeDepth + ", " + solutionNodeInstance + ", " + solutionDepthTotalInstances + ", ";
+            String s = fName + ", " + timeTotal + ", " + timeBuildingSearchTree + ", " + hybNumExact + ", " + hybLowerBound + ", " + hybNumFromMCTS + ", " + solutionNodeDepth + ", " + solutionNodeInstance + ", " + solutionDepthTotalInstances + ", ";
             if (canceled) s += "true";
             else s += "false";
             return s;
