@@ -1,8 +1,8 @@
 
-FOR %%i IN (20, 50, 100) ^
-DO FOR %%j IN (5, 10, 15, 20) ^
-DO FOR %%k IN (25, 50, 75) ^
-DO FOR /L %%l IN (1, 1, 20) DO ^
+FOR %%i IN (50, 100) ^
+DO FOR %%j IN (20) ^
+DO FOR %%k IN (25, 50) ^
+DO FOR /L %%l IN (1, 1, 50) DO ^
 Call :AddInstance %%i %%j %%k %%l
   
 EXIT /B %ERRORLEVEL%
@@ -15,6 +15,6 @@ java -jar RandomRSPR.jar %~2 0 < A.txt > B.txt
 java TreeContract %~3 0 < A.txt > A_NB.txt
 java TreeContract %~3 0 < B.txt > B_NB.txt
 
-type A_NB.txt B_NB.txt > Data/n%~1r%~2c%~3_%~4.txt
+type A_NB.txt B_NB.txt > Data/b0n%~1c%~3_%~4.txt
 
 Exit /B 0
