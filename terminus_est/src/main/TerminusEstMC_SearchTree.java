@@ -85,6 +85,11 @@ public class TerminusEstMC_SearchTree {
         return bestChild;
     }
 
+    /**
+     * Run multiple times and return the single best tree found, according to the best solution discovered in that tree.
+     * @param te4
+     * @return
+     */
     public Tuple2<NodeMCTS, NodeMCTS> GetBestTreeAndLeaf(TerminusEstV4 te4) {
         NodeMCTS[] trees = GetSearchTrees(te4);
         NodeMCTS root = trees[0];

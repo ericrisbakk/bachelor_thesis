@@ -55,8 +55,9 @@ public class TerminusEstMCTS {
         data.fName = fName;
 
         TerminusEstV4 te4 = new TerminusEstV4(fName);
-        NodeMCTS searchTree = searchTreeUtil.GetSearchTree(te4);
-        NodeMCTS bestFound = searchTreeUtil.GetBestFound(searchTree);
+        Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf(te4);
+        NodeMCTS searchTree = b.item1;
+        NodeMCTS bestFound = b.item2;
 
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
@@ -303,13 +304,10 @@ public class TerminusEstMCTS {
         double timeStart = System.currentTimeMillis();
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
-        double timeEndSearchTree = System.currentTimeMillis();
-
-        NodeMCTS bestFound = tem.searchTreeUtil.GetBestFound(searchTree);
-
-        double seconds =  ((double)(timeEndSearchTree - timeStart))/1000.0;
-
+        Tuple2<NodeMCTS, NodeMCTS> b = tem.searchTreeUtil.GetBestTreeAndLeaf(te4);
+        NodeMCTS searchTree = b.item1;
+        NodeMCTS bestFound = b.item2;
+        
         int upperBound;
         if (bestFound == null) {
             if (VERBOSE) System.out.println("No solution in the tree.");
