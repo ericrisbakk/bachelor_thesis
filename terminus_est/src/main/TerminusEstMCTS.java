@@ -44,6 +44,15 @@ public class TerminusEstMCTS {
         searchTreeUtil = new TerminusEstMC_SearchTree(1, iterations, simulations, param_c, param_d, this);
     }
 
+    public TerminusEstMCTS(int iterations, int simulations, double param_c, double param_d, int trees) {
+        this.iterations = iterations;
+        this.simulations = simulations;
+        this.param_c = param_c;
+        this.param_d = param_d;
+
+        searchTreeUtil = new TerminusEstMC_SearchTree(trees, iterations, simulations, param_c, param_d, this);
+    }
+
     /**
      * Runs a single experiment on the problem found in the given fName, for the duration given.
      * @param fName filename of problem
@@ -307,7 +316,7 @@ public class TerminusEstMCTS {
         Tuple2<NodeMCTS, NodeMCTS> b = tem.searchTreeUtil.GetBestTreeAndLeaf(te4);
         NodeMCTS searchTree = b.item1;
         NodeMCTS bestFound = b.item2;
-        
+
         int upperBound;
         if (bestFound == null) {
             if (VERBOSE) System.out.println("No solution in the tree.");
@@ -573,7 +582,7 @@ public class TerminusEstMCTS {
 
         // GetExactSolution(args[0]);
 
-        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000);
+        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000, 3);
 
         test.RunExperiment(args[0], 600);
     }
