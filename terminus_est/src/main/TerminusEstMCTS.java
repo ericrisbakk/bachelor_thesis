@@ -25,17 +25,23 @@ public class TerminusEstMCTS {
     public int LeafCollection_NodesTraversed = 0;
     public int LeafCollection_Duplicates = 0;
 
-    private long timeStart;
-    private long timeSinceLastSearchTreeBuilt;
-    private long timeSinceLastSearchTreeCompleted;
+    public long timeStart;
+    public long timeSinceLastSearchTreeBuilt;
+    public long timeSinceLastSearchTreeCompleted;
 
-    public TerminusEstMCTS() {}
+    public TerminusEstMC_SearchTree searchTreeUtil;
+
+    public TerminusEstMCTS() {
+        searchTreeUtil = new TerminusEstMC_SearchTree(iterations, simulations, param_c, param_d, this);
+    }
 
     public TerminusEstMCTS(int iterations, int simulations, double param_c, double param_d) {
         this.iterations = iterations;
         this.simulations = simulations;
         this.param_c = param_c;
         this.param_d = param_d;
+
+        searchTreeUtil = new TerminusEstMC_SearchTree(iterations, simulations, param_c, param_d, this);
     }
 
     /**
@@ -49,7 +55,7 @@ public class TerminusEstMCTS {
         data.fName = fName;
 
         TerminusEstV4 te4 = new TerminusEstV4(fName);
-        NodeMCTS searchTree = GetSearchTree(te4);
+        NodeMCTS searchTree = searchTreeUtil.GetSearchTree(te4);
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         timeStart = timeSinceLastSearchTreeBuilt;
@@ -264,28 +270,6 @@ public class TerminusEstMCTS {
         return te4.FixNetwork(currentNetwork);
     }
 
-
-    public NodeMCTS GetSearchTree(TerminusEstV4 te4) {
-        SelectUCT_SP select = new SelectUCT_SP();
-        SelectUCT_SP.param_c = param_c;
-        SelectUCT_SP.param_d = param_d;
-        HeuristicNegativeDepth  heuristic = new HeuristicNegativeDepth();
-        ResultUCT_SPGenerator gen = new ResultUCT_SPGenerator();
-        SimulateRandom sim = new SimulateRandom(simulations, heuristic, gen);
-        MCTS mcts = new MCTS(iterations, select, sim, gen);
-
-        Tree T1 = te4.t1.copy(null, null);
-        Tree T2 = te4.t2.copy(null, null);
-        TerminusEstState state = new TerminusEstState(T1, T2, 0);
-
-        if (VERBOSE) System.out.println("Building search tree.");
-        timeSinceLastSearchTreeBuilt = System.currentTimeMillis();
-        mcts.BuildTree(state);
-        timeSinceLastSearchTreeCompleted = System.currentTimeMillis();
-        if (VERBOSE) System.out.println("Search tree completed.");
-        return mcts.root;
-    }
-
     /**
      * Class which contains data run by an experiment.
      * Missing data definitions:
@@ -319,7 +303,7 @@ public class TerminusEstMCTS {
         double timeStart = System.currentTimeMillis();
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        NodeMCTS searchTree = tem.GetSearchTree(te4);
+        NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
         double timeEndSearchTree = System.currentTimeMillis();
 
         NodeMCTS bestFound = GetBestFound(searchTree);
@@ -545,7 +529,7 @@ public class TerminusEstMCTS {
         double timeNow = System.currentTimeMillis();
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        NodeMCTS searchTree = tem.GetSearchTree(te4);
+        NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
         NodeMCTS bestFound = GetBestFound(searchTree);
 
         double timeEnd = System.currentTimeMillis();
