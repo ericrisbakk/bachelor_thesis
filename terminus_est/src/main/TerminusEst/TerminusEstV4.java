@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 
 public class TerminusEstV4 {
 
@@ -1315,7 +1316,7 @@ public class TerminusEstV4 {
      * @param b Time in milliseconds.
      * @return
      */
-    private static double getIntervalInSeconds(long a, long b) {
+    public static double getIntervalInSeconds(long a, long b) {
         return ((double) (a-b))/1000.0;
     }
 
