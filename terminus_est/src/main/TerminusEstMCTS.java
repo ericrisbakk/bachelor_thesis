@@ -596,40 +596,7 @@ public class TerminusEstMCTS {
 
         return bestChild;
     }
-
-    public static void RunSingleInstance(String file) {
-        TerminusEstMCTS tem = new TerminusEstMCTS();
-        System.out.println("Beginning MCTS: ");
-        TerminusEstV4 te4 = new TerminusEstV4(file);
-        NodeMCTS searchTree = tem.GetSearchTree(te4);
-        System.out.println("\n\nMCTS completed.");
-        NodeMCTS bestFound = GetBestFound(searchTree);
-
-        if (bestFound != null) {
-        System.out.println("Best solution found has depth: " + bestFound.depth);
-        Action[] actionSequence = bestFound.GetActionSequenceFromRoot();
-            for (int i = 0; i < actionSequence.length; ++i) {
-                System.out.println(i + ": " + actionSequence[i].toString());
-            }
-
-            // Verify
-            System.out.println("Verifying solution: ");
-            String[] taxons = new String[actionSequence.length];
-            for (int i = 0; i < actionSequence.length; ++i) {
-                taxons[i] = ((TerminusEstAction) actionSequence[i]).taxon.getName();
-            }
-
-            TerminusEstState s = (TerminusEstState) searchTree.root;
-            System.out.println(" > " +TerminusEstV4.verifyHybNum(s.t1, s.t2, taxons));
-
-        } else {
-            System.out.println("Didn't find a solution.");
-        }
-
-        System.out.println("\n\nNewick format search tree:");
-        System.out.println(searchTree.GetNewick());
-    }
-
+    
     /**
      * Retuurn time interval of (a-b) in seconds.
      * @param a Time in milliseconds
