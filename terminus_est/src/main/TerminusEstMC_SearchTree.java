@@ -1,13 +1,15 @@
 package main;
 
+import main.TerminusEst.TerminusEstAction;
 import main.TerminusEst.TerminusEstState;
 import main.TerminusEst.TerminusEstV4;
 import main.TerminusEst.Tree;
 import main.mcts.*;
 import main.mcts.base.MCTS;
+import main.mcts.processing.Traversal;
 import main.utility.Tuple2;
 
-import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Manages the aspects of the search tree created by MCTS.
@@ -111,5 +113,76 @@ public class TerminusEstMC_SearchTree {
         return new Tuple2<>(root, child);
     }
 
+    public Hashtable<String, Double> ScoreActions(NodeMCTS root) {
+        Hashtable<String, Double> ht = new Hashtable<>();
 
+        return null;
+    }
+
+    public class ActionHeuristicTraversal extends Traversal {
+
+        public Hashtable<String, Double> sums;
+        public Hashtable<String, Long> count;
+        public Hashtable<String, Double> score;
+
+        public ActionHeuristicTraversal() {
+            sums = new Hashtable<>();
+            count = new Hashtable<>();
+        }
+
+        @Override
+        public boolean StopCondition(NodeMCTS n) {
+            if (n.leaf)
+                return true;
+
+            if (n.expandedChildren >= n.children.length)
+                return false;
+
+            return true;
+        }
+
+        /**
+         * Go through contents of sum and count to create final score.
+         */
+        @Override
+        public void PostProcess() {
+            score = new Hashtable<>();
+            for (var a:
+                 sums.keySet()) {
+                score.put(a, sums.get(a)/count.get(a));
+            }
+        }
+
+        /**
+         * Go through all children of this node and log value/sum.
+         * @param n
+         */
+        @Override
+        public void BeforeSort(NodeMCTS n) {
+            for (var c:
+                 n.children) {
+                AddScore(c,n);
+            }
+        }
+
+        private void AddScore(NodeMCTS c, NodeMCTS n) {
+            String a = ((TerminusEstAction) c.lastAction).toString();
+            if (sums.containsKey(a)) {
+                sums.put(a, sums.get(a) + GetScore(c, n) );
+                count.put(a, count.get(a) + 1);
+            }
+            else {
+                sums.put(a, GetScore(c, n));
+                count.put(a, (long) 1);
+            }
+        }
+
+        private double GetScore(NodeMCTS c, NodeMCTS p) {
+            return ((double) GetVisits(c) / (double) GetVisits(p));
+        }
+
+        private long GetVisits(NodeMCTS n) {
+            return ((ResultUCT_SP) n.result).simulations;
+        }
+    }
 }
