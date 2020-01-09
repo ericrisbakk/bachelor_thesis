@@ -9,12 +9,17 @@ import main.mcts.base.MCTS;
 import main.mcts.processing.Traversal;
 import main.utility.Tuple2;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Hashtable;
 
 /**
  * Manages the aspects of the search tree created by MCTS.
  */
 public class TerminusEstMC_SearchTree {
+
+    public static boolean VERBOSE = false;
+
     public int trees;
     public int iterations;
     public int simulations;
@@ -119,6 +124,92 @@ public class TerminusEstMC_SearchTree {
         return null;
     }
 
+    public class CollectLeaves extends Traversal {
+
+        public int LeafCollection_NodesTraversed;
+        public int LeafCollection_Duplicates;
+        public ArrayList<NodeMCTS> nodes;
+        public Hashtable<String, NodeMCTS> uniques;
+        public int[] depthCount;
+        public TerminusEstV4 te4;
+        public int maxDepth;
+
+        // Out.
+        NodeMCTS[][] nodeByDepth;
+
+        public CollectLeaves(int maxDepth) {
+            LeafCollection_Duplicates = 0;
+            LeafCollection_NodesTraversed = 0;
+            nodes = new ArrayList<>();
+            uniques = new Hashtable<>();
+            depthCount = new int[maxDepth];
+            this.maxDepth = maxDepth;
+            comp = new SortByVisits();
+        }
+
+        @Override
+        public void PostProcess() {
+            // Create array container.
+            nodeByDepth = new NodeMCTS[maxDepth][];
+            for (int i = 0; i < nodeByDepth.length; ++i) {
+                nodeByDepth[i] = new NodeMCTS[depthCount[i]];
+            }
+
+            int[] count = new int[maxDepth];
+
+            // Add everything!
+            for (NodeMCTS node : nodes) {
+                nodeByDepth[node.depth][count[node.depth]] = node;
+                count[node.depth] += 1;
+            }
+        }
+
+        public NodeMCTS[][] GetNodeByDepth() {
+            return nodeByDepth;
+        }
+
+        @Override
+        public void BeforeStop(NodeMCTS n) {
+            LeafCollection_NodesTraversed += 1;
+        }
+
+        @Override
+        public boolean StopCondition(NodeMCTS n) {
+            if (n.IsTerminal() || n.depth >= maxDepth || n.IsLeaf())
+                return true;
+
+            return false;
+        }
+
+        @Override
+        public void OnStop(NodeMCTS n) {
+            if (n.IsLeaf()) {
+                if (AddUnique(n)) {
+                    nodes.add(n);
+                    depthCount[n.depth] += 1;
+                }
+                else {
+                    LeafCollection_Duplicates += 1;
+                }
+            }
+        }
+
+        /**
+         * @param n
+         * @return true if n is not in the list of uniques, and adds n to uniques, false otherwise.
+         */
+        private boolean AddUnique(NodeMCTS n) {
+            TerminusEstState s = (TerminusEstState) n.ConstructNodeState();
+            String bitString = te4.GetBitString(s.t1, s.t2);
+            if (uniques.containsKey(bitString)) {
+                return false;
+            }
+
+            uniques.put(bitString, n);
+            return true;
+        }
+    }
+
     public class ActionHeuristicTraversal extends Traversal {
 
         public Hashtable<String, Double> sums;
@@ -183,6 +274,20 @@ public class TerminusEstMC_SearchTree {
 
         private long GetVisits(NodeMCTS n) {
             return ((ResultUCT_SP) n.result).simulations;
+        }
+    }
+
+    public static class SortByVisits implements Comparator<NodeMCTS> {
+        @Override
+        public int compare(NodeMCTS o1, NodeMCTS o2) {
+            if ( ((ResultUCT_SP) o1.GetResult()).simulations > ((ResultUCT_SP) o2.GetResult()).simulations ) {
+                return 1;
+            }
+            else if ( ((ResultUCT_SP) o1.GetResult()).simulations < ((ResultUCT_SP) o2.GetResult()).simulations ) {
+                return -1;
+            }
+
+            return 0;
         }
     }
 }
