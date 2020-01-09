@@ -9,16 +9,18 @@ import java.util.Comparator;
  * Class for traversing an MCTS search tree by using NodeMCTS. Has a collection of methods that can be overrided.
  */
 public abstract class Traversal {
+    public Comparator<NodeMCTS> comp;
+
     public void Setup() {}
     public void PostProcess() {}
 
-    public void StartDepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
+    public void StartDepthFirstTraversal(NodeMCTS n) {
         Setup();
-        DepthFirstTraversal(n, comp);
+        DepthFirstTraversal(n);
         PostProcess();
     }
 
-    protected void DepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
+    protected void DepthFirstTraversal(NodeMCTS n) {
         BeforeStop(n);
         if (StopCondition(n)) {
             OnStop(n);
@@ -33,7 +35,7 @@ public abstract class Traversal {
         for (var c :
                 children) {
             ChildPreProcess(c);
-            DepthFirstTraversal(n, comp);
+            DepthFirstTraversal(n);
             ChildPostProcess(c);
         }
 
