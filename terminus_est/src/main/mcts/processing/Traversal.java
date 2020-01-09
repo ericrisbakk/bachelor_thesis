@@ -1,63 +1,72 @@
-package main.utility;
+package main.mcts.processing;
 
 import main.mcts.NodeMCTS;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
+/**
+ * Class for traversing an MCTS search tree by using NodeMCTS. Has a collection of methods that can be overrided.
+ */
 public abstract class Traversal {
+    public void Setup() {}
+    public void PostProcess() {}
+
+    public void StartDepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
+        Setup();
+        DepthFirstTraversal(n, comp);
+        PostProcess();
+    }
+
+    protected void DepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
+        BeforeStop(n);
+        if (StopCondition(n)) {
+            OnStop(n);
+            return;
+        }
+        BeforeSort(n);
+        NodeMCTS[] children = n.children.clone();
+        if (comp != null) {
+            Arrays.sort(children, comp);
+        }
+        BeforeRecursion(n, children);
+        for (var c :
+                children) {
+            ChildPreProcess(c);
+            DepthFirstTraversal(n, comp);
+            ChildPostProcess(c);
+        }
+
+        Final(n, children);
+    }
 
     /**
-     * Search through
+     * @return true if we should stop searching from this node, false otherwise.
      */
-        SearchContext context;
+    public boolean StopCondition(NodeMCTS n) { return true; }
 
-        public abstract void Setup();
+    /**
+     * Called before StopCondition method is called.
+     * @param n
+     */
+    public void BeforeStop(NodeMCTS n) {}
 
-        public abstract void Process();
+    /**
+     * Called if StopCondition was evaluated as true.
+     * @param n
+     */
+    public void OnStop(NodeMCTS n) {}
 
-        public void StartDepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
-            Setup();
-            DepthFirstTraversal(n, comp);
-            Process();
-        }
+    /**
+     * Called if StopCondition was evaluated as false, before children have been sorted.
+     * @param n
+     */
+    public void BeforeSort(NodeMCTS n) {}
 
-        protected void DepthFirstTraversal(NodeMCTS n, Comparator<NodeMCTS> comp) {
-            BeforeStop(n);
-            if (StopCondition(n)) {
-                OnStop(n);
-                return;
-            }
+    public void BeforeRecursion(NodeMCTS n, NodeMCTS[] children) {}
 
-            BeforeSort(n);
-            NodeMCTS[] children = n.children;
-            if (comp != null) {
-                Arrays.sort(children, comp);
-            }
+    public void Final(NodeMCTS n, NodeMCTS[] children) {}
 
-            BeforeRecursion(n);
-            for (var c :
-                    children) {
-                DepthFirstTraversal(n, comp);
-            }
-
-            Final(n);
-        }
-
-        /**
-         * Condition for telling whether the search should stop at this node.
-         *
-         * @return
-         */
-        public abstract boolean StopCondition(NodeMCTS n);
-
-        public abstract void BeforeStop(NodeMCTS n);
-
-        public abstract void OnStop(NodeMCTS n);
-
-        public abstract void BeforeSort(NodeMCTS n);
-
-        public abstract void BeforeRecursion(NodeMCTS n);
-
-        public abstract void Final(NodeMCTS n);
+    public void ChildPreProcess(NodeMCTS c) {}
+    public void ChildPostProcess(NodeMCTS c) {}
 }
