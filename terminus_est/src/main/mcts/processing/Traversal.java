@@ -35,7 +35,7 @@ public abstract class Traversal {
         for (var c :
                 children) {
             ChildPreProcess(c);
-            DepthFirstTraversal(n);
+            DepthFirstTraversal(c);
             ChildPostProcess(c);
         }
 

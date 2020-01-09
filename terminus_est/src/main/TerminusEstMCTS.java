@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = false;
+    public static boolean VERBOSE = true;
     public static boolean PARALLEL = false;
 
     public int iterations = 100000;
@@ -86,8 +86,8 @@ public class TerminusEstMCTS {
             data.hybNumFromMCTS = bestFound.depth;
         }
 
-        // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = GetCandidateLeaves(searchTree, upperBound, te4);
+        NodeMCTS[][] searchNodes = GetLeavesForSearch(upperBound, searchTree, te4);
+
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
             System.out.println("Distribution: ");
@@ -309,6 +309,22 @@ public class TerminusEstMCTS {
         }
     }
 
+    /**
+     * Abstracting out method that collects the different possible search path options.
+     * @param upperBound
+     * @param searchTree
+     * @param te4
+     * @return
+     */
+    private NodeMCTS[][] GetLeavesForSearch(int upperBound, NodeMCTS searchTree, TerminusEstV4 te4) {
+        // Find all candidate tree nodes to search from.
+        TerminusEstMC_SearchTree.CollectLeaves collectLeaves = new TerminusEstMC_SearchTree.CollectLeaves(upperBound, te4);
+        collectLeaves.StartDepthFirstTraversal(searchTree);
+        LeafCollection_Duplicates = collectLeaves.LeafCollection_Duplicates;
+        LeafCollection_NodesTraversed = collectLeaves.LeafCollection_NodesTraversed;
+        return collectLeaves.GetNodeByDepth();
+    }
+
     public static TerminusEstSolution GetExactSolution(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
@@ -334,7 +350,7 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = tem.GetCandidateLeaves(searchTree, upperBound, te4);
+        NodeMCTS[][] searchNodes = tem.GetLeavesForSearch(upperBound, searchTree, te4);
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
             System.out.println("Distribution: ");
@@ -428,110 +444,6 @@ public class TerminusEstMCTS {
         return new  TerminusEstSolution(currentNetwork, 0, 0);
     }
 
-    private static class SortByVisits implements Comparator<NodeMCTS> {
-        @Override
-        public int compare(NodeMCTS o1, NodeMCTS o2) {
-            if ( ((ResultUCT_SP) o1.GetResult()).simulations > ((ResultUCT_SP) o2.GetResult()).simulations ) {
-                return 1;
-            }
-            else if ( ((ResultUCT_SP) o1.GetResult()).simulations < ((ResultUCT_SP) o2.GetResult()).simulations ) {
-                return -1;
-            }
-
-            return 0;
-        }
-    }
-
-    /**
-     * Method to get all leaves that are less than max-depth.
-     * @param root
-     * @param maxDepth
-     * @return
-     */
-    public NodeMCTS[][] GetCandidateLeaves(NodeMCTS root, int maxDepth, TerminusEstV4 te4) {
-        ArrayList<NodeMCTS> n = new ArrayList<>();
-        SortByVisits comp = new SortByVisits();
-        int[] depthCount = new int[maxDepth];
-
-        // Let's keep track of only unique nodes!
-        Hashtable<String, NodeMCTS> uniques = new Hashtable<>();
-
-        DFSWithSort(root, n, comp, maxDepth, depthCount, uniques, te4);
-
-        if (VERBOSE) {
-            System.out.println("Candidate leaves collected. Information: ");
-            System.out.println("Total traversed: " + LeafCollection_NodesTraversed);
-            System.out.println("Duplicates detected " + LeafCollection_Duplicates);
-            System.out.println("Leaves added: " + n.size());
-        }
-
-        // Create array container.
-        NodeMCTS[][] nodeByDepth = new NodeMCTS[maxDepth][];
-        for (int i = 0; i < nodeByDepth.length; ++i) {
-            nodeByDepth[i] = new NodeMCTS[depthCount[i]];
-        }
-
-        int[] count = new int[maxDepth];
-
-        // Add everything!
-        for (NodeMCTS node : n) {
-            nodeByDepth[node.depth][count[node.depth]] = node;
-            count[node.depth] += 1;
-        }
-
-        return nodeByDepth;
-    }
-
-    /**
-     * Adds all leaf nodes, traversing in a DFS manner, visiting according to order imposed by the given comparator.
-     * @param node
-     * @param list
-     * @param comp
-     */
-    private void DFSWithSort(NodeMCTS node, ArrayList<NodeMCTS> list, Comparator<NodeMCTS> comp,
-                                    int maxDepth, int[] depthCount, Hashtable<String, NodeMCTS> uniques, TerminusEstV4 te4) {
-        LeafCollection_NodesTraversed += 1;
-        if (node.IsTerminal()) {
-            return;
-        }
-
-        // Only add nodes below the maxDepth
-        if (node.depth >= maxDepth)
-            return;
-
-        // Only add if leaf and under max depth.
-        if (node.IsLeaf()) {
-            if (IsUnique(uniques, node, te4)) {
-                list.add(node);
-                depthCount[node.depth] += 1;
-            }
-            else {
-                LeafCollection_Duplicates += 1;
-            }
-
-            return;
-        }
-
-        NodeMCTS[] children = new NodeMCTS[node.children.length];
-        System.arraycopy(node.children, 0, children, 0, node.children.length);
-        Arrays.sort(children, comp);
-
-        for (int i = 0; i < children.length; ++i) {
-            DFSWithSort(children[i], list, comp, maxDepth, depthCount, uniques, te4);
-        }
-    }
-
-    public static boolean IsUnique(Hashtable<String, NodeMCTS> uniques, NodeMCTS n, TerminusEstV4 te4) {
-        TerminusEstState s = (TerminusEstState) n.ConstructNodeState();
-        String bitString = te4.GetBitString(s.t1, s.t2);
-        if (uniques.containsKey(bitString)) {
-            return false;
-        }
-
-        uniques.put(bitString, n);
-        return true;
-    }
-
     public static TerminusEstSolution AttemptSolution(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
@@ -584,7 +496,7 @@ public class TerminusEstMCTS {
 
         // GetExactSolution(args[0]);
 
-        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000, 3);
+        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000);
 
         test.RunExperiment(args[0], 600);
     }

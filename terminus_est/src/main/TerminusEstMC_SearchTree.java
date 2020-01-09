@@ -124,7 +124,10 @@ public class TerminusEstMC_SearchTree {
         return null;
     }
 
-    public class CollectLeaves extends Traversal {
+    /**
+     * Collect the leaves of a search tree, if we want to use it as a jumping point for search.
+     */
+    public static class CollectLeaves extends Traversal {
 
         public int LeafCollection_NodesTraversed;
         public int LeafCollection_Duplicates;
@@ -137,13 +140,14 @@ public class TerminusEstMC_SearchTree {
         // Out.
         NodeMCTS[][] nodeByDepth;
 
-        public CollectLeaves(int maxDepth) {
+        public CollectLeaves(int maxDepth, TerminusEstV4 te4) {
             LeafCollection_Duplicates = 0;
             LeafCollection_NodesTraversed = 0;
             nodes = new ArrayList<>();
             uniques = new Hashtable<>();
             depthCount = new int[maxDepth];
             this.maxDepth = maxDepth;
+            this.te4 = te4;
             comp = new SortByVisits();
         }
 
@@ -183,7 +187,7 @@ public class TerminusEstMC_SearchTree {
 
         @Override
         public void OnStop(NodeMCTS n) {
-            if (n.IsLeaf()) {
+            if (n.IsLeaf() && !n.IsTerminal() && n.depth < maxDepth) {
                 if (AddUnique(n)) {
                     nodes.add(n);
                     depthCount[n.depth] += 1;
@@ -281,10 +285,10 @@ public class TerminusEstMC_SearchTree {
         @Override
         public int compare(NodeMCTS o1, NodeMCTS o2) {
             if ( ((ResultUCT_SP) o1.GetResult()).simulations > ((ResultUCT_SP) o2.GetResult()).simulations ) {
-                return 1;
+                return -1;
             }
             else if ( ((ResultUCT_SP) o1.GetResult()).simulations < ((ResultUCT_SP) o2.GetResult()).simulations ) {
-                return -1;
+                return 1;
             }
 
             return 0;
