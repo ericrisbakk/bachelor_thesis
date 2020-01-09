@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = true;
+    public static boolean VERBOSE = false;
     public static boolean PARALLEL = false;
 
     public int iterations = 100000;
@@ -322,6 +322,10 @@ public class TerminusEstMCTS {
         collectLeaves.StartDepthFirstTraversal(searchTree);
         LeafCollection_Duplicates = collectLeaves.LeafCollection_Duplicates;
         LeafCollection_NodesTraversed = collectLeaves.LeafCollection_NodesTraversed;
+        if (VERBOSE) {
+            System. out.println("Nodes traversed: " + LeafCollection_NodesTraversed
+                    + "\tNode duplicates in tree: " + LeafCollection_Duplicates);
+        }
         return collectLeaves.GetNodeByDepth();
     }
 
