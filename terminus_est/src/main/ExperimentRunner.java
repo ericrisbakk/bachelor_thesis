@@ -200,7 +200,7 @@ public class ExperimentRunner {
     }
 
     public void ExperimentTerminusEstMCTS() {
-        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN.csv";
+        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN_1_10.csv";
 
         int num = 6;
         int[] instances = new int[num];
@@ -209,7 +209,7 @@ public class ExperimentRunner {
         }
 
         // DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
-        DataFetcher df = new DataFetcher(new int[] {0, 1}, new int[]{50, 100}, new int[]{25, 50}, 1, 50);
+        DataFetcher df = new DataFetcher(new int[] {0, 1}, new int[]{50, 100}, new int[]{25, 50}, 1, 10);
 
         String hdr = TerminusEstMCTS.ExperimentData.hdr + "\n";
         System.out.println(hdr);
