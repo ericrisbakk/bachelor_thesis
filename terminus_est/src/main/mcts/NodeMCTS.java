@@ -92,6 +92,9 @@ public class NodeMCTS {
      * Creates the children of this node using all the legal actions of the current state.
      */
     public void Expand() {
+        if (parent != null && !expanded) {
+            parent.expandedChildren += 1;
+        }
         State temp = ConstructNodeState();
         Action[] actions = temp.GetLegalActions();
 
@@ -106,9 +109,6 @@ public class NodeMCTS {
             leaf = true;
         else
             leaf = false;
-
-        if (parent != null)
-            parent.expandedChildren += 1;
     }
 
 
