@@ -118,6 +118,12 @@ public class TerminusEstMC_SearchTree {
         return new Tuple2<>(root, child);
     }
 
+    /**
+     * TODO: FINISH THIS.
+     * Call to score actions of a single tree.
+     * @param root
+     * @return
+     */
     public Hashtable<String, Double> ScoreActions(NodeMCTS root) {
         Hashtable<String, Double> ht = new Hashtable<>();
 
@@ -214,6 +220,9 @@ public class TerminusEstMC_SearchTree {
         }
     }
 
+    /**
+     * Traverses an MCTS tree to compute heuristic scores for all actions encountered.
+     */
     public class ActionHeuristicTraversal extends Traversal {
 
         public Hashtable<String, Double> sums;
@@ -281,6 +290,9 @@ public class TerminusEstMC_SearchTree {
         }
     }
 
+    /**
+     * Comparator to be used in Arrays.sort. Sorts nodes with more visits in front of nodes with less.
+     */
     public static class SortByVisits implements Comparator<NodeMCTS> {
         @Override
         public int compare(NodeMCTS o1, NodeMCTS o2) {
