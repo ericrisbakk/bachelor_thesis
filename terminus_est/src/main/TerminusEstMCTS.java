@@ -67,7 +67,7 @@ public class TerminusEstMCTS {
         Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf(te4);
         NodeMCTS searchTree = b.item1;
         NodeMCTS bestFound = b.item2;
-        
+
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
 
