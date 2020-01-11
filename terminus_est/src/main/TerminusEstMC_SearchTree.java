@@ -12,6 +12,7 @@ import main.utility.Tuple2;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Manages the aspects of the search tree created by MCTS.
@@ -125,9 +126,34 @@ public class TerminusEstMC_SearchTree {
      * @return
      */
     public Hashtable<String, Double> ScoreActions(NodeMCTS root) {
-        Hashtable<String, Double> ht = new Hashtable<>();
+        ActionHeuristicTraversal aht = new ActionHeuristicTraversal();
+        aht.StartDepthFirstTraversal(root);
+        Hashtable<String, Double> ht = aht.scores;
+        return ht;
+    }
 
-        return null;
+    public Hashtable<String, Double> CombineScores(Hashtable<String, Double>[] hTables) {
+        // Get all keys.
+        Set<String> keys = hTables[0].keySet();
+        for (int i = 1; i < hTables.length; ++i) {
+            keys.addAll(hTables[i].keySet());
+        }
+
+        Hashtable<String, Double> combined = new Hashtable<>();
+        for (String id:
+             keys) {
+            double sum = 0;
+            int count = 0;
+            for (int i = 0; i < hTables.length; ++i) {
+                if (hTables[i].containsKey(id)) {
+                    sum += hTables[i].get(id);
+                    count += 1;
+                }
+            }
+            combined.put(id, sum/count);
+        }
+
+        return combined;
     }
 
     /**
@@ -223,11 +249,11 @@ public class TerminusEstMC_SearchTree {
     /**
      * Traverses an MCTS tree to compute heuristic scores for all actions encountered.
      */
-    public class ActionHeuristicTraversal extends Traversal {
+    public static class ActionHeuristicTraversal extends Traversal {
 
         public Hashtable<String, Double> sums;
         public Hashtable<String, Long> count;
-        public Hashtable<String, Double> score;
+        public Hashtable<String, Double> scores;
 
         public ActionHeuristicTraversal() {
             sums = new Hashtable<>();
@@ -250,10 +276,10 @@ public class TerminusEstMC_SearchTree {
          */
         @Override
         public void PostProcess() {
-            score = new Hashtable<>();
+            scores = new Hashtable<>();
             for (var a:
                  sums.keySet()) {
-                score.put(a, sums.get(a)/count.get(a));
+                scores.put(a, sums.get(a)/count.get(a));
             }
         }
 
