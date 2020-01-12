@@ -14,8 +14,9 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static boolean VERBOSE = false;
-    public static boolean PARALLEL = false;
+    public static final boolean VERBOSE = false;
+    public static final boolean PARALLEL = false;
+    public static final boolean SORT = true;
 
     public int iterations = 100000;
     public int simulations = 10;
