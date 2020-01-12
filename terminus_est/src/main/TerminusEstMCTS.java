@@ -5,7 +5,7 @@ import main.mcts.*;
 import main.mcts.base.*;
 import main.utility.Tuple2;
 
-import java.lang.reflect.Array;
+import javax.swing.plaf.synth.SynthTableUI;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +32,15 @@ public class TerminusEstMCTS {
 
     public TerminusEstMC_SearchTree searchTreeUtil;
 
+    private ExperimentData data;
+    private TerminusEstV4 te4;
+    private NodeMCTS searchTree;
+    private NodeMCTS bestFound;
+    private Hashtable<String, Double> heuristic;
+
+    private int upperBound;
+    private int lowerBound;
+
     public TerminusEstMCTS() {
         searchTreeUtil = new TerminusEstMC_SearchTree(1, iterations, simulations, param_c, param_d, this);
     }
@@ -54,38 +63,35 @@ public class TerminusEstMCTS {
         searchTreeUtil = new TerminusEstMC_SearchTree(trees, iterations, simulations, param_c, param_d, this);
     }
 
+    private void ExperimentSetup(String fName) {
+        // Setup.
+        if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
+        data = new ExperimentData();
+        data.fName = fName;
+        te4 = new TerminusEstV4(fName);
+
+        searchTreeUtil.CreateSearchTrees(te4);
+        // Get best search tree to start from, and the heuristic.
+        Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf();
+        searchTree = b.item1;
+        bestFound = b.item2;
+
+        searchTreeUtil.ComputeHeuristic();
+        heuristic = searchTreeUtil.heuristic;
+
+        SetUpperBound();
+    }
+
     /**
      * Runs a single experiment on the problem found in the given fName, for the duration given.
      * @param fName filename of problem
      * @param maxTime max duration for search in seconds.
      */
     public ExperimentData RunExperiment(String fName, double maxTime) {
-        if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
-        ExperimentData data = new ExperimentData();
-        data.fName = fName;
-
-        TerminusEstV4 te4 = new TerminusEstV4(fName);
-        Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf(te4);
-        NodeMCTS searchTree = b.item1;
-        NodeMCTS bestFound = b.item2;
+        ExperimentSetup(fName);
 
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
-
-        int upperBound;
-        if (bestFound == null) {
-            if (VERBOSE) System.out.println("No solution in the tree.");
-            // No solution found at all.
-            // (Increase by one to ensure we also check for the case in which we have do delete *all* leaves).
-            upperBound = te4.seenLeaves + 1;
-        } else {
-            if (VERBOSE) System.out.println("A solution was found in the tree.");
-            if (VERBOSE) System.out.println("At level: " + bestFound.depth);
-
-            // Best solution in tree is upper bound.
-            upperBound = bestFound.depth;
-            data.hybNumFromMCTS = bestFound.depth;
-        }
 
         NodeMCTS[][] searchNodes = GetLeavesForSearch(upperBound, searchTree, te4);
 
@@ -312,6 +318,7 @@ public class TerminusEstMCTS {
 
     /**
      * Abstracting out method that collects the different possible search path options.
+     * // TODO: Update this.
      * @param upperBound
      * @param searchTree
      * @param te4
@@ -330,13 +337,29 @@ public class TerminusEstMCTS {
         return collectLeaves.GetNodeByDepth();
     }
 
+    private void SetUpperBound() {
+        if (bestFound == null) {
+            if (VERBOSE) System.out.println("No solution in the tree.");
+            // No solution found at all.
+            // (Increase by one to ensure we also check for the case in which we have do delete *all* leaves).
+            upperBound = te4.seenLeaves + 1;
+        } else {
+            if (VERBOSE) System.out.println("A solution was found in the tree.");
+            if (VERBOSE) System.out.println("At level: " + bestFound.depth);
+
+            // Best solution in tree is upper bound.
+            upperBound = bestFound.depth;
+            data.hybNumFromMCTS = bestFound.depth;
+        }
+    }
+
     public static TerminusEstSolution GetExactSolution(String file) {
         TerminusEstMCTS tem = new TerminusEstMCTS();
 
         double timeStart = System.currentTimeMillis();
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
-        Tuple2<NodeMCTS, NodeMCTS> b = tem.searchTreeUtil.GetBestTreeAndLeaf(te4);
+        Tuple2<NodeMCTS, NodeMCTS> b = tem.searchTreeUtil.GetBestTreeAndLeaf();
         NodeMCTS searchTree = b.item1;
         NodeMCTS bestFound = b.item2;
 
@@ -456,7 +479,7 @@ public class TerminusEstMCTS {
         TerminusEstV4 te4 = new TerminusEstV4(file);
 
         NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
-        NodeMCTS bestFound = tem.searchTreeUtil.GetBestFound(searchTree);
+        NodeMCTS bestFound = tem.searchTreeUtil.GetBestInTree(searchTree);
 
         double timeEnd = System.currentTimeMillis();
         double seconds =  ((double)(timeEnd - timeNow))/1000.0;

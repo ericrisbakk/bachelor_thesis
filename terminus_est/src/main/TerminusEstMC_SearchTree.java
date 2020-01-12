@@ -21,13 +21,19 @@ public class TerminusEstMC_SearchTree {
 
     public static boolean VERBOSE = false;
 
+    // Params set at construction.
     public int trees;
     public int iterations;
     public int simulations;
     public double param_c;
     public double param_d;
-
     public TerminusEstMCTS manager;
+
+    // Created dynamically
+    public NodeMCTS[] searchTrees;
+    public Hashtable<String, Double>[] scores;
+    public Hashtable<String, Double> heuristic;
+
 
     public TerminusEstMC_SearchTree(int trees, int iterations, int simulations, double param_c, double param_d, TerminusEstMCTS manager) {
         this.trees = trees;
@@ -59,16 +65,18 @@ public class TerminusEstMC_SearchTree {
         return mcts.root;
     }
 
-    public NodeMCTS[] GetSearchTrees(TerminusEstV4 te4) {
-        NodeMCTS[] ar = new NodeMCTS[trees];
-        for (int i = 0; i < ar.length; ++i) {
-            ar[i] = GetSearchTree(te4);
-        }
-
-        return ar;
+    public NodeMCTS[] GetSearchTrees() {
+        return searchTrees;
     }
 
-    public NodeMCTS GetBestFound(NodeMCTS node) {
+    public void CreateSearchTrees(TerminusEstV4 te4) {
+        searchTrees = new NodeMCTS[trees];
+        for (int i = 0; i < searchTrees.length; ++i) {
+            searchTrees[i] = GetSearchTree(te4);
+        }
+    }
+
+    public NodeMCTS GetBestInTree(NodeMCTS node) {
         if (node.IsTerminal()) {
             return node;
         }
@@ -79,7 +87,7 @@ public class TerminusEstMC_SearchTree {
 
         NodeMCTS bestChild = null;
         for (int i = 0; i < node.children.length; ++i) {
-            NodeMCTS option = GetBestFound(node.children[i]);
+            NodeMCTS option = GetBestInTree(node.children[i]);
             if (option != null) {
                 if (bestChild == null)
                     bestChild = option;
@@ -95,15 +103,14 @@ public class TerminusEstMC_SearchTree {
 
     /**
      * Run multiple times and return the single best tree found, according to the best solution discovered in that tree.
-     * @param te4
      * @return
      */
-    public Tuple2<NodeMCTS, NodeMCTS> GetBestTreeAndLeaf(TerminusEstV4 te4) {
-        NodeMCTS[] trees = GetSearchTrees(te4);
+    public Tuple2<NodeMCTS, NodeMCTS> GetBestTreeAndLeaf() {
+        NodeMCTS[] trees = searchTrees;
         NodeMCTS root = trees[0];
-        NodeMCTS child = GetBestFound(trees[0]);
+        NodeMCTS child = GetBestInTree(trees[0]);
         for (int i = 1; i < trees.length; ++i) {
-            NodeMCTS next = GetBestFound(trees[i]);
+            NodeMCTS next = GetBestInTree(trees[i]);
             if (next != null) {
                 if (child == null) {
                     child = next;
@@ -119,20 +126,29 @@ public class TerminusEstMC_SearchTree {
         return new Tuple2<>(root, child);
     }
 
+    public void ComputeHeuristic() {
+        scores = new Hashtable[searchTrees.length];
+        for (int i = 0; i < scores.length; ++i) {
+            scores[i] = ScoreActions(searchTrees[i]);
+        }
+
+        heuristic = CombineScores(scores);
+    }
+
     /**
      * TODO: FINISH THIS.
      * Call to score actions of a single tree.
      * @param root
      * @return
      */
-    public Hashtable<String, Double> ScoreActions(NodeMCTS root) {
+    private Hashtable<String, Double> ScoreActions(NodeMCTS root) {
         ActionHeuristicTraversal aht = new ActionHeuristicTraversal();
         aht.StartDepthFirstTraversal(root);
         Hashtable<String, Double> ht = aht.scores;
         return ht;
     }
 
-    public Hashtable<String, Double> CombineScores(Hashtable<String, Double>[] hTables) {
+    private Hashtable<String, Double> CombineScores(Hashtable<String, Double>[] hTables) {
         // Get all keys.
         Set<String> keys = hTables[0].keySet();
         for (int i = 1; i < hTables.length; ++i) {
