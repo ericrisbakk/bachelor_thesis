@@ -5,7 +5,6 @@ import main.mcts.*;
 import main.mcts.base.*;
 import main.utility.Tuple2;
 
-import javax.swing.plaf.synth.SynthTableUI;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +16,7 @@ public class TerminusEstMCTS {
     public static final boolean VERBOSE = false;
     public static final boolean PARALLEL = false;
     public static final boolean SORT = true;
+    public static final boolean BY_DEPTH = false;
 
     public int iterations = 100000;
     public int simulations = 10;
@@ -37,6 +37,8 @@ public class TerminusEstMCTS {
     private NodeMCTS searchTree;
     private NodeMCTS bestFound;
     private Hashtable<String, Double> heuristic;
+    private NodeMCTS[] sorted;
+    private NodeMCTS[][] sortedByDepth;
 
     private int upperBound;
     private int lowerBound;
@@ -63,7 +65,7 @@ public class TerminusEstMCTS {
         searchTreeUtil = new TerminusEstMC_SearchTree(trees, iterations, simulations, param_c, param_d, this);
     }
 
-    private void ExperimentSetup(String fName) {
+    private void ExperimentSetup(String fName, double maxTime) {
         // Setup.
         if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
         data = new ExperimentData();
@@ -80,6 +82,26 @@ public class TerminusEstMCTS {
         heuristic = searchTreeUtil.heuristic;
 
         SetUpperBound();
+
+        timeStart = timeSinceLastSearchTreeBuilt;
+        data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
+
+        if (BY_DEPTH)
+            sortedByDepth = GetSortedByDepth(upperBound, searchTree, te4);
+        else
+            sorted = GetSortedByHeuristic();
+
+        if (VERBOSE) System.out.println("Nodes to search from collected.");
+        if (VERBOSE) {
+            System.out.println("Distribution: ");
+            for (int i = 0; i < sortedByDepth.length; ++i) {
+                System.out.println("Depth " + i + ": " + sortedByDepth[i].length);
+            }
+
+        }
+
+        te4.startTime = timeStart;
+        te4.setRuntime(maxTime);
     }
 
     /**
@@ -88,25 +110,9 @@ public class TerminusEstMCTS {
      * @param maxTime max duration for search in seconds.
      */
     public ExperimentData RunExperiment(String fName, double maxTime) {
-        ExperimentSetup(fName);
-
-        timeStart = timeSinceLastSearchTreeBuilt;
-        data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
-
-        NodeMCTS[][] searchNodes = GetLeavesForSearch(upperBound, searchTree, te4);
-
-        if (VERBOSE) System.out.println("Nodes to search from collected.");
-        if (VERBOSE) {
-            System.out.println("Distribution: ");
-            for (int i = 0; i < searchNodes.length; ++i) {
-                System.out.println("Depth " + i + ": " + searchNodes[i].length);
-            }
-
-        }
+        ExperimentSetup(fName, maxTime);
 
         // Time to run!
-        te4.startTime = timeStart;
-        te4.setRuntime(maxTime);
         TerminusEstSolution solution = null;
         NodeMCTS solutionNode = null;
 
@@ -128,7 +134,7 @@ public class TerminusEstMCTS {
 
                 if (PARALLEL) {
                     // Create the parallell callables.
-                    NodeMCTS[] subset = searchNodes[j];
+                    NodeMCTS[] subset = sortedByDepth[j];
                     if (subset.length > 0) {
                         ArrayList<TerminusEstParallel> l = new ArrayList<>(subset.length);
                         for (int m = 0; m < subset.length; ++m) {
@@ -165,7 +171,7 @@ public class TerminusEstMCTS {
                                     data.hybNumExact = i;
                                     data.solutionNodeDepth = j;
                                     data.solutionNodeInstance = -1;
-                                    data.solutionDepthTotalInstances = searchNodes[j].length;
+                                    data.solutionDepthTotalInstances = sortedByDepth[j].length;
                                     break;
                                 }
                             }
@@ -175,9 +181,9 @@ public class TerminusEstMCTS {
                     }
                 }
                 else {
-                    for (int k = 0; k < searchNodes[j].length; ++k) {
+                    for (int k = 0; k < sortedByDepth[j].length; ++k) {
                         // Construct trees we are searching from.
-                        NodeMCTS node = searchNodes[j][k]; // Make it easier to reference this node.
+                        NodeMCTS node = sortedByDepth[j][k]; // Make it easier to reference this node.
                         TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
                         solution = te4.ComputePartialSolution(s.t1, s.t2, j, i - j);
                         solutionNode = node;
@@ -199,7 +205,7 @@ public class TerminusEstMCTS {
                             data.hybNumExact = i;
                             data.solutionNodeDepth = j;
                             data.solutionNodeInstance = k;
-                            data.solutionDepthTotalInstances = searchNodes[j].length;
+                            data.solutionDepthTotalInstances = sortedByDepth[j].length;
                             break;
                         }
                     }
@@ -324,7 +330,7 @@ public class TerminusEstMCTS {
      * @param te4
      * @return
      */
-    private NodeMCTS[][] GetLeavesForSearch(int upperBound, NodeMCTS searchTree, TerminusEstV4 te4) {
+    private NodeMCTS[][] GetSortedByDepth(int upperBound, NodeMCTS searchTree, TerminusEstV4 te4) {
         // Find all candidate tree nodes to search from.
         TerminusEstMC_SearchTree.CollectLeaves collectLeaves = new TerminusEstMC_SearchTree.CollectLeaves(upperBound, te4);
         collectLeaves.StartDepthFirstTraversal(searchTree);
@@ -335,6 +341,22 @@ public class TerminusEstMCTS {
                     + "\tNode duplicates in tree: " + LeafCollection_Duplicates);
         }
         return collectLeaves.GetNodeByDepth();
+    }
+
+    private NodeMCTS[] GetSortedByHeuristic() {
+        TerminusEstMC_SearchTree.CollectLeaves collectLeaves = new TerminusEstMC_SearchTree.CollectLeaves(upperBound, te4);
+        collectLeaves.comp = new TerminusEstMC_SearchTree.SortByHeuristic(heuristic);
+
+        collectLeaves.StartDepthFirstTraversal(searchTree);
+
+        LeafCollection_Duplicates = collectLeaves.LeafCollection_Duplicates;
+        LeafCollection_NodesTraversed = collectLeaves.LeafCollection_NodesTraversed;
+        if (VERBOSE) {
+            System. out.println("Nodes traversed: " + LeafCollection_NodesTraversed
+                    + "\tNode duplicates in tree: " + LeafCollection_Duplicates);
+        }
+
+        return collectLeaves.nodes.toArray(new NodeMCTS[collectLeaves.nodes.size()]);
     }
 
     private void SetUpperBound() {
@@ -378,7 +400,7 @@ public class TerminusEstMCTS {
         }
 
         // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = tem.GetLeavesForSearch(upperBound, searchTree, te4);
+        NodeMCTS[][] searchNodes = tem.GetSortedByDepth(upperBound, searchTree, te4);
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
             System.out.println("Distribution: ");

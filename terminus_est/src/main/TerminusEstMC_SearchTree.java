@@ -348,4 +348,32 @@ public class TerminusEstMC_SearchTree {
             return 0;
         }
     }
+
+    /**
+     * Comparator to be used in Arrays.sort. Sorts nodes with more visits in front of nodes with less.
+     */
+    public static class SortByHeuristic implements Comparator<NodeMCTS> {
+        Hashtable<String, Double> h;
+
+        public SortByHeuristic(Hashtable<String, Double> h) {
+            this.h = h;
+        }
+
+        @Override
+        public int compare(NodeMCTS o1, NodeMCTS o2) {
+            if ( getH(o1) > getH(o2)) {
+                return -1;
+            }
+            else if ( getH(o1) < getH(o2) ) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        private double getH(NodeMCTS o) {
+            return h.get(o.lastAction.toString());
+        }
+    }
+
 }
