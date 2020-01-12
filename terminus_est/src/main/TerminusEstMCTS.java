@@ -1,6 +1,5 @@
 package main;
 
-import jdk.jshell.spi.ExecutionControl;
 import main.TerminusEst.*;
 import main.mcts.*;
 import main.mcts.base.*;
@@ -14,8 +13,9 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
     public static final boolean PARALLEL = false;
+    public static final boolean USE_HEURISTIC = false;
     public static final boolean USE_TREE = true;
     public static final boolean SORT_BY_DEPTH = false;
 
@@ -84,16 +84,19 @@ public class TerminusEstMCTS {
         searchTree = b.item1;
         bestFound = b.item2;
 
-        searchTreeUtil.ComputeHeuristic();
-        heuristic = searchTreeUtil.heuristic;
-        te4.UseHeuristic(heuristic);
+        if (USE_HEURISTIC) {
+            searchTreeUtil.ComputeHeuristic();
+            heuristic = searchTreeUtil.heuristic;
+            te4.UseHeuristic(heuristic);
+        }
+
         SetUpperBound();
 
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
 
         if (USE_TREE){
-            sorted = GetSortedByHeuristic();
+            sorted = GetTree();
             if (SORT_BY_DEPTH) {
                 SortByDepth(sorted);
             }
@@ -313,8 +316,8 @@ public class TerminusEstMCTS {
             currentNetwork = solution.root;
 
             if (solutionNode.IsRoot()) {
-                System.out.println("Solution node was root, somewhow.");
-                // return new TerminusEstSolution(currentNetwork, 0, 0);
+                System.out.println("Solution node was root.");
+                return te4.FixNetwork(currentNetwork);
             }
 
             nextNode = solutionNode;
@@ -405,9 +408,9 @@ public class TerminusEstMCTS {
         Arrays.sort(toBeSorted, new TerminusEstMC_SearchTree.SortByDepth());
     }
 
-    private NodeMCTS[] GetSortedByHeuristic() {
+    private NodeMCTS[] GetTree() {
         TerminusEstMC_SearchTree.CollectLeaves collectLeaves = new TerminusEstMC_SearchTree.CollectLeaves(upperBound, te4);
-        collectLeaves.comp = new TerminusEstMC_SearchTree.SortByHeuristic(heuristic);
+        if (USE_HEURISTIC) collectLeaves.comp = new TerminusEstMC_SearchTree.SortByHeuristic(heuristic);
 
         collectLeaves.StartDepthFirstTraversal(searchTree);
 
@@ -608,7 +611,7 @@ public class TerminusEstMCTS {
 
         // GetExactSolution(args[0]);
 
-        TerminusEstMCTS test = new TerminusEstMCTS( (int) (Math.pow(10, 4)), 10, Math.sqrt(2), 1000, 10);
+        TerminusEstMCTS test = new TerminusEstMCTS( (int) (3*Math.pow(10, 3)), 10, Math.sqrt(2), 1000, 10);
 
         test.RunExperiment(args[0], 3600, 14);
     }
