@@ -1,15 +1,14 @@
 package main.TerminusEst;
 
-import java.text.ParseException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.concurrent.Callable;
+import main.TerminusEstMC_SearchTree;
+
+import java.util.*;
 
 public class TerminusEstV4 {
 
     public Hashtable nameToNum;
     public Hashtable numToName;
+    private Comparator<Tree> comp;
 
     //! VERSION 3: HASHING IS BY DEFAULT SWITCHED ON
     //! VERSION 2: LOOKUP TABLE FOR ALREADY COMPUTED SOLUTIONS
@@ -27,6 +26,10 @@ public class TerminusEstV4 {
     public long startTime;
 
     public TerminusEstV4(String file) {
+        Setup(file);
+    }
+
+    private void Setup(String file) {
         TerminusEstInputHandler ih = new TerminusEstInputHandler();
         ih.InterpretFile(file, this);
 
@@ -53,6 +56,17 @@ public class TerminusEstV4 {
 
             t2.dump();
             System.out.println(";");
+        }
+    }
+
+    public void UseHeuristic(Hashtable<String, Double> heuristic) {
+        if (heuristic != null) {
+            SORT_BY_HEURISTIC = true;
+            comp = new TerminusEstV4.CompareByHeuristic(heuristic);
+        }
+        else {
+            SORT_BY_HEURISTIC = false;
+            comp = null;
         }
     }
 
@@ -112,6 +126,7 @@ public class TerminusEstV4 {
     public static boolean USEMINCLUS = true;
     public static boolean BUILDNETWORK = true;
     public static boolean USEHASH = true;
+    private boolean SORT_BY_HEURISTIC;
 
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
@@ -583,6 +598,10 @@ public class TerminusEstV4 {
 
         //! ---------------------------------------------------------------------------
         if(VERBOSE) System.out.println(guessSet.size()+" taxa to consider deleting.");
+
+        if (SORT_BY_HEURISTIC) {
+            guessSet.sort(comp);
+        }
 
         for( int m=0; m<guessSet.size(); m++ )
         {
@@ -1321,6 +1340,30 @@ public class TerminusEstV4 {
     }
 
     public boolean isCanceled() { return canceled; }
+
+    private static class CompareByHeuristic implements Comparator<Tree> {
+        private Hashtable<String, Double> h;
+
+        CompareByHeuristic(Hashtable<String, Double> h) {
+            this.h = h;
+        }
+
+        @Override
+        public int compare(Tree o1, Tree o2) {
+            if (getH(o1) > getH(o2)) return -1;
+            if (getH(o1) < getH(o2)) return 1;
+
+            return 0;
+        }
+
+        private double getH(Tree o) {
+            String id = o.getName();
+            if (h.containsKey(id)) {
+                return h.get(id);
+            }
+            return 0;
+        }
+    }
 
     public static void main(String args[])
     {
