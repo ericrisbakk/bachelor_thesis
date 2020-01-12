@@ -15,8 +15,8 @@ public class TerminusEstMCTS {
 
     public static final boolean VERBOSE = false;
     public static final boolean PARALLEL = false;
-    public static final boolean SORT = true;
-    public static final boolean BY_DEPTH = false;
+    public static final boolean USE_TREE = true;
+    public static final boolean SORT_BY_DEPTH = false;
 
     public int iterations = 100000;
     public int simulations = 10;
@@ -86,10 +86,15 @@ public class TerminusEstMCTS {
         timeStart = timeSinceLastSearchTreeBuilt;
         data.timeBuildingSearchTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
 
-        if (BY_DEPTH)
-            sortedByDepth = GetSortedByDepth(upperBound, searchTree, te4);
-        else
+        if (USE_TREE){
             sorted = GetSortedByHeuristic();
+            if (SORT_BY_DEPTH) {
+                SortByDepth(sorted);
+            }
+        } else {
+            // Use arbitrary root as search start.
+            sorted = new NodeMCTS[] {searchTree};
+        }
 
         if (VERBOSE) System.out.println("Nodes to search from collected.");
         if (VERBOSE) {
@@ -341,6 +346,11 @@ public class TerminusEstMCTS {
                     + "\tNode duplicates in tree: " + LeafCollection_Duplicates);
         }
         return collectLeaves.GetNodeByDepth();
+    }
+
+    public void SortByDepth(NodeMCTS[] toBeSorted) {
+
+        Arrays.sort(toBeSorted, new TerminusEstMC_SearchTree.SortByDepth());
     }
 
     private NodeMCTS[] GetSortedByHeuristic() {
