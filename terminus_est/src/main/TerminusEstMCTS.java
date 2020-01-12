@@ -136,8 +136,13 @@ public class TerminusEstMCTS {
         } // End of search
     }
 
+    /**
+     * Search the subset at hyb=i in a parallel fashion.
+     * @param subset
+     * @param i
+     */
     private void ParallelSearch(NodeMCTS[] subset, int i) {
-        // Create the parallell callables.
+        // Create the parallel callables.
         if (subset.length > 0) {
             ArrayList<TerminusEstParallel> l = new ArrayList<>(subset.length);
             for (int m = 0; m < subset.length; ++m) {
@@ -185,6 +190,11 @@ public class TerminusEstMCTS {
         }
     }
 
+    /**
+     * Search the subset at hyb=i in a linear fashion.
+     * @param subset
+     * @param i
+     */
     private void LinearSearch(NodeMCTS[] subset, int i) {
         for (int k = 0; k < subset.length; ++k) {
             // Construct trees we are searching from.
@@ -216,6 +226,11 @@ public class TerminusEstMCTS {
         }
     }
 
+    /**
+     * @param ar
+     * @param depth
+     * @return Subset array of mcts nodes with depth equal to or less than the one given.
+     */
     private NodeMCTS[] GetSubset(NodeMCTS[] ar, int depth) {
         ArrayList<NodeMCTS> subset = new ArrayList<>();
 
@@ -229,14 +244,10 @@ public class TerminusEstMCTS {
     }
 
     /**
-     * Runs a single experiment on the problem found in the given fName, for the duration given.
-     * @param fName filename of problem
-     * @param maxTime max duration for search in seconds.
+     * To be run after search has been performed. Creation of the network and any additional data gathering happens
+     * in this section.
      */
-    public ExperimentData RunExperiment(String fName, double maxTime) {
-        ExperimentSetup(fName, maxTime);
-        Search();
-
+    private void PostSearchEvaluation() {
         if (solution == null && bestFound != null && !te4.isCanceled()) {
             data.hybNumExact = bestFound.depth;
             data.solutionNodeDepth = bestFound.depth;
@@ -253,7 +264,17 @@ public class TerminusEstMCTS {
         } else {
             if (VERBOSE) System.out.println("No network constructed.");
         }
+    }
 
+    /**
+     * Runs a single experiment on the problem found in the given fName, for the duration given.
+     * @param fName filename of problem
+     * @param maxTime max duration for search in seconds.
+     */
+    public ExperimentData RunExperiment(String fName, double maxTime) {
+        ExperimentSetup(fName, maxTime);
+        Search();
+        PostSearchEvaluation();
         return data;
     }
 
