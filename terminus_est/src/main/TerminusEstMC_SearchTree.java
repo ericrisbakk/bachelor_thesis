@@ -350,7 +350,7 @@ public class TerminusEstMC_SearchTree {
     }
 
     /**
-     * Comparator to be used in Arrays.sort. Sorts nodes with more visits in front of nodes with less.
+     * Comparator to be used in Arrays.sort. Sorts nodes with with higher scores first.
      */
     public static class SortByHeuristic implements Comparator<NodeMCTS> {
         Hashtable<String, Double> h;
@@ -376,4 +376,10 @@ public class TerminusEstMC_SearchTree {
         }
     }
 
+    public static class SortByDepth implements Comparator<NodeMCTS> {
+        @Override
+        public int compare(NodeMCTS o1, NodeMCTS o2) {
+            return o2.depth - o1.depth;
+        }
+    }
 }
