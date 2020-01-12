@@ -126,7 +126,7 @@ public class TerminusEstV4 {
     public static boolean USEMINCLUS = true;
     public static boolean BUILDNETWORK = true;
     public static boolean USEHASH = true;
-    private boolean SORT_BY_HEURISTIC;
+    private boolean SORT_BY_HEURISTIC = false;
 
 //! IN VERSION 2 we will remember when this call fails, and put it in a hash table...
 
