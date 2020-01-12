@@ -200,7 +200,7 @@ public class ExperimentRunner {
     }
 
     public void ExperimentTerminusEstMCTS() {
-        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN_41_50.csv";
+        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN_IGNORE.csv";
 
         int num = 6;
         int[] instances = new int[num];
