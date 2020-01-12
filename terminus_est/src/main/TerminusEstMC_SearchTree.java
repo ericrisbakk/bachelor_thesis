@@ -9,10 +9,7 @@ import main.mcts.base.MCTS;
 import main.mcts.processing.Traversal;
 import main.utility.Tuple2;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Manages the aspects of the search tree created by MCTS.
@@ -57,11 +54,9 @@ public class TerminusEstMC_SearchTree {
         Tree T2 = te4.t2.copy(null, null);
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
-        if (manager.VERBOSE) System.out.println("Building search tree.");
         manager.timeSinceLastSearchTreeBuilt = System.currentTimeMillis();
         mcts.BuildTree(state);
         manager.timeSinceLastSearchTreeCompleted = System.currentTimeMillis();
-        if (manager.VERBOSE) System.out.println("Search tree completed.");
         return mcts.root;
     }
 
@@ -70,10 +65,14 @@ public class TerminusEstMC_SearchTree {
     }
 
     public void CreateSearchTrees(TerminusEstV4 te4) {
+        if (manager.VERBOSE) System.out.println("Building search trees: ");
         searchTrees = new NodeMCTS[trees];
         for (int i = 0; i < searchTrees.length; ++i) {
+            if (manager.VERBOSE) System.out.print(i + ", ");
             searchTrees[i] = GetSearchTree(te4);
         }
+
+        if (manager.VERBOSE) System.out.println();
     }
 
     public NodeMCTS GetBestInTree(NodeMCTS node) {
@@ -109,8 +108,18 @@ public class TerminusEstMC_SearchTree {
         NodeMCTS[] trees = searchTrees;
         NodeMCTS root = trees[0];
         NodeMCTS child = GetBestInTree(trees[0]);
+
+        if (manager.VERBOSE)  {
+            if (child != null) System.out.print("Best depths: " + child.depth + ", ");
+            else System.out.print("Best depths: X, ");
+        }
+
         for (int i = 1; i < trees.length; ++i) {
             NodeMCTS next = GetBestInTree(trees[i]);
+            if (manager.VERBOSE) {
+                if (next != null) System.out.print(next.depth + ", ");
+                else System.out.print("X, ");
+            }
             if (next != null) {
                 if (child == null) {
                     child = next;
@@ -122,7 +131,7 @@ public class TerminusEstMC_SearchTree {
                 }
             }
         }
-
+        if (manager.VERBOSE) System.out.println();
         return new Tuple2<>(root, child);
     }
 
@@ -150,7 +159,7 @@ public class TerminusEstMC_SearchTree {
 
     private Hashtable<String, Double> CombineScores(Hashtable<String, Double>[] hTables) {
         // Get all keys.
-        Set<String> keys = hTables[0].keySet();
+        HashSet<String> keys = new HashSet<>(hTables[0].keySet());
         for (int i = 1; i < hTables.length; ++i) {
             keys.addAll(hTables[i].keySet());
         }
@@ -372,7 +381,11 @@ public class TerminusEstMC_SearchTree {
         }
 
         private double getH(NodeMCTS o) {
-            return h.get(o.lastAction.toString());
+            String key = o.lastAction.toString();
+            if (h.containsKey(key))
+                return h.get(o.lastAction.toString());
+            else
+                return 0;
         }
     }
 
