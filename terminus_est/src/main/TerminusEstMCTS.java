@@ -1,5 +1,6 @@
 package main;
 
+import jdk.jshell.spi.ExecutionControl;
 import main.TerminusEst.*;
 import main.mcts.*;
 import main.mcts.base.*;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 public class TerminusEstMCTS {
 
-    public static final boolean VERBOSE = false;
+    public static final boolean VERBOSE = true;
     public static final boolean PARALLEL = false;
     public static final boolean USE_TREE = true;
     public static final boolean SORT_BY_DEPTH = false;
@@ -85,7 +86,7 @@ public class TerminusEstMCTS {
 
         searchTreeUtil.ComputeHeuristic();
         heuristic = searchTreeUtil.heuristic;
-
+        te4.UseHeuristic(heuristic);
         SetUpperBound();
 
         timeStart = timeSinceLastSearchTreeBuilt;
@@ -118,18 +119,22 @@ public class TerminusEstMCTS {
         }
 
         // i = investigation decision problem r = i.
-        for (int i = 0; i < upperBound; ++i) {
+        data.hybLowerBound = lowerBound;
+        for (int i = lowerBound; i < upperBound; ++i) {
             if (VERBOSE) System.out.println("Attempting hyb = " + i);
             if (VERBOSE) System.out.print("\tProgress: ");
             // j = All search nodes at depth i which we wish to investigate.
             NodeMCTS[] subset = GetSubset(sorted, i);
 
+            if (subset.length > 0) {
                 if (PARALLEL) {
                     ParallelSearch(subset, i);
-                }
-                else {
+                } else {
                     LinearSearch(subset, i);
                 }
+            }
+
+                if (VERBOSE) System.out.println();
 
                 data.hybLowerBound = i;
                 if (solution != null || te4.isCanceled()) break;
@@ -143,7 +148,6 @@ public class TerminusEstMCTS {
      */
     private void ParallelSearch(NodeMCTS[] subset, int i) {
         // Create the parallel callables.
-        if (subset.length > 0) {
             ArrayList<TerminusEstParallel> l = new ArrayList<>(subset.length);
             for (int m = 0; m < subset.length; ++m) {
                 TerminusEstState s = (TerminusEstState) subset[m].ConstructNodeState();
@@ -187,7 +191,6 @@ public class TerminusEstMCTS {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
     }
 
     /**
@@ -197,6 +200,14 @@ public class TerminusEstMCTS {
      */
     private void LinearSearch(NodeMCTS[] subset, int i) {
         for (int k = 0; k < subset.length; ++k) {
+
+            if (VERBOSE) {
+                int step = (subset.length/10) + 1;
+                if (k%step == 0) {
+                    System.out.print(". ");
+                }
+            }
+
             // Construct trees we are searching from.
             NodeMCTS node = subset[k]; // Make it easier to reference this node.
             TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
@@ -271,11 +282,17 @@ public class TerminusEstMCTS {
      * @param fName filename of problem
      * @param maxTime max duration for search in seconds.
      */
-    public ExperimentData RunExperiment(String fName, double maxTime) {
+    public ExperimentData RunExperiment(String fName, double maxTime, int lowerBound) {
+        this.lowerBound = lowerBound;
         ExperimentSetup(fName, maxTime);
         Search();
         PostSearchEvaluation();
+        if (VERBOSE) System.out.println("\nDATA:\n" + data.GetData());
         return data;
+    }
+
+    public ExperimentData RunExperiment(String fName, double maxTime) {
+        return RunExperiment(fName, maxTime, 0);
     }
 
     /**
@@ -591,9 +608,9 @@ public class TerminusEstMCTS {
 
         // GetExactSolution(args[0]);
 
-        TerminusEstMCTS test = new TerminusEstMCTS((int) Math.pow(10, 4), 10, Math.sqrt(2), 1000);
+        TerminusEstMCTS test = new TerminusEstMCTS( (int) (Math.pow(10, 4)), 10, Math.sqrt(2), 1000, 10);
 
-        test.RunExperiment(args[0], 600);
+        test.RunExperiment(args[0], 3600, 14);
     }
 
     
