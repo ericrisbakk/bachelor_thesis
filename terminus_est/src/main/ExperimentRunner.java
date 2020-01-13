@@ -4,7 +4,9 @@ import main.TerminusEst.TerminusEstSolution;
 import main.TerminusEst.TerminusEstV4;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ExperimentRunner {
 
@@ -167,9 +169,21 @@ public class ExperimentRunner {
             Write(line);
         }
 
+        public void WriteResult(String fileName, TerminusEstSolution s, int lowerBound) {
+            String line = fileName + ", " + s.hyb + ", " + s.runtime + ", " + lowerBound + "\n";
+            Write(line);
+        }
+
+
+
         public void WriteResult(TerminusEstMCTS.ExperimentData d) {
             String line = d.GetData() + "\n";
             Write(line);
+        }
+
+        public void WriteResult(String fileName, String line) {
+            String l = fileName + ", " + line;
+            Write(l);
         }
 
         public void Close () {
@@ -210,15 +224,23 @@ public class ExperimentRunner {
         dw.Close();
     }
 
-    public void BasicTerminusEst(String[] files, String outputFile, int runtime) {
-        String hdr = "ID, BASIC_HYB, BASIC_RUNTIME\n";
+    public void BasicTerminusEst(String[] files, String outputFile, int runtime, int startAt) {
+        System.out.println("\nWriting to: " + outputFile + "\n");
+        String hdr = "ID, BASIC_HYB, BASIC_RUNTIME, BASIC_LB\n";
         DataWriter dw = new DataWriter(outputFile, hdr);
 
-        for (int i = 0; i < files.length; ++i) {
-            System.out.print(files[i] + ", ");
-            TerminusEstSolution s = (new TerminusEstV4(files[i])).ComputeSolution(runtime);
-            System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime);
-            dw.WriteResult(files[i], s);
+        for (int i = startAt; i < files.length; ++i) {
+            System.out.print("(" + (i+1) + "/" + files.length + ") "  +files[i] + ", ");
+            TerminusEstV4 te4 = new TerminusEstV4(files[i]);
+            TerminusEstSolution s = te4.ComputeSolution(runtime);
+            if (s != null){
+                System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime);
+                dw.WriteResult(files[i], s, te4.lowerBound);
+            }
+            else {
+                System.out.println("Didn't finish.");
+                dw.WriteResult(files[i], "-1, " + runtime + ", " + te4.lowerBound);
+            }
         }
 
         dw.Close();
@@ -250,9 +272,23 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    public static String outputFolder = "D:/Uni/DataOutput/";
+
+    public static String basicTE = "basicTE";
+
+    public static String fType = ".csv";
+    public static SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
+
+    public static String GetFileName(String base) {
+        Date date = new Date(); // this object contains the current date value
+        return outputFolder + base + "_" + format.format(date) + fType;
+    }
+
     public static void main(String[] args) {
         ExperimentRunner er = new ExperimentRunner();
         // er.ExperimentTerminusEstMCTS();
-        // er.BasicTerminusEst(er.getDataEasy(), ,600);
+        // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
+        // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
+        er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 1);
     }
 }

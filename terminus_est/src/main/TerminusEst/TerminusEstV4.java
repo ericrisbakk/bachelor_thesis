@@ -24,6 +24,7 @@ public class TerminusEstV4 {
     public double runtime;
     private boolean canceled = false;
     public long startTime;
+    public int lowerBound;
 
     public TerminusEstV4(String file) {
         Setup(file);
@@ -1199,6 +1200,7 @@ public class TerminusEstV4 {
 
         for( int l=0; l <= seenLeaves; l++ )
         {
+            lowerBound = l;
             // System.out.println("Trying hybridization number: " + l);
             Tree T1 = t1.copy(null,null);
             Tree T2 = t2.copy(null,null);
