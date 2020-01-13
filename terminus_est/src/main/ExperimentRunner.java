@@ -3,15 +3,14 @@ package main;
 import main.TerminusEst.TerminusEstSolution;
 import main.TerminusEst.TerminusEstV4;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 
 public class ExperimentRunner {
 
     public static String dataFolder = "D:/Uni/TreeGen/Data/";
     public static String finalDataFolder = "D:/Uni/TreeGen/FinalData/";
+    public static String dataSubset = "D:/Uni/DataInput/";
 
     /**
      * Fetches files from the relevant folder. All files are assumed to follow a pattern of
@@ -30,6 +29,25 @@ public class ExperimentRunner {
 
         String[] files;
         int file;
+
+        public DataFetcher(String file) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                ArrayList<String> f = new ArrayList<>();
+                String dataPoint = br.readLine();
+                while (dataPoint != null) {
+                    f.add(dataPoint);
+                    dataPoint = br.readLine();
+                }
+
+                files = f.toArray(new String[] {});
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         public DataFetcher(int[] b, int[] n, int[] c, int inst_lower, int inst_upper) {
             this.folderPath = finalDataFolder;
@@ -99,6 +117,22 @@ public class ExperimentRunner {
             return folderPath + "n" + n[ni] + "r" + r[ri] + "c" + c[ci] + "_" + inst[ii] + ".txt";
         }
     }
+
+    public String[] getDataEasy() {
+        DataFetcher df = new DataFetcher(dataSubset + "data_easy.txt");
+        return df.files;
+    }
+
+    public String[] getDataMedium() {
+        DataFetcher df = new DataFetcher(dataSubset + "data_medium.txt");
+        return df.files;
+    }
+
+    public String[] getDataHard() {
+        DataFetcher df = new DataFetcher(dataSubset + "data_hard.txt");
+        return df.files;
+    }
+
 
     public class DataWriter {
         FileWriter fr = null;
@@ -176,24 +210,15 @@ public class ExperimentRunner {
         dw.Close();
     }
 
-    public void ExperimentBasicTerminusEst() {
-        String outputFile = "D:/Uni/DataOutput/BasicTerminusEst_1.csv";
-
-        int num = 6;
-        int[] instances = new int[num];
-        for (int i = 1; i <= num; ++i) {
-            instances[i-1] = i;
-        }
-
-        DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
+    public void BasicTerminusEst(String[] files, String outputFile, int runtime) {
         String hdr = "ID, BASIC_HYB, BASIC_RUNTIME\n";
         DataWriter dw = new DataWriter(outputFile, hdr);
 
-        for (int i = 0; i < df.files.length; ++i) {
-            System.out.print(df.files[i] + ", ");
-            TerminusEstSolution s = (new TerminusEstV4(df.files[i])).ComputeSolution(600);
+        for (int i = 0; i < files.length; ++i) {
+            System.out.print(files[i] + ", ");
+            TerminusEstSolution s = (new TerminusEstV4(files[i])).ComputeSolution(runtime);
             System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime);
-            dw.WriteResult(df.files[i], s);
+            dw.WriteResult(files[i], s);
         }
 
         dw.Close();
@@ -227,6 +252,7 @@ public class ExperimentRunner {
 
     public static void main(String[] args) {
         ExperimentRunner er = new ExperimentRunner();
-        er.ExperimentTerminusEstMCTS();
+        // er.ExperimentTerminusEstMCTS();
+        // er.BasicTerminusEst(er.getDataEasy(), ,600);
     }
 }
