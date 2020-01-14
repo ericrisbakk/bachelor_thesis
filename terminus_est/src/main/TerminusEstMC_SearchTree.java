@@ -190,6 +190,7 @@ public class TerminusEstMC_SearchTree {
         public Hashtable<Integer, Integer> nodesAtDepth = new Hashtable<>();
         public int firstTerminalNodeDepth = -1;
         public long firstTerminalNodeID = -1;
+        public int deepestDepth;
         public int numberOfNodes;
         public TerminusEstMCTS.TreeData d;
 
@@ -211,12 +212,20 @@ public class TerminusEstMC_SearchTree {
                 count += nodesAtDepth.get(depth);
             }
 
+            d.treeDepthAvg = (double) sum  / (double) count;
+
             // Get percentiles.
             int current = 0;
             for (var depth : nodesAtDepth.keySet()) {
-                sum += depth*nodesAtDepth.get(depth);
-                count += nodesAtDepth.get(depth);
+                current += nodesAtDepth.get(depth);
+
+                if (d.treeDepth0 == -1) d.treeDepth0 = depth;
+                if (d.treeDepth25 == -1 && ((double) current/ (double)count) > 0.25) d.treeDepth25 = depth;
+                if (d.treeDepth50 == -1 && ((double) current/count) > 0.50) d.treeDepth50 = depth;
+                if (d.treeDepth75 == -1 && ((double) current/count) > 0.75) d.treeDepth75 = depth;
             }
+
+            d.treeDepth100 = deepestDepth;
         }
 
         @Override
@@ -228,6 +237,7 @@ public class TerminusEstMC_SearchTree {
         public void BeforeStop(NodeMCTS n) {
             ++numberOfNodes;
             if (n.IsTerminal()) CheckTerminalNode(n);
+            if (deepestDepth < n.depth) deepestDepth = n.depth;
 
             if (nodesAtDepth.containsKey(n.depth)) nodesAtDepth.put(n.depth, nodesAtDepth.get(n.depth) + 1);
             else nodesAtDepth.put(n.depth, 1);
