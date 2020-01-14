@@ -388,11 +388,11 @@ public class TerminusEstMCTS {
         public double timeToBuildTree = -1;
         public double upperBound = -1;
         public double treeDepthAvg = -1;
-        public double treeDepth0 = -1;
-        public double treeDepth25 = -1;
-        public double treeDepth50 = -1;
-        public double treeDepth75 = -1;
-        public double treeDepth100 = -1;
+        public int shallowestLeaf = -1;
+        public int treeDepth25 = -1;
+        public int treeDepth50 = -1;
+        public int treeDepth75 = -1;
+        public int deepestNode = -1;
         public int depthOfFirstSolution = -1;
         public int nodesTotal = -1;
 
@@ -400,8 +400,8 @@ public class TerminusEstMCTS {
                                             + "DEPTH_50,DEPTH_75,DEPTH_100,DEPTH_FIRST_SOLUTION, NODES_TOTAL";
         public String GetData() {
             return fName + del + timeToBuildTree + del + upperBound + del + treeDepthAvg + del
-                    + treeDepth0 + del + treeDepth25 + del + treeDepth50 + del
-                    + treeDepth75 + del + treeDepth100 + del + depthOfFirstSolution + del + nodesTotal;
+                    + shallowestLeaf + del + treeDepth25 + del + treeDepth50 + del
+                    + treeDepth75 + del + deepestNode + del + depthOfFirstSolution + del + nodesTotal;
         }
     }
 

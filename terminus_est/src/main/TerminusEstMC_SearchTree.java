@@ -191,6 +191,7 @@ public class TerminusEstMC_SearchTree {
         public Hashtable<Integer, Integer> nodesAtDepth = new Hashtable<>();
         public int firstTerminalNodeDepth = -1;
         public long firstTerminalNodeID = -1;
+        public int shallowestLeaf = -1;
         public int deepestDepth;
         public int numberOfNodes;
         public TerminusEstMCTS.TreeData d;
@@ -216,17 +217,26 @@ public class TerminusEstMC_SearchTree {
             d.treeDepthAvg = (double) sum  / (double) count;
 
             // Get percentiles.
-            int current = 0;
-            for (var depth : nodesAtDepth.keySet()) {
-                current += nodesAtDepth.get(depth);
+            // Have to get the depths sorted first!
+            int[] ar = new int[nodesAtDepth.keySet().size()];
+            int i = 0;
+            for (var id: nodesAtDepth.keySet()) {
+                ar[i] = id;
+                ++i;
+            }
 
-                if (d.treeDepth0 == -1) d.treeDepth0 = depth;
+            Arrays.sort(ar);
+
+            int current = 0;
+            for (var depth : ar) {
+                current += nodesAtDepth.get(depth);
                 if (d.treeDepth25 == -1 && ((double) current/ (double)count) > 0.25) d.treeDepth25 = depth;
                 if (d.treeDepth50 == -1 && ((double) current/count) > 0.50) d.treeDepth50 = depth;
                 if (d.treeDepth75 == -1 && ((double) current/count) > 0.75) d.treeDepth75 = depth;
             }
 
-            d.treeDepth100 = deepestDepth;
+            d.shallowestLeaf = shallowestLeaf;
+            d.deepestNode = deepestDepth;
         }
 
         @Override
@@ -238,6 +248,7 @@ public class TerminusEstMC_SearchTree {
         public void BeforeStop(NodeMCTS n) {
             ++numberOfNodes;
             if (n.IsTerminal()) CheckTerminalNode(n);
+            if (n.IsLeaf()) CheckLeaf(n);
             if (deepestDepth < n.depth) deepestDepth = n.depth;
 
             if (nodesAtDepth.containsKey(n.depth)) nodesAtDepth.put(n.depth, nodesAtDepth.get(n.depth) + 1);
@@ -253,6 +264,11 @@ public class TerminusEstMC_SearchTree {
                 firstTerminalNodeID = n.id;
                 firstTerminalNodeDepth = n.depth;
             }
+        }
+
+        public void CheckLeaf(NodeMCTS n) {
+            if (shallowestLeaf == -1) shallowestLeaf = n.depth;
+            if (shallowestLeaf > n.depth) shallowestLeaf = n.depth;
         }
     }
 

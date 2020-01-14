@@ -2,6 +2,7 @@ package main;
 
 import main.TerminusEst.TerminusEstSolution;
 import main.TerminusEst.TerminusEstV4;
+import main.utility.Tuple2;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -277,20 +278,40 @@ public class ExperimentRunner {
         dw.Close();
     }
 
-    public void ExperimentTreeBuild(String[] files, String outputFile, int startAt) {
+    public void ExperimentTreeBuild(String[] files, String outputFile, int startAt, int it, int sim, double param_c, double param_d) {
         System.out.println("\nWriting to: " + outputFile + "\n");
         String hdr = TerminusEstMCTS.TreeData.hdr;
         DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = startAt; i < files.length; ++i) {
             System.out.print("(" + (i+1) + "/" + files.length + ") "  +files[i] + ", ");
-            TerminusEstMCTS tem = new TerminusEstMCTS();
+            TerminusEstMCTS tem = new TerminusEstMCTS(it, sim, param_c, param_d);
             TerminusEstMCTS.TreeData d = tem.GetTreeData(files[i]);
             System.out.println(d.GetData());
             dw.WriteResult(d);
         }
 
         dw.Close();
+    }
+
+    public void TreeParamTuning() {
+        int[] iterations = new int[] {10000, 100000, 500000};
+        Tuple2<Double, Double>[] params = new Tuple2[] {
+                new Tuple2(0.1, 32.0),
+                new Tuple2(Math.sqrt(2), 1000.0),
+                new Tuple2(5.0, 10000.0)
+        };
+
+        for (int i = 0; i < iterations.length; ++i) {
+            for (int j = 0; j < params.length; ++j) {
+                if (i == 0 && j == 0) continue;
+
+                ExperimentTreeBuild(getDataMedium(), GetFileName(treeTE + "_medium_" + i + "_" + j), 0,
+                        iterations[i], 10, params[j].item1, params[j].item2);
+                ExperimentTreeBuild(getDataHard(), GetFileName(treeTE + "_hard_" + i + "_" + j), 0,
+                        iterations[i], 10, params[j].item1, params[j].item2);
+            }
+        }
     }
 
     public static String outputFolder = "D:/Uni/DataOutput/";
@@ -312,6 +333,6 @@ public class ExperimentRunner {
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
         // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
         // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
-        er.ExperimentTreeBuild(er.getDataEasy(), GetFileName(treeTE + "_easy"), 0);
+        er.TreeParamTuning();
     }
 }
