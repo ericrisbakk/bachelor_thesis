@@ -186,6 +186,11 @@ public class ExperimentRunner {
             Write(l);
         }
 
+        public void WriteResult(TerminusEstMCTS.TreeData d) {
+            String line = d.GetData() + "\n";
+            Write(line);
+        }
+
         public void Close () {
             try {
                 br.close();
@@ -272,9 +277,26 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    public void ExperimentTreeBuild(String[] files, String outputFile, int startAt) {
+        System.out.println("\nWriting to: " + outputFile + "\n");
+        String hdr = TerminusEstMCTS.TreeData.hdr;
+        DataWriter dw = new DataWriter(outputFile, hdr);
+
+        for (int i = startAt; i < files.length; ++i) {
+            System.out.print("(" + (i+1) + "/" + files.length + ") "  +files[i] + ", ");
+            TerminusEstMCTS tem = new TerminusEstMCTS();
+            TerminusEstMCTS.TreeData d = tem.GetTreeData(files[i]);
+            System.out.println(d.GetData());
+            dw.WriteResult(d);
+        }
+
+        dw.Close();
+    }
+
     public static String outputFolder = "D:/Uni/DataOutput/";
 
     public static String basicTE = "basicTE";
+    public static String treeTE = "treeTE";
 
     public static String fType = ".csv";
     public static SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
@@ -290,5 +312,6 @@ public class ExperimentRunner {
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
         // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
         // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
+        er.ExperimentTreeBuild(er.getDataEasy(), GetFileName(treeTE + "_easy"), 0);
     }
 }
