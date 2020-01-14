@@ -234,7 +234,7 @@ public class ExperimentRunner {
             TerminusEstV4 te4 = new TerminusEstV4(files[i]);
             TerminusEstSolution s = te4.ComputeSolution(runtime);
             if (s != null){
-                System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime);
+                System.out.println("Hyb: " + s.hyb + ", Runtime: " + s.runtime + ", Lower-bound: " + te4.lowerBound);
                 dw.WriteResult(files[i], s, te4.lowerBound);
             }
             else {
@@ -289,6 +289,6 @@ public class ExperimentRunner {
         // er.ExperimentTerminusEstMCTS();
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
         // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
-        er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 1);
+        // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
     }
 }
