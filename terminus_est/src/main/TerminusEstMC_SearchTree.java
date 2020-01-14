@@ -54,6 +54,7 @@ public class TerminusEstMC_SearchTree {
         Tree T2 = te4.t2.copy(null, null);
         TerminusEstState state = new TerminusEstState(T1, T2, 0);
 
+        NodeMCTS.nextId = 0;
         manager.timeSinceLastSearchTreeBuilt = System.currentTimeMillis();
         mcts.BuildTree(state);
         manager.timeSinceLastSearchTreeCompleted = System.currentTimeMillis();
@@ -179,6 +180,69 @@ public class TerminusEstMC_SearchTree {
         }
 
         return combined;
+    }
+
+    public void CollectTreeDepthStatistics(NodeMCTS root, TerminusEstMCTS.TreeData data) {
+
+    }
+
+    public static class CollectTreeDepthInfo extends Traversal {
+        public Hashtable<Integer, Integer> nodesAtDepth = new Hashtable<>();
+        public int firstTerminalNodeDepth = -1;
+        public long firstTerminalNodeID = -1;
+        public int numberOfNodes;
+        public TerminusEstMCTS.TreeData d;
+
+        public CollectTreeDepthInfo(TerminusEstMCTS.TreeData d)  {
+            this.d = d;
+        }
+
+        @Override
+        public void PostProcess() {
+            // Add everything to TreeData.
+            d.nodesTotal = numberOfNodes;
+            d.depthOfFirstSolution = firstTerminalNodeDepth;
+
+            // Get Average!
+            long sum = 0;
+            int count = 0;
+            for (var depth : nodesAtDepth.keySet()) {
+                sum += depth*nodesAtDepth.get(depth);
+                count += nodesAtDepth.get(depth);
+            }
+
+            // Get percentiles.
+            int current = 0;
+            for (var depth : nodesAtDepth.keySet()) {
+                sum += depth*nodesAtDepth.get(depth);
+                count += nodesAtDepth.get(depth);
+            }
+        }
+
+        @Override
+        public boolean StopCondition(NodeMCTS n) {
+            return n.IsLeaf();
+        }
+
+        @Override
+        public void BeforeStop(NodeMCTS n) {
+            ++numberOfNodes;
+            if (n.IsTerminal()) CheckTerminalNode(n);
+
+            if (nodesAtDepth.containsKey(n.depth)) nodesAtDepth.put(n.depth, nodesAtDepth.get(n.depth) + 1);
+            else nodesAtDepth.put(n.depth, 1);
+        }
+
+        public void CheckTerminalNode(NodeMCTS n) {
+            if (firstTerminalNodeID == -1) {
+                firstTerminalNodeID = n.id;
+                firstTerminalNodeDepth = n.depth;
+            }
+            else if (n.id < firstTerminalNodeID) {
+                firstTerminalNodeID = n.id;
+                firstTerminalNodeDepth = n.depth;
+            }
+        }
     }
 
     /**

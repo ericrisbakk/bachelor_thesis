@@ -382,6 +382,29 @@ public class TerminusEstMCTS {
         }
     }
 
+    public class TreeData {
+        public static final String del = ",";
+        public String fName = "";
+        public double timeToBuildTree = -1;
+        public double upperBound = -1;
+        public double treeDepthAvg = -1;
+        public double treeDepth0 = -1;
+        public double treeDepth25 = -1;
+        public double treeDepth50 = -1;
+        public double treeDepth75 = -1;
+        public double treeDepth100 = -1;
+        public int depthOfFirstSolution = -1;
+        public int nodesTotal = -1;
+
+        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,DEPTH_STD,DEPTH_0,DEPTH_25,"
+                                            + "DEPTH_50,DEPTH_75,DEPTH_100,DEPTH_FIRST_SOLUTION, NODES_TOTAL";
+        public String GetData() {
+            return fName + del + timeToBuildTree + del + upperBound + del + treeDepthAvg + del
+                    + treeDepth0 + del + treeDepth25 + del + treeDepth50 + del
+                    + treeDepth75 + del + treeDepth100 + del + depthOfFirstSolution + del + nodesTotal;
+        }
+    }
+
     /**
      * Abstracting out method that collects the different possible search path options.
      * // TODO: Update this.
@@ -438,6 +461,25 @@ public class TerminusEstMCTS {
             upperBound = bestFound.depth;
             data.hybNumFromMCTS = bestFound.depth;
         }
+    }
+
+    public TreeData GetTreeData(String fName) {
+        // Setup.
+        if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
+        TreeData data = new TreeData();
+        data.fName = fName;
+        te4 = new TerminusEstV4(fName);
+        searchTreeUtil.CreateSearchTrees(te4);
+        // Get best search tree to start from, and the heuristic.
+        Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf();
+        searchTree = b.item1;
+        bestFound = b.item2;
+
+        data.timeToBuildTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
+        data.upperBound = bestFound.depth;
+        data.depthOfFirstSolution = -1;
+
+        return data;
     }
 
     public static TerminusEstSolution GetExactSolution(String file) {
