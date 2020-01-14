@@ -6,6 +6,9 @@ import main.mcts.base.IResultGenerator;
 import main.mcts.base.State;
 
 public class NodeMCTS {
+    public static long nextId = 0;
+    public long id;
+
     // Properties related to the problem.
     public State root;
     public Action lastAction;
@@ -40,6 +43,9 @@ public class NodeMCTS {
         leaf = true;
 
         result = resultGenerator.Generate();
+
+        id = nextId;
+        ++nextId;
     }
 
     /**
