@@ -183,7 +183,8 @@ public class TerminusEstMC_SearchTree {
     }
 
     public void CollectTreeDepthStatistics(NodeMCTS root, TerminusEstMCTS.TreeData data) {
-
+        CollectTreeDepthInfo collect = new CollectTreeDepthInfo(data);
+        collect.StartDepthFirstTraversal(root);
     }
 
     public static class CollectTreeDepthInfo extends Traversal {

@@ -477,8 +477,7 @@ public class TerminusEstMCTS {
 
         data.timeToBuildTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
         data.upperBound = bestFound.depth;
-        data.depthOfFirstSolution = -1;
-
+        searchTreeUtil.CollectTreeDepthStatistics(searchTree, data);
         return data;
     }
 
