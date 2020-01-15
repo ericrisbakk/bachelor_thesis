@@ -305,6 +305,7 @@ public class ExperimentRunner {
         for (int i = 0; i < iterations.length; ++i) {
             for (int j = 0; j < params.length; ++j) {
                 if (i == 0 && j == 0) continue;
+                if (i == 0 && j == 1) continue;
 
                 ExperimentTreeBuild(getDataMedium(), GetFileName(treeTE + "_medium_" + i + "_" + j), 0,
                         iterations[i], 10, params[j].item1, params[j].item2);
