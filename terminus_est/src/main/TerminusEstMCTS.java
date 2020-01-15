@@ -395,12 +395,13 @@ public class TerminusEstMCTS {
         public int deepestNode = -1;
         public int depthOfFirstSolution = -1;
         public int nodesTotal = -1;
+        public int trees = -1;
 
-        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,SHALLOWEST_LEAF,DEPTH_25,DEPTH_50,DEPTH_75,DEEPEST_NODE,DEPTH_FIRST_SOLUTION,NODES_TOTAL";
+        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,SHALLOWEST_LEAF,DEPTH_25,DEPTH_50,DEPTH_75,DEEPEST_NODE,DEPTH_FIRST_SOLUTION,NODES_TOTAL,trees";
         public String GetData() {
             return fName + del + timeToBuildTree + del + upperBound + del + treeDepthAvg + del
                     + shallowestLeaf + del + treeDepth25 + del + treeDepth50 + del
-                    + treeDepth75 + del + deepestNode + del + depthOfFirstSolution + del + nodesTotal;
+                    + treeDepth75 + del + deepestNode + del + depthOfFirstSolution + del + nodesTotal + del + trees;
         }
     }
 
@@ -467,6 +468,7 @@ public class TerminusEstMCTS {
         if (VERBOSE) System.out.println("\n\nRunning experiment for: " + fName);
         TreeData data = new TreeData();
         data.fName = fName;
+        data.trees = searchTreeUtil.trees;
         te4 = new TerminusEstV4(fName);
         searchTreeUtil.CreateSearchTrees(te4);
         // Get best search tree to start from, and the heuristic.

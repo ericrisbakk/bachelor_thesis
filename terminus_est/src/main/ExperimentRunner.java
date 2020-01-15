@@ -253,24 +253,27 @@ public class ExperimentRunner {
     }
 
     public void ExperimentTerminusEstMCTS() {
-        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_2MIN_IGNORE.csv";
+        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_Up.csv";
 
-        int num = 6;
-        int[] instances = new int[num];
-        for (int i = 1; i <= num; ++i) {
-            instances[i-1] = i;
-        }
+//        int num = 6;
+//        int[] instances = new int[num];
+//        for (int i = 1; i <= num; ++i) {
+//            instances[i-1] = i;
+//        }
 
-        // DataFetcher df = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
-        DataFetcher df = new DataFetcher(new int[] {0, 1}, new int[]{50, 100}, new int[]{25, 50}, 41, 50);
+        String[] files = null;
+        // files = new DataFetcher(dataFolder, new int[]{50, 100}, new int[]{15, 20}, new int[]{25, 50}, instances);
+        // files df = new DataFetcher(new int[] {0, 1}, new int[]{50, 100}, new int[]{25, 50}, 41, 50);
+        files = getDataHard();
 
         String hdr = TerminusEstMCTS.ExperimentData.hdr + "\n";
         System.out.println(hdr);
         DataWriter dw = new DataWriter(outputFile, hdr);
 
-        for (int i = 0; i < df.files.length; ++i) {
-            System.out.print(df.files[i] + ", ");
-            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS()).RunExperiment(df.files[i], 120);
+        for (int i = 0; i < files.length; ++i) {
+            System.out.print(files[i] + ", ");
+            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS())
+                    .RunExperiment(files[i], 120);
             System.out.println(d.GetData());
             dw.WriteResult(d);
         }
@@ -278,14 +281,14 @@ public class ExperimentRunner {
         dw.Close();
     }
 
-    public void ExperimentTreeBuild(String[] files, String outputFile, int startAt, int it, int sim, double param_c, double param_d) {
+    public void ExperimentTreeBuild(String[] files, String outputFile, int startAt, int it, int sim, double param_c, double param_d, int trees) {
         System.out.println("\nWriting to: " + outputFile + "\n");
-        String hdr = TerminusEstMCTS.TreeData.hdr;
+        String hdr = TerminusEstMCTS.TreeData.hdr + "\n";
         DataWriter dw = new DataWriter(outputFile, hdr);
 
         for (int i = startAt; i < files.length; ++i) {
             System.out.print("(" + (i+1) + "/" + files.length + ") "  +files[i] + ", ");
-            TerminusEstMCTS tem = new TerminusEstMCTS(it, sim, param_c, param_d);
+            TerminusEstMCTS tem = new TerminusEstMCTS(it, sim, param_c, param_d, trees);
             TerminusEstMCTS.TreeData d = tem.GetTreeData(files[i]);
             System.out.println(d.GetData());
             dw.WriteResult(d);
@@ -304,14 +307,19 @@ public class ExperimentRunner {
 
         for (int i = 0; i < iterations.length; ++i) {
             for (int j = 0; j < params.length; ++j) {
-                if (i == 0 && j == 0) continue;
-                if (i == 0 && j == 1) continue;
 
                 ExperimentTreeBuild(getDataMedium(), GetFileName(treeTE + "_medium_" + i + "_" + j), 0,
-                        iterations[i], 10, params[j].item1, params[j].item2);
+                        iterations[i], 10, params[j].item1, params[j].item2, 1);
                 ExperimentTreeBuild(getDataHard(), GetFileName(treeTE + "_hard_" + i + "_" + j), 0,
-                        iterations[i], 10, params[j].item1, params[j].item2);
+                        iterations[i], 10, params[j].item1, params[j].item2, 1);
             }
+        }
+    }
+
+    public void MetaSearch(int startAt, int stopAt, int step) {
+        for (int i = startAt; i < stopAt; i += step) {
+            ExperimentTreeBuild(getDataHard(), GetFileName(metaTE + "_hard_" + i), 0,
+                    10000, 10, 1.0, 32.0, i);
         }
     }
 
@@ -319,6 +327,7 @@ public class ExperimentRunner {
 
     public static String basicTE = "basicTE";
     public static String treeTE = "treeTE";
+    public static String metaTE = "metaTE";
 
     public static String fType = ".csv";
     public static SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
@@ -334,6 +343,6 @@ public class ExperimentRunner {
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
         // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
         // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
-        er.TreeParamTuning();
+        er.MetaSearch(2, 11, 2);
     }
 }
