@@ -396,8 +396,7 @@ public class TerminusEstMCTS {
         public int depthOfFirstSolution = -1;
         public int nodesTotal = -1;
 
-        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,DEPTH_STD,DEPTH_0,DEPTH_25,"
-                                            + "DEPTH_50,DEPTH_75,DEPTH_100,DEPTH_FIRST_SOLUTION, NODES_TOTAL";
+        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,SHALLOWEST_LEAF,DEPTH_25,DEPTH_50,DEPTH_75,DEEPEST_NODE,DEPTH_FIRST_SOLUTION,NODES_TOTAL";
         public String GetData() {
             return fName + del + timeToBuildTree + del + upperBound + del + treeDepthAvg + del
                     + shallowestLeaf + del + treeDepth25 + del + treeDepth50 + del
@@ -476,7 +475,7 @@ public class TerminusEstMCTS {
         bestFound = b.item2;
 
         data.timeToBuildTree = getIntervalInSeconds(timeSinceLastSearchTreeCompleted, timeSinceLastSearchTreeBuilt);
-        data.upperBound = bestFound.depth;
+        if (bestFound != null) data.upperBound = bestFound.depth;
         searchTreeUtil.CollectTreeDepthStatistics(searchTree, data);
         return data;
     }
