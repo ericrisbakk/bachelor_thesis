@@ -252,9 +252,10 @@ public class ExperimentRunner {
         dw.Close();
     }
 
-    public void ExperimentTerminusEstMCTS() {
-        String outputFile = "D:/Uni/DataOutput/TerminusEst_MCTS_Up.csv";
+    public void ExperimentTerminusEstMCTS(int startAt, int runX) {
+        String outputFile = GetFileName("TE_MCTS_" + startAt + "-" + (startAt + runX - 1));
 
+        System.out.println("\nFile: " + outputFile + "\n");
 //        int num = 6;
 //        int[] instances = new int[num];
 //        for (int i = 1; i <= num; ++i) {
@@ -270,10 +271,12 @@ public class ExperimentRunner {
         System.out.println(hdr);
         DataWriter dw = new DataWriter(outputFile, hdr);
 
-        for (int i = 0; i < files.length; ++i) {
-            System.out.print(files[i] + ", ");
-            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS())
-                    .RunExperiment(files[i], 120);
+        for (int i = startAt; i < startAt + runX; ++i) {
+            System.out.print("(" + (i+1) + "/" + files.length + ") "  +files[i] + ", ");
+            TerminusEstMCTS.ExperimentData d = (new TerminusEstMCTS(
+                    10000, 10, 0.1, 32.0, 15
+            ))
+                    .RunExperiment(files[i], 600);
             System.out.println(d.GetData());
             dw.WriteResult(d);
         }
@@ -319,7 +322,7 @@ public class ExperimentRunner {
     public void MetaSearch(int startAt, int stopAt, int step) {
         for (int i = startAt; i < stopAt; i += step) {
             ExperimentTreeBuild(getDataHard(), GetFileName(metaTE + "_hard_" + i), 0,
-                    10000, 10, 1.0, 32.0, i);
+                    50000, 10, 1.0, 32.0, i);
         }
     }
 
@@ -327,7 +330,7 @@ public class ExperimentRunner {
 
     public static String basicTE = "basicTE";
     public static String treeTE = "treeTE";
-    public static String metaTE = "metaTE";
+    public static String metaTE = "metaTE_50k";
 
     public static String fType = ".csv";
     public static SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
@@ -343,6 +346,21 @@ public class ExperimentRunner {
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
         // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
         // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
-        er.MetaSearch(2, 11, 2);
+        er.ExperimentTerminusEstMCTS(0, 10);
+        er.MetaSearch(21, 26, 4);
+        er.ExperimentTerminusEstMCTS(10, 10);
+        er.MetaSearch(3, 13, 4);
+        er.ExperimentTerminusEstMCTS(20, 20);
+        er.MetaSearch(15, 26, 4);
+        er.ExperimentTerminusEstMCTS(40, 20);
+        er.MetaSearch(27, 40, 2);
+        er.ExperimentTerminusEstMCTS(60, 20);
+        er.MetaSearch(27, 40, 2);
+        er.ExperimentTerminusEstMCTS(80, 20);
+        er.MetaSearch(41, 50, 2);
+        er.ExperimentTerminusEstMCTS(100, 20);
+
+
+
     }
 }

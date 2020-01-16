@@ -16,7 +16,7 @@ public class TerminusEstMCTS {
     public static final boolean VERBOSE = false;
     public static final boolean PARALLEL = false;
     public static final boolean USE_HEURISTIC = false;
-    public static final boolean USE_TREE = true;
+    public static final boolean USE_TREE = false;
     public static final boolean SORT_BY_DEPTH = false;
 
     public int iterations = 100000;
@@ -396,12 +396,14 @@ public class TerminusEstMCTS {
         public int depthOfFirstSolution = -1;
         public int nodesTotal = -1;
         public int trees = -1;
+        public int treesCompleted = 0;
 
-        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,SHALLOWEST_LEAF,DEPTH_25,DEPTH_50,DEPTH_75,DEEPEST_NODE,DEPTH_FIRST_SOLUTION,NODES_TOTAL,trees";
+        public static final String hdr = "ID,TIME_BUILDING_TREE,UPPER_BOUND,DEPTH_AVG,SHALLOWEST_LEAF,DEPTH_25,DEPTH_50,DEPTH_75,DEEPEST_NODE,DEPTH_FIRST_SOLUTION,NODES_TOTAL,trees,T_COMPLETED";
         public String GetData() {
             return fName + del + timeToBuildTree + del + upperBound + del + treeDepthAvg + del
                     + shallowestLeaf + del + treeDepth25 + del + treeDepth50 + del
-                    + treeDepth75 + del + deepestNode + del + depthOfFirstSolution + del + nodesTotal + del + trees;
+                    + treeDepth75 + del + deepestNode + del + depthOfFirstSolution + del + nodesTotal
+                    + del + trees + del + treesCompleted;
         }
     }
 
@@ -473,6 +475,7 @@ public class TerminusEstMCTS {
         searchTreeUtil.CreateSearchTrees(te4);
         // Get best search tree to start from, and the heuristic.
         Tuple2<NodeMCTS, NodeMCTS> b = searchTreeUtil.GetBestTreeAndLeaf();
+        data.treesCompleted = searchTreeUtil.treesCompleted;
         searchTree = b.item1;
         bestFound = b.item2;
 

@@ -30,6 +30,7 @@ public class TerminusEstMC_SearchTree {
     public NodeMCTS[] searchTrees;
     public Hashtable<String, Double>[] scores;
     public Hashtable<String, Double> heuristic;
+    public int treesCompleted;
 
 
     public TerminusEstMC_SearchTree(int trees, int iterations, int simulations, double param_c, double param_d, TerminusEstMCTS manager) {
@@ -110,6 +111,10 @@ public class TerminusEstMC_SearchTree {
         NodeMCTS root = trees[0];
         NodeMCTS child = GetBestInTree(trees[0]);
 
+        treesCompleted = 0;
+
+        if (child != null) ++treesCompleted;
+
         if (manager.VERBOSE)  {
             if (child != null) System.out.print("Best depths: " + child.depth + ", ");
             else System.out.print("Best depths: X, ");
@@ -122,6 +127,7 @@ public class TerminusEstMC_SearchTree {
                 else System.out.print("X, ");
             }
             if (next != null) {
+                ++treesCompleted;
                 if (child == null) {
                     child = next;
                     root = trees[i];
@@ -132,6 +138,7 @@ public class TerminusEstMC_SearchTree {
                 }
             }
         }
+
         if (manager.VERBOSE) System.out.println();
         return new Tuple2<>(root, child);
     }
