@@ -42,6 +42,11 @@ public class TerminusEstMC_SearchTree {
         this.manager = manager;
     }
 
+    /**
+     * Creates the MCTS class which builds the search tree, then takes it.
+     * @param te4 Context.
+     * @return
+     */
     public NodeMCTS GetSearchTree(TerminusEstV4 te4) {
         SelectUCT_SP select = new SelectUCT_SP();
         SelectUCT_SP.param_c = param_c;
@@ -66,6 +71,10 @@ public class TerminusEstMC_SearchTree {
         return searchTrees;
     }
 
+    /**
+     * For creating more than one.
+     * @param te4
+     */
     public void CreateSearchTrees(TerminusEstV4 te4) {
         if (manager.VERBOSE) System.out.println("Building search trees: ");
         searchTrees = new NodeMCTS[trees];
@@ -77,6 +86,11 @@ public class TerminusEstMC_SearchTree {
         if (manager.VERBOSE) System.out.println();
     }
 
+    /**
+     * Get the best end-state, i.e. TerminusEst trees in the node are 'identical'.
+     * @param node
+     * @return The best node, if any.
+     */
     public NodeMCTS GetBestInTree(NodeMCTS node) {
         if (node.IsTerminal()) {
             return node;

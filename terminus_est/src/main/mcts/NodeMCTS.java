@@ -5,6 +5,11 @@ import main.mcts.base.IResult;
 import main.mcts.base.IResultGenerator;
 import main.mcts.base.State;
 
+/**
+ * Base node in an MCTS tree.
+ * Edges are only implicit - Nodes keeps track of its parent and children as nodes too, and the last played
+ * action is tied to the node it resulted in.
+ */
 public class NodeMCTS {
     public static long nextId = 0;
     public long id;

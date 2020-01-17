@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Handles reading a specific file, with the aid of a TerminunsEstV4 object.
+ */
 public class TerminusEstInputHandler {
 
     // Tree construction.

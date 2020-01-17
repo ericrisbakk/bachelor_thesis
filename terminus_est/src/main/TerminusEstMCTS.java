@@ -11,6 +11,11 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This object handles the MCTS-aided TerminusEst search.
+ * A search can be initialized with the 'RunExperiment' method.
+ * If you just want an MCTS search tree, call 'GetTreeData' method.
+ */
 public class TerminusEstMCTS {
 
     public static final boolean VERBOSE = false;
@@ -483,158 +488,6 @@ public class TerminusEstMCTS {
         if (bestFound != null) data.upperBound = bestFound.depth;
         searchTreeUtil.CollectTreeDepthStatistics(searchTree, data);
         return data;
-    }
-
-    public static TerminusEstSolution GetExactSolution(String file) {
-        TerminusEstMCTS tem = new TerminusEstMCTS();
-
-        double timeStart = System.currentTimeMillis();
-        TerminusEstV4 te4 = new TerminusEstV4(file);
-
-        Tuple2<NodeMCTS, NodeMCTS> b = tem.searchTreeUtil.GetBestTreeAndLeaf();
-        NodeMCTS searchTree = b.item1;
-        NodeMCTS bestFound = b.item2;
-
-        int upperBound;
-        if (bestFound == null) {
-            if (VERBOSE) System.out.println("No solution in the tree.");
-            // No solution found at all.
-            // (Increase by one to ensure we also check for the case in which we have do delete *all* leaves).
-            upperBound = te4.seenLeaves + 1;
-        }
-        else {
-            if (VERBOSE) System.out.println("A solution was found in the tree.");
-            // Best solution in tree is upper bound.
-            upperBound = bestFound.depth;
-            if (VERBOSE) System.out.println("At level: " + upperBound);
-        }
-
-        // Find all candidate tree nodes to search from.
-        NodeMCTS[][] searchNodes = tem.GetSortedByDepth(upperBound, searchTree, te4);
-        if (VERBOSE) System.out.println("Nodes to search from collected.");
-        if (VERBOSE) {
-            System.out.println("Distribution: ");
-            for (int i = 0; i < searchNodes.length; ++i) {
-                System.out.println("Depth " + i + ": " + searchNodes[i].length);
-            }
-
-        }
-
-        TerminusEstSolution solution = null;
-        NodeMCTS solutionNode = null;
-        // i = the current depth we're trying to compute at
-        for (int i = 0; i < upperBound; ++i) {
-            if (VERBOSE) System.out.println("Attempting hyb = " + i);
-            if (VERBOSE) System.out.print("\tAt nodes of depth: ");
-            // j = All search nodes at depth i which we wish to investigate.
-            for (int j = i; j >= 0; --j) {
-                if (VERBOSE) System.out.print(j + ", ");
-                for (int k = 0; k < searchNodes[j].length; ++k) {
-                    // Construct trees we are searching from.
-                    NodeMCTS node = searchNodes[j][k]; // Make it easier to reference this node.
-                    TerminusEstState s = (TerminusEstState) node.ConstructNodeState();
-                    solution = te4.ComputePartialSolution(s.t1, s.t2, j, i-j);
-                    solutionNode = node;
-
-                    if (solution != null) {
-                        if (VERBOSE) {
-                            System.out.println("A solution was found!");
-                            System.out.println(solution.toString());
-                            System.out.println("Hyb: " + i + "\tAt depth: " + j);
-                            System.out.println("Node:\n" + node.GetNewick());
-                        }
-
-                        break;
-                    }
-                }
-                if (solution != null) break;
-            }
-            if (VERBOSE) System.out.println();
-            if (solution != null) break;
-        } // End for-loop
-
-        // Construct the network.
-        Network currentNetwork = null;
-        NodeMCTS nextNode = null;
-        if (solution != null) {
-            if (VERBOSE) System.out.println("Using solution found in search.");
-            // Initial network already has been  constructed.
-            currentNetwork = solution.root;
-
-            if (solutionNode.IsRoot()) {
-                System.out.println("Solution node was root, somewhow.");
-                return new TerminusEstSolution(currentNetwork, 0, 0);
-            }
-
-            nextNode = solutionNode;
-        }
-        else if (bestFound != null) {
-            if (VERBOSE) System.out.println("Using best solution from MCTS.");
-            // Construct using bestFound.
-            // No solution was found through the search. construct initial solution from bestFound.
-            TerminusEstState finalState = ((TerminusEstState) bestFound.ConstructNodeState());
-            Vector ST = Tree.computeMaxSTsets(finalState.t1, finalState.t2);
-            if (ST.size() != 1) {
-                System.out.println("ERROR: best found trees not compatible.");
-                System.exit(0);
-            }
-
-            currentNetwork = TerminusEstV4.ConstructInitialNetwork(ST, finalState.t1, finalState.t2, te4.t1, te4.t2, finalState.depth);
-
-            if (bestFound.IsRoot()) { // Small subcase.
-                System.out.println("BestFound was root.");
-                return new TerminusEstSolution(currentNetwork, 0, 0);
-            }
-
-            nextNode = bestFound;
-        }
-
-        // Use solution node to construct
-        do {
-            TerminusEstState nextState = ((TerminusEstState) nextNode.ConstructNodeState());
-            TerminusEstAction a = (TerminusEstAction) nextNode.GetLastAction();
-            currentNetwork = TerminusEstV4.GrowNetwork(a.taxon, currentNetwork, te4.t1, te4.t2);
-            nextNode = nextNode.parent;
-        } while (!nextNode.IsRoot());
-
-        Network net = te4.FixNetwork(currentNetwork);
-        if (VERBOSE) TerminusEstV4.DumpENewick(net);
-        if (VERBOSE) System.out.println("Network fully constructed.");
-
-        return new  TerminusEstSolution(currentNetwork, 0, 0);
-    }
-
-    public static TerminusEstSolution AttemptSolution(String file) {
-        TerminusEstMCTS tem = new TerminusEstMCTS();
-
-        double timeNow = System.currentTimeMillis();
-        TerminusEstV4 te4 = new TerminusEstV4(file);
-
-        NodeMCTS searchTree = tem.searchTreeUtil.GetSearchTree(te4);
-        NodeMCTS bestFound = tem.searchTreeUtil.GetBestInTree(searchTree);
-
-        double timeEnd = System.currentTimeMillis();
-        double seconds =  ((double)(timeEnd - timeNow))/1000.0;
-
-        if (bestFound != null) {
-            Action[] actionSequence = bestFound.GetActionSequenceFromRoot();
-
-            // Verify. If we are not able to, return empty.
-            String[] taxons = new String[actionSequence.length];
-            for (int i = 0; i < actionSequence.length; ++i) {
-                taxons[i] = ((TerminusEstAction) actionSequence[i]).taxon.getName();
-            }
-
-            TerminusEstState s = (TerminusEstState) searchTree.root;
-            if (!TerminusEstV4.verifyHybNum(s.t1, s.t2, taxons)) {
-                return new TerminusEstSolution(null, -2, seconds);
-            }
-
-            // TODO: Also extract the network.
-            return new TerminusEstSolution(null, bestFound.depth, seconds);
-        } else {
-            return new TerminusEstSolution(null, -1, seconds);
-        }
     }
 
 

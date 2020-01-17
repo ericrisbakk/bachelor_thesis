@@ -4,6 +4,11 @@ import main.TerminusEstMC_SearchTree;
 
 import java.util.*;
 
+/**
+ * New version of TerminusEst. The major changes is that the classes it depends on have been moved out of the file,
+ * and it is runs in an object-oriented fashion rather than statically. Methods have also been provided to make
+ * it easier for external methods to use this class.
+ */
 public class TerminusEstV4 {
 
     public Hashtable nameToNum;

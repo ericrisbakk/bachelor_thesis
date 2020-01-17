@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Class for traversing an MCTS search tree by using NodeMCTS. Has a collection of methods that can be overrided.
+ * Class for traversing an MCTS search tree by using NodeMCTS. Has a collection of methods that can be overridden.
  */
 public abstract class Traversal {
     public Comparator<NodeMCTS> comp;

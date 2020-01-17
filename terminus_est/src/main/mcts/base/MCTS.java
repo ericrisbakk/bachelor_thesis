@@ -3,7 +3,7 @@ package main.mcts.base;
 import main.mcts.NodeMCTS;
 
 /**
- * Basic MCTS.
+ * Basic MCTS. The steps have been abstracted to facilitate an object-oriented workflow.
  */
 public class MCTS {
     public int maxIterations = 0;

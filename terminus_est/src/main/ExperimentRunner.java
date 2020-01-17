@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * This class governs the running of experiments and provides functionality for it.
+ */
 public class ExperimentRunner {
 
     public static String dataFolder = "D:/Uni/TreeGen/Data/";
@@ -16,9 +19,10 @@ public class ExperimentRunner {
     public static String dataSubset = "D:/Uni/DataInput/";
 
     /**
-     * Fetches files from the relevant folder. All files are assumed to follow a pattern of
-     * n[X]r[Y]c[Z]_[Inst], where X is the taxa size, Y the number of rSPR moves, Z the percent of
-     * contractions performed, and Inst an instance identifer.
+     * Fetches files from the relevant folder. The current input data uses a format of
+     * b[A]n[B]r[C]c[D]_[E], where A is whether the file is binary or not,
+     * B is the taxa size, C the number of rSPR moves, D the percent of
+     * contractions performed, and E an instance identifer.
      */
     public class DataFetcher {
         String folderPath;
@@ -121,6 +125,8 @@ public class ExperimentRunner {
         }
     }
 
+    // Below: Quick methods for getting relevant data.
+
     public String[] getDataEasy() {
         DataFetcher df = new DataFetcher(dataSubset + "data_easy.txt");
         return df.files;
@@ -136,7 +142,9 @@ public class ExperimentRunner {
         return df.files;
     }
 
-
+    /**
+     * Writes results to file.
+     */
     public class DataWriter {
         FileWriter fr = null;
         BufferedWriter br = null;
@@ -202,34 +210,7 @@ public class ExperimentRunner {
         }
     }
 
-    /**
-     * Q: For simple data-sets (r <= 15), does TerminusEstMCTS always find a solution? And is it optimal?
-     */
-    public void RunExperimentA() {
-        String outputFile = "D:/Uni/DataOutput/BasicMCTSResultsN100.csv";
-
-        int[] instances = new int[20];
-        for (int i = 1; i <= 20; ++i) {
-            instances[i-1] = i;
-        }
-
-        String hdr = "ID, REGULAR_HYB, REGULAR_RUNTIME, MCTS_HYB, MCTS_RUNTIME\n";
-
-        DataFetcher df = new DataFetcher(dataFolder, new int[]{100}, new int[]{15}, new int[]{25, 50, 75}, instances);
-        DataWriter dw = new DataWriter(outputFile, hdr);
-
-        for (int i = 0; i < df.files.length; ++i) {
-            System.out.print(df.files[i]);
-            TerminusEstSolution s_normal = (new TerminusEstV4(df.files[i])).ComputeSolution();
-            System.out.print("\t" + s_normal.hyb + ", " + s_normal.runtime);
-            TerminusEstSolution s_mcts = TerminusEstMCTS.AttemptSolution(df.files[i]);
-            System.out.println("\t" + s_mcts.hyb + ", " + s_mcts.runtime);
-            dw.WriteResult(df.files[i], s_normal, s_mcts);
-        }
-
-        dw.Close();
-    }
-
+    // Run basic TerminusEst
     public void BasicTerminusEst(String[] files, String outputFile, int runtime, int startAt) {
         System.out.println("\nWriting to: " + outputFile + "\n");
         String hdr = "ID, BASIC_HYB, BASIC_RUNTIME, BASIC_LB\n";
@@ -252,6 +233,7 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    // Run TerminusEstMCTS
     public void ExperimentTerminusEstMCTS(int startAt, int runX) {
         String outputFile = GetFileName("TE_MCTS_" + startAt + "-" + (startAt + runX - 1));
 
@@ -284,6 +266,7 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    // Build tree!
     public void ExperimentTreeBuild(String[] files, String outputFile, int startAt, int it, int sim, double param_c, double param_d, int trees) {
         System.out.println("\nWriting to: " + outputFile + "\n");
         String hdr = TerminusEstMCTS.TreeData.hdr + "\n";
@@ -300,6 +283,7 @@ public class ExperimentRunner {
         dw.Close();
     }
 
+    // Parameter tuning experiment.
     public void TreeParamTuning() {
         int[] iterations = new int[] {10000, 100000, 500000};
         Tuple2<Double, Double>[] params = new Tuple2[] {
@@ -319,6 +303,7 @@ public class ExperimentRunner {
         }
     }
 
+    // Meta search experiment.
     public void MetaSearch(int startAt, int stopAt, int step) {
         for (int i = startAt; i < stopAt; i += step) {
             ExperimentTreeBuild(getDataHard(), GetFileName(metaTE + "_hard_" + i), 0,
@@ -342,25 +327,6 @@ public class ExperimentRunner {
 
     public static void main(String[] args) {
         ExperimentRunner er = new ExperimentRunner();
-        // er.ExperimentTerminusEstMCTS();
         // er.BasicTerminusEst(er.getDataEasy(), GetFileName(basicTE + "_easy"),600);
-        // er.BasicTerminusEst(er.getDataMedium(), GetFileName(basicTE + "_medium"),600, 36);
-        // er.BasicTerminusEst(er.getDataHard(), GetFileName(basicTE + "_hard"),600, 31);
-        er.ExperimentTerminusEstMCTS(0, 10);
-        er.MetaSearch(21, 26, 4);
-        er.ExperimentTerminusEstMCTS(10, 10);
-        er.MetaSearch(3, 13, 4);
-        er.ExperimentTerminusEstMCTS(20, 20);
-        er.MetaSearch(15, 26, 4);
-        er.ExperimentTerminusEstMCTS(40, 20);
-        er.MetaSearch(27, 40, 2);
-        er.ExperimentTerminusEstMCTS(60, 20);
-        er.MetaSearch(27, 40, 2);
-        er.ExperimentTerminusEstMCTS(80, 20);
-        er.MetaSearch(41, 50, 2);
-        er.ExperimentTerminusEstMCTS(100, 20);
-
-
-
     }
 }
